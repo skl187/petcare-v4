@@ -244,3 +244,30 @@ FROM pet_types pt, users u
 WHERE pt.name = 'Cat' AND u.email = 'admin@petcare.com'
   AND NOT EXISTS (SELECT 1 FROM breeds b WHERE lower(b.name) = lower('Siamese') AND b.pet_type_id = pt.id);
 
+-- ==================== SEED USER ADDRESSES ====================
+-- Add sample addresses for owner@petcare.com (or first user if missing)
+DO $$
+DECLARE
+  uid uuid;
+BEGIN
+  SELECT id INTO uid FROM users WHERE email = 'owner@petcare.com' LIMIT 1;
+  IF uid IS NULL THEN
+    SELECT id INTO uid FROM users LIMIT 1;
+  END IF;
+
+  IF uid IS NOT NULL THEN
+    INSERT INTO user_addresses (user_id, type, label, address_line1, address_line2, city, state, postal_code, country, is_primary)
+    SELECT uid, 'home', 'Home', '123 Main St', 'Apt 4', 'Springfield', 'IL', '62704', 'USA', true
+    WHERE NOT EXISTS (
+      SELECT 1 FROM user_addresses WHERE user_id = uid AND type = 'home' AND address_line1 = '123 Main St' AND deleted_at IS NULL
+    );
+
+    INSERT INTO user_addresses (user_id, type, label, address_line1, address_line2, city, state, postal_code, country, is_primary)
+    SELECT uid, 'work', 'Work', '456 Corporate Ave', NULL, 'Springfield', 'IL', '62705', 'USA', false
+    WHERE NOT EXISTS (
+      SELECT 1 FROM user_addresses WHERE user_id = uid AND type = 'work' AND address_line1 = '456 Corporate Ave' AND deleted_at IS NULL
+    );
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+

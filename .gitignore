@@ -1,0 +1,14 @@
+# for git and rsync
+# git push -u origin main
+# rsync -avz --exclude-from='.gitignore' ./ admskl@bracevps:/home/admskl/v4
+.git/
+.claude/
+.zencoder/
+.zenflow/
+
+frontend/node_modules/
+
+backend/node_modules/
+
+_docs/
+_sql/

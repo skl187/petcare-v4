@@ -83,6 +83,34 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX IF NOT EXISTS idx_users_email ON users (lower(email));
 CREATE INDEX IF NOT EXISTS idx_users_status ON users (status);
 
+-- Addresses table: users can have multiple addresses (home, work, billing, etc.)
+CREATE TABLE IF NOT EXISTS user_addresses (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type text NOT NULL DEFAULT 'home' CHECK (type IN ('home','work','other','billing','shipping')),
+    label text,
+    address_line1 text NOT NULL,
+    address_line2 text,
+    city text NOT NULL,
+    state text,
+    postal_code text,
+    country text,
+    latitude numeric(9,6),
+    longitude numeric(9,6),
+    is_primary boolean NOT NULL DEFAULT FALSE,
+    status smallint NOT NULL DEFAULT 1,
+    created_by uuid REFERENCES users(id) ON DELETE SET NULL,
+    updated_by uuid REFERENCES users(id) ON DELETE SET NULL,
+    deleted_by uuid REFERENCES users(id) ON DELETE SET NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    deleted_at timestamptz
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_addresses_user_id ON user_addresses (user_id);
+CREATE INDEX IF NOT EXISTS idx_user_addresses_is_primary ON user_addresses (user_id, is_primary);
+CREATE INDEX IF NOT EXISTS idx_user_addresses_postal_code ON user_addresses (postal_code);
+
 CREATE TABLE IF NOT EXISTS user_roles (
     user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     role_id uuid NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
@@ -151,6 +179,7 @@ CREATE TABLE IF NOT EXISTS pet_types (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name text NOT NULL UNIQUE,
     slug text NOT NULL UNIQUE,
+    icon_url text,
     status smallint NOT NULL DEFAULT 1,
     created_by uuid REFERENCES users(id) ON DELETE SET NULL,
     updated_by uuid REFERENCES users(id) ON DELETE SET NULL,
@@ -964,7 +993,7 @@ CREATE INDEX IF NOT EXISTS idx_pet_insurance_verifications_policy_id ON pet_insu
 DO $$
 DECLARE
     tables text[] := ARRAY[
-        'roles', 'permissions', 'users', 'pet_types', 'breeds', 'pets',
+        'roles', 'permissions', 'users', 'user_addresses', 'pet_types', 'breeds', 'pets',
         'vet_clinics', 'veterinarians', 'vet_clinic_mappings', 'vet_services',
         'vet_schedules', 'vet_appointments', 'vet_appointment_payments',
         'vet_payment_transactions', 'vet_appointment_reminders',
