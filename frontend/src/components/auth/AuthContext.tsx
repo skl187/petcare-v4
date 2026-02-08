@@ -40,8 +40,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           parsedUser.roles &&
           parsedUser.roles.length > 0
         ) {
-          parsedUser.role = parsedUser.roles[0].toLowerCase();
+          const firstRole = parsedUser.roles[0];
+          // Handle both object {name: 'role', slug: 'role'} and string 'role'
+          parsedUser.role =
+            typeof firstRole === 'string'
+              ? firstRole.toLowerCase()
+              : (
+                  (firstRole as any).slug ||
+                  (firstRole as any).name ||
+                  ''
+                ).toLowerCase();
         }
+        console.log('AuthContext loaded user:', parsedUser);
         setUser(parsedUser);
       } catch (e) {
         console.error('Failed to parse stored user:', e);
@@ -60,10 +70,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setUserData = (userData: User | null) => {
     if (userData) {
       // Map roles array to role (pick first role)
+      const firstRole = userData.roles?.[0];
+      let roleString: string | undefined;
+
+      // Handle both object {name: 'role', slug: 'role'} and string 'role'
+      if (typeof firstRole === 'string') {
+        roleString = firstRole.toLowerCase();
+      } else if (firstRole && typeof firstRole === 'object') {
+        roleString = (
+          (firstRole as any).slug ||
+          (firstRole as any).name ||
+          ''
+        ).toLowerCase();
+      } else {
+        roleString = userData.role;
+      }
+
       const mappedUser: User = {
         ...userData,
-        role: (userData.roles?.[0]?.toLowerCase() as any) || userData.role,
+        role: roleString as any,
       };
+
+      console.log('AuthContext setUser - Original userData:', userData);
+      console.log('AuthContext setUser - Mapped user:', mappedUser);
+
       setUser(mappedUser);
       sessionStorage.setItem('user', JSON.stringify(mappedUser));
     } else {

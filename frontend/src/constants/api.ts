@@ -82,6 +82,9 @@ export const API_ENDPOINTS = {
     DETAIL: (id: string) => `${API_BASE_URL}/api/users/${id}`,
     ROLES: (id: string) => `${API_BASE_URL}/api/users/${id}/roles`,
     PERMISSIONS: (id: string) => `${API_BASE_URL}/api/users/${id}/permissions`,
+    ADDRESSES: (id: string) => `${API_BASE_URL}/api/users/${id}/addresses`,
+    ADDRESS_DETAIL: (userId: string, addressId: string) =>
+      `${API_BASE_URL}/api/users/${userId}/addresses/${addressId}`,
   },
 
   // Dashboard
@@ -89,6 +92,7 @@ export const API_ENDPOINTS = {
     ADMIN_SUMMARY: `${API_BASE_URL}/api/dashboard/admin/summary`,
     OWNER_SUMMARY: `${API_BASE_URL}/api/dashboard/owner/summary`,
     VETERINARIAN_SUMMARY: `${API_BASE_URL}/api/dashboard/veterinarian/summary`,
+    PROFILE: `${API_BASE_URL}/api/dashboard/profile`,
   },
 
   // Reviews
@@ -96,9 +100,12 @@ export const API_ENDPOINTS = {
     BASE: `${API_BASE_URL}/api/reviews`,
     MY_REVIEWS: `${API_BASE_URL}/api/reviews/my-reviews`,
     PENDING: `${API_BASE_URL}/api/reviews/pending`,
-    CAN_REVIEW: (appointmentId: string) => `${API_BASE_URL}/api/reviews/can-review/${appointmentId}`,
-    BY_APPOINTMENT: (appointmentId: string) => `${API_BASE_URL}/api/reviews/appointment/${appointmentId}`,
-    BY_VETERINARIAN: (veterinarianId: string) => `${API_BASE_URL}/api/reviews/veterinarian/${veterinarianId}`,
+    CAN_REVIEW: (appointmentId: string) =>
+      `${API_BASE_URL}/api/reviews/can-review/${appointmentId}`,
+    BY_APPOINTMENT: (appointmentId: string) =>
+      `${API_BASE_URL}/api/reviews/appointment/${appointmentId}`,
+    BY_VETERINARIAN: (veterinarianId: string) =>
+      `${API_BASE_URL}/api/reviews/veterinarian/${veterinarianId}`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/reviews/${id}`,
   },
 } as const;

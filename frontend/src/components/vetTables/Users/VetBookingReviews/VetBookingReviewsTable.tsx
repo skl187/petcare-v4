@@ -1,124 +1,113 @@
 // src/components/vetTables/Veterinary/VetBookingReviewsTable/VetBookingReviewsTable.tsx
-import { MdDelete } from "react-icons/md";
-import { useMemo, useState } from "react";
+import { MdDelete } from 'react-icons/md';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../../../ui/table"; // adjust path if needed
-import Checkbox from "../../../form/input/Checkbox";
-import Pagination from "../../../../components/tables/tableComponents/Pagination";
-import useSort from "../../../../hooks/useSort";
-import SortableTableHeader from "../../../../components/tables/tableComponents/SortableTableHeader";
-import { OptimizedTableToolbar } from "../../../../components/tables/tableComponents/OptimizedTableToolbar";
-import Rating from "../../../../components/tables/tableComponents/Rating";
-import ImageHoverPreview from "../../../../components/tables/tableComponents/ImageHoverPreview";
-import DeleteDialog from "../../../../components/tables/tableComponents/DeleteDailog";
+} from '../../../ui/table';
+import Checkbox from '../../../form/input/Checkbox';
+import Pagination from '../../../../components/tables/tableComponents/Pagination';
+import useSort from '../../../../hooks/useSort';
+import SortableTableHeader from '../../../../components/tables/tableComponents/SortableTableHeader';
+import { OptimizedTableToolbar } from '../../../../components/tables/tableComponents/OptimizedTableToolbar';
+import Rating from '../../../../components/tables/tableComponents/Rating';
+import DeleteDialog from '../../../../components/tables/tableComponents/DeleteDailog';
+import {
+  VeterinarianReviewFromAPI,
+  VeterinarianReviewsResponse,
+} from '../../../../services/reviewsService';
+import { API_ENDPOINTS } from '../../../../constants/api';
 
-export interface VetBookingReview {
-  id: number;
-  bookingId?: number;
-  vetId: number; // the veterinarian this review belongs to
-  client: {
-    name: string;
-    email: string;
-    image: string;
-  };
-  pet?: {
-    name: string;
-    image?: string;
-    species?: string;
-  };
-  message: string;
-  rating: number;      // 1..5
-  updatedAt: string;   // ISO
-}
+const VetBookingReviewsTable: React.FC = () => {
+  console.log('[VetBookingReviewsTable] Component rendering...');
 
-// ---- Mock (replace with API) ----
-const mockVetReviews: VetBookingReview[] = [
-  {
-    id: 101,
-    bookingId: 5001,
-    vetId: 1,
-    client: { name: "John Doe", email: "john@example.com", image: "/images/clients/client-1.jpg" },
-    pet: { name: "Bella", image: "/images/pets/dog.jpg", species: "Dog" },
-    message: "Dr. Kim was amazing with Bella. Thorough checkup and super kind.",
-    rating: 5,
-    updatedAt: "2025-08-10T10:35:00Z",
-  },
-  {
-    id: 102,
-    bookingId: 5002,
-    vetId: 1,
-    client: { name: "Alice Johnson", email: "alice@example.com", image: "/images/clients/client-2.jpg" },
-    pet: { name: "Coco", image: "/images/pets/cat.jpg", species: "Cat" },
-    message: "Great experience, slight delay but worth the wait.",
-    rating: 4,
-    updatedAt: "2025-08-08T14:05:00Z",
-  },
-  {
-    id: 103,
-    bookingId: 5003,
-    vetId: 2,
-    client: { name: "Mark Ray", email: "mark@example.com", image: "/images/clients/client-3.jpg" },
-    pet: { name: "Rocky", image: "/images/pets/dog2.jpg", species: "Dog" },
-    message: "Procedure went smoothly. Dr. Singh explained everything clearly.",
-    rating: 5,
-    updatedAt: "2025-08-05T09:20:00Z",
-  },
-  {
-    id: 104,
-    bookingId: 5004,
-    vetId: 1,
-    client: { name: "Eva Green", email: "eva@example.com", image: "/images/clients/client-4.jpg" },
-    pet: { name: "Milo", image: "/images/pets/cat2.jpg", species: "Cat" },
-    message: "Average visit. Clinic was crowded.",
-    rating: 3,
-    updatedAt: "2025-07-30T16:40:00Z",
-  },
-];
-
-type Props = {
-  /** If provided, shows reviews for this vet only */
-  vetId?: number;
-};
-
-const VetBookingReviewsTable: React.FC<Props> = ({ vetId }) => {
-  const initial = useMemo(
-    () => (vetId ? mockVetReviews.filter(r => r.vetId === vetId) : mockVetReviews),
-    [vetId]
-  );
-
-  const [reviews, setReviews] = useState<VetBookingReview[]>(initial);
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reviewsData, setReviewsData] =
+    useState<VeterinarianReviewsResponse | null>(null);
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [reviewToDelete, setReviewToDelete] = useState<number | null>(null);
+  const [reviewToDelete, setReviewToDelete] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Fetch reviews using my-reviews endpoint (no ID needed)
+  useEffect(() => {
+    const loadReviews = async () => {
+      try {
+        console.log('[VetBookingReviewsTable] Fetching my reviews...');
+        setLoading(true);
+
+        const token = sessionStorage.getItem('token');
+        const queryParams = new URLSearchParams();
+        queryParams.set('page', currentPage.toString());
+        queryParams.set('limit', itemsPerPage.toString());
+
+        const url = `${API_ENDPOINTS.REVIEWS.MY_REVIEWS}?${queryParams.toString()}`;
+        console.log('[VetBookingReviewsTable] Calling:', url);
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch reviews: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log('[VetBookingReviewsTable] API Response:', result);
+        setReviewsData(result.data);
+        setError(null);
+      } catch (err) {
+        console.error('[VetBookingReviewsTable] Failed to load reviews:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load reviews');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadReviews();
+  }, [currentPage, itemsPerPage]);
 
   const columns = [
-    { key: "client",    label: "Client",     className: "min-w-[220px] font-semibold" },
-    { key: "pet",       label: "Pet",        className: "min-w-[180px]" },
-    { key: "message",   label: "Review",     className: "min-w-[280px]" },
-    { key: "rating",    label: "Rating",     className: "min-w-[120px]" },
-    { key: "updatedAt", label: "Updated",    className: "min-w-[160px]" },
-    { key: "bookingId", label: "Booking ID", className: "min-w-[120px]" },
+    { key: 'user', label: 'Client', className: 'min-w-[220px] font-semibold' },
+    { key: 'appointment', label: 'Appointment', className: 'min-w-[180px]' },
+    { key: 'review_text', label: 'Review', className: 'min-w-[280px]' },
+    { key: 'rating', label: 'Rating', className: 'min-w-[120px]' },
+    { key: 'created_at', label: 'Date', className: 'min-w-[160px]' },
+    { key: 'is_verified', label: 'Status', className: 'min-w-[100px]' },
   ] as const;
 
-  // Search filter
+  const reviews = reviewsData?.reviews || [];
+
+  // Search filter (client-side for displayed items)
   const filtered = useMemo(() => {
     if (!searchQuery) return reviews;
     const q = searchQuery.toLowerCase();
-    return reviews.filter(r => {
+    return reviews.filter((r) => {
+      const displayName = r.is_anonymous
+        ? 'Anonymous'
+        : r.owner_first_name && r.owner_last_name
+          ? `${r.owner_first_name} ${r.owner_last_name}`
+          : 'Unknown';
+
       const hay = [
-        r.client.name, r.client.email, r.message,
-        r.pet?.name, r.pet?.species, String(r.bookingId ?? "")
+        displayName,
+        r.review_text || '',
+        r.appointment_type || '',
+        r.appointment_date || '',
+        r.pet_name || '',
       ]
         .filter(Boolean)
-        .join(" ")
+        .join(' ')
         .toLowerCase();
       return hay.includes(q);
     });
@@ -126,46 +115,105 @@ const VetBookingReviewsTable: React.FC<Props> = ({ vetId }) => {
 
   // Sort
   const { sortedData, requestSort, sortConfig } = useSort(filtered, {
-    key: "updatedAt",
-    direction: "desc",
+    key: 'created_at',
+    direction: 'desc',
   } as any);
 
-  // Pagination
-  const indexOfLast = currentPage * itemsPerPage;
-  const currentItems = (sortedData as VetBookingReview[]).slice(indexOfLast - itemsPerPage, indexOfLast);
-
   // Selection
-  const toggleSelectRow = (id: number) =>
-    setSelectedRows(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
+  const toggleSelectRow = (id: string) =>
+    setSelectedRows((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
   const toggleSelectAll = () =>
-    setSelectedRows(selectedRows.length === reviews.length ? [] : reviews.map(r => r.id));
+    setSelectedRows(
+      selectedRows.length === reviews.length ? [] : reviews.map((r) => r.id),
+    );
 
-  // Delete
-  const handleDelete = (id?: number) => {
+  // Delete (placeholder - implement delete API call if needed)
+  const handleDelete = (id?: string) => {
     setReviewToDelete(id ?? null);
     setIsDeleteDialogOpen(true);
   };
   const confirmDelete = () => {
-    const updated = reviewToDelete
-      ? reviews.filter(r => r.id !== reviewToDelete)
-      : reviews.filter(r => !selectedRows.includes(r.id));
-    setReviews(updated);
+    // Implement delete API call here
+    console.log('Delete review:', reviewToDelete || selectedRows);
     setSelectedRows([]);
     setReviewToDelete(null);
     setIsDeleteDialogOpen(false);
   };
 
   const formatDate = (iso: string) =>
-    new Date(iso).toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
+    new Date(iso).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
     });
 
+  const formatAppointmentDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+
+  if (loading && !reviewsData) {
+    return (
+      <div className='p-4 bg-white rounded-xl shadow-md'>
+        <div className='flex items-center justify-center min-h-[400px]'>
+          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='p-4 bg-white rounded-xl shadow-md'>
+        <div className='flex items-center justify-center min-h-[400px]'>
+          <div className='text-center'>
+            <p className='text-red-500 mb-4'>{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 bg-white rounded-xl shadow-md">
+    <div className='p-4 bg-white rounded-xl shadow-md'>
+      {/* Summary Stats */}
+      {reviewsData?.stats && (
+        <div className='mb-6 grid grid-cols-1 md:grid-cols-4 gap-4'>
+          <div className='p-4 bg-gray-50 rounded-lg'>
+            <div className='text-sm text-gray-600'>Average Rating</div>
+            <div className='text-2xl font-bold text-gray-900'>
+              {parseFloat(reviewsData.stats.average_rating).toFixed(1)}
+            </div>
+          </div>
+          <div className='p-4 bg-gray-50 rounded-lg'>
+            <div className='text-sm text-gray-600'>Total Reviews</div>
+            <div className='text-2xl font-bold text-gray-900'>
+              {reviewsData.stats.total_reviews}
+            </div>
+          </div>
+          <div className='p-4 bg-gray-50 rounded-lg'>
+            <div className='text-sm text-gray-600'>Positive Reviews</div>
+            <div className='text-2xl font-bold text-gray-900'>
+              {reviewsData.stats.positive_reviews}
+            </div>
+          </div>
+          <div className='p-4 bg-gray-50 rounded-lg'>
+            <div className='text-sm text-gray-600'>Avg Professionalism</div>
+            <div className='text-2xl font-bold text-gray-900'>
+              {parseFloat(reviewsData.stats.avg_professionalism || '0').toFixed(
+                1,
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toolbar (search + bulk delete) */}
       <OptimizedTableToolbar
         bulkActions={
@@ -174,14 +222,14 @@ const VetBookingReviewsTable: React.FC<Props> = ({ vetId }) => {
                 selectedCount: selectedRows.length,
                 options: (
                   <>
-                    <option value="No actions">No actions</option>
-                    <option value="Delete">Delete</option>
+                    <option value='No actions'>No actions</option>
+                    <option value='Delete'>Delete</option>
                   </>
                 ),
                 onActionChange: (action) => {
-                  if (action === "Delete") handleDelete();
+                  if (action === 'Delete') handleDelete();
                 },
-                actionValue: "No actions",
+                actionValue: 'No actions',
                 onApply: () => {
                   if (selectedRows.length > 0) handleDelete();
                 },
@@ -191,32 +239,35 @@ const VetBookingReviewsTable: React.FC<Props> = ({ vetId }) => {
         search={{
           query: searchQuery,
           onChange: setSearchQuery,
-          placeholder: "Search by client, pet, message, booking id…",
+          placeholder: 'Search by client, review, appointment…',
         }}
       />
 
       {/* Empty state */}
       {filtered.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 p-8 text-center text-sm text-gray-600">
+        <div className='rounded-lg border border-gray-200 p-8 text-center text-sm text-gray-600'>
           No reviews found.
         </div>
       ) : (
-        <div className="w-full overflow-x-auto rounded-lg border border-gray-200">
-          <div className="min-w-[1100px]">
-            <Table className="w-full">
-              <TableHeader className="bg-gray-50">
+        <div className='w-full overflow-x-auto rounded-lg border border-gray-200'>
+          <div className='min-w-[1100px]'>
+            <Table className='w-full'>
+              <TableHeader className='bg-gray-50'>
                 <TableRow>
-                  <TableCell className="w-10 p-2 py-3">
+                  <TableCell className='w-10 p-2 py-3'>
                     <Checkbox
-                      checked={selectedRows.length === reviews.length && reviews.length > 0}
+                      checked={
+                        selectedRows.length === reviews.length &&
+                        reviews.length > 0
+                      }
                       onChange={toggleSelectAll}
                     />
                   </TableCell>
 
                   {columns.map((col) => (
-                    <SortableTableHeader<VetBookingReview>
+                    <SortableTableHeader<VeterinarianReviewFromAPI>
                       key={col.key}
-                      columnKey={col.key as keyof VetBookingReview}
+                      columnKey={col.key as keyof VeterinarianReviewFromAPI}
                       label={col.label}
                       sortConfig={sortConfig}
                       requestSort={requestSort}
@@ -224,86 +275,128 @@ const VetBookingReviewsTable: React.FC<Props> = ({ vetId }) => {
                     />
                   ))}
 
-                  <TableCell className="w-16 p-2 py-4 text-sm font-medium">Actions</TableCell>
+                  <TableCell className='w-16 p-2 py-4 text-sm font-medium'>
+                    Actions
+                  </TableCell>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
-                {currentItems.map((r) => (
-                  <TableRow key={r.id} className="hover:bg-gray-50">
-                    <TableCell className="p-2 py-4">
-                      <Checkbox
-                        checked={selectedRows.includes(r.id)}
-                        onChange={() => toggleSelectRow(r.id)}
-                      />
-                    </TableCell>
+                {(sortedData as VeterinarianReviewFromAPI[]).map((r) => {
+                  const displayName = r.is_anonymous
+                    ? 'Anonymous'
+                    : r.owner_first_name && r.owner_last_name
+                      ? `${r.owner_first_name} ${r.owner_last_name}`
+                      : 'Unknown';
 
-                    {/* Client */}
-                    <TableCell className="p-2 py-4">
-                      <div className="flex items-center gap-3">
-                        <ImageHoverPreview
-                          src={r.client.image}
-                          alt={r.client.name}
-                          className="w-8 h-8 rounded-full object-cover"
+                  const initials = r.is_anonymous
+                    ? 'A'
+                    : displayName && displayName !== 'Unknown'
+                      ? displayName
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                          .toUpperCase()
+                      : 'U';
+
+                  return (
+                    <TableRow key={r.id} className='hover:bg-gray-50'>
+                      <TableCell className='p-2 py-4'>
+                        <Checkbox
+                          checked={selectedRows.includes(r.id)}
+                          onChange={() => toggleSelectRow(r.id)}
                         />
-                        <div className="text-sm">
-                          <div className="font-medium text-gray-900">{r.client.name}</div>
-                          <div className="text-xs text-gray-500">{r.client.email}</div>
-                        </div>
-                      </div>
-                    </TableCell>
+                      </TableCell>
 
-                    {/* Pet */}
-                    <TableCell className="p-2 py-4">
-                      {r.pet ? (
-                        <div className="flex items-center gap-3">
-                          <ImageHoverPreview
-                            src={r.pet.image || "/images/pets/placeholder.jpg"}
-                            alt={r.pet.name}
-                            className="w-8 h-8 rounded-full object-cover"
-                          />
-                          <div className="text-sm">
-                            <div className="font-medium text-gray-900">{r.pet.name}</div>
-                            <div className="text-xs text-gray-500">{r.pet.species || ""}</div>
+                      {/* Client */}
+                      <TableCell className='p-2 py-4'>
+                        <div className='flex items-center gap-3'>
+                          <div className='w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600'>
+                            {initials}
+                          </div>
+                          <div className='text-sm'>
+                            <div className='font-medium text-gray-900'>
+                              {displayName}
+                            </div>
+                            {r.is_verified && (
+                              <div className='text-xs text-green-600'>
+                                ✓ Verified
+                              </div>
+                            )}
+                            {r.pet_name && (
+                              <div className='text-xs text-gray-500'>
+                                Pet: {r.pet_name}
+                              </div>
+                            )}
                           </div>
                         </div>
-                      ) : (
-                        <span className="text-sm text-gray-500">—</span>
-                      )}
-                    </TableCell>
+                      </TableCell>
 
-                    {/* Message */}
-                    <TableCell className="p-2 py-4 text-sm text-gray-600">
-                      <div className="line-clamp-2">{r.message}</div>
-                    </TableCell>
+                      {/* Appointment */}
+                      <TableCell className='p-2 py-4'>
+                        {r.appointment_type && r.appointment_date ? (
+                          <div className='text-sm'>
+                            <div className='font-medium text-gray-900 capitalize'>
+                              {r.appointment_type}
+                            </div>
+                            <div className='text-xs text-gray-500'>
+                              {formatAppointmentDate(r.appointment_date)}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className='text-sm text-gray-400'>
+                            No appointment info
+                          </div>
+                        )}
+                      </TableCell>
 
-                    {/* Rating */}
-                    <TableCell className="p-2 py-4">
-                      <Rating value={r.rating} max={5} />
-                    </TableCell>
+                      {/* Review Text */}
+                      <TableCell className='p-2 py-4 text-sm text-gray-600'>
+                        <div className='line-clamp-2'>
+                          {r.review_text || 'No review text'}
+                        </div>
+                      </TableCell>
 
-                    {/* Updated */}
-                    <TableCell className="p-2 py-4 text-sm text-gray-500">
-                      {formatDate(r.updatedAt)}
-                    </TableCell>
+                      {/* Rating */}
+                      <TableCell className='p-2 py-4'>
+                        <Rating value={parseFloat(r.rating)} max={5} />
+                        <div className='text-xs text-gray-500 mt-1'>
+                          {parseFloat(r.rating).toFixed(1)}/5.0
+                        </div>
+                        {r.professionalism_rating && (
+                          <div className='text-xs text-gray-400 mt-1'>
+                            Prof: {r.professionalism_rating.toFixed(1)}
+                          </div>
+                        )}
+                      </TableCell>
 
-                    {/* Booking ID */}
-                    <TableCell className="p-2 py-4 text-sm">
-                      {r.bookingId ? `#${r.bookingId}` : "—"}
-                    </TableCell>
+                      {/* Date */}
+                      <TableCell className='p-2 py-4 text-sm text-gray-500'>
+                        {formatDate(r.created_at)}
+                      </TableCell>
 
-                    {/* Actions */}
-                    <TableCell className="p-2 py-4">
-                      <button
-                        onClick={() => handleDelete(r.id)}
-                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-                        title="Delete"
-                      >
-                        <MdDelete className="w-5 h-5" />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      {/* Status */}
+                      <TableCell className='p-2 py-4'>
+                        <span
+                          className={`px-2 py-1 text-xs rounded ${r.is_verified ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}
+                        >
+                          {r.is_verified ? 'Verified' : 'Unverified'}
+                        </span>
+                      </TableCell>
+
+                      {/* Actions */}
+                      <TableCell className='p-2 py-4'>
+                        <button
+                          onClick={() => handleDelete(r.id)}
+                          className='text-red-600 hover:text-red-800 transition-colors'
+                          title='Delete review'
+                        >
+                          <MdDelete className='text-xl' />
+                        </button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
@@ -311,25 +404,27 @@ const VetBookingReviewsTable: React.FC<Props> = ({ vetId }) => {
       )}
 
       {/* Pagination */}
-      <Pagination
-        totalItems={filtered.length}
-        itemsPerPage={itemsPerPage}
-        onPageChange={setCurrentPage}
-        onItemsPerPageChange={(n) => {
-          setItemsPerPage(n);
-          setCurrentPage(1);
-        }}
-      />
+      {reviewsData?.pagination && (
+        <Pagination
+          totalItems={reviewsData.pagination.total}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+          onItemsPerPageChange={(n) => {
+            setItemsPerPage(n);
+            setCurrentPage(1);
+          }}
+        />
+      )}
 
       {/* Delete Dialog */}
       <DeleteDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={confirmDelete}
-        itemLabel="review"
+        itemLabel='review'
         description={
           reviewToDelete
-            ? "Are you sure you want to delete this review?"
+            ? 'Are you sure you want to delete this review?'
             : `Are you sure you want to delete ${selectedRows.length} selected reviews?`
         }
       />

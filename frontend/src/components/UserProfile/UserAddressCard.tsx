@@ -1,16 +1,97 @@
+import { useState, useEffect } from 'react';
 import { useModal } from '../../hooks/useModal';
 import { Modal } from '../ui/modal';
 import Button from '../ui/button/Button';
 import Input from '../form/input/InputField';
 import Label from '../form/Label';
+import {
+  ProfileData,
+  ProfileAddress,
+  createAddress,
+  updateAddress,
+} from '../../services/profileService';
 
-export default function UserAddressCard() {
+interface UserAddressCardProps {
+  profileData: ProfileData | null;
+  onUpdate: () => void;
+}
+
+export default function UserAddressCard({
+  profileData,
+  onUpdate,
+}: UserAddressCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log('Saving changes...');
-    closeModal();
+  const [formData, setFormData] = useState<Partial<ProfileAddress>>({
+    type: 'home',
+    label: 'Home',
+    address_line1: '',
+    address_line2: '',
+    city: '',
+    state: '',
+    postal_code: '',
+    country: '',
+    is_primary: true,
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+
+  const primaryAddress = profileData?.addresses.find((a) => a.is_primary);
+  const userId = profileData?.user.id;
+
+  useEffect(() => {
+    if (isOpen && primaryAddress) {
+      setFormData(primaryAddress);
+      setEditingAddressId(primaryAddress.id || null);
+    } else if (isOpen) {
+      setFormData({
+        type: 'home',
+        label: 'Home',
+        address_line1: '',
+        address_line2: '',
+        city: '',
+        state: '',
+        postal_code: '',
+        country: '',
+        is_primary: true,
+      });
+      setEditingAddressId(null);
+    }
+  }, [isOpen, primaryAddress]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userId) return;
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      if (editingAddressId) {
+        // Update existing address
+        await updateAddress(userId, editingAddressId, formData);
+      } else {
+        // Create new address
+        await createAddress(userId, formData as Omit<ProfileAddress, 'id'>);
+      }
+      onUpdate();
+      closeModal();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save address');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!profileData) return null;
+
   return (
     <>
       <div className='p-5 border border-gray-200 rounded-2xl dark:border-gray-700 lg:p-6'>
@@ -20,43 +101,60 @@ export default function UserAddressCard() {
               Address
             </h4>
 
-            <div className='grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32'>
-              <div>
-                <p className='mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400'>
-                  Country
-                </p>
-                <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
-                  United States.
-                </p>
-              </div>
+            {primaryAddress ? (
+              <div className='grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32'>
+                <div>
+                  <p className='mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+                    Country
+                  </p>
+                  <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
+                    {primaryAddress.country}
+                  </p>
+                </div>
 
-              <div>
-                <p className='mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400'>
-                  City/State
-                </p>
-                <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
-                  Phoenix, Arizona, United States.
-                </p>
-              </div>
+                <div>
+                  <p className='mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+                    City/State
+                  </p>
+                  <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
+                    {primaryAddress.city}, {primaryAddress.state}
+                  </p>
+                </div>
 
-              <div>
-                <p className='mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400'>
-                  Postal Code
-                </p>
-                <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
-                  ERT 2489
-                </p>
-              </div>
+                <div>
+                  <p className='mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+                    Postal Code
+                  </p>
+                  <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
+                    {primaryAddress.postal_code}
+                  </p>
+                </div>
 
-              <div>
-                <p className='mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400'>
-                  TAX ID
-                </p>
-                <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
-                  AS4568384
-                </p>
+                <div>
+                  <p className='mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+                    Address Line 1
+                  </p>
+                  <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
+                    {primaryAddress.address_line1}
+                  </p>
+                </div>
+
+                {primaryAddress.address_line2 && (
+                  <div>
+                    <p className='mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+                      Address Line 2
+                    </p>
+                    <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
+                      {primaryAddress.address_line2}
+                    </p>
+                  </div>
+                )}
               </div>
-            </div>
+            ) : (
+              <p className='text-sm text-gray-500 dark:text-gray-400'>
+                No address added yet.
+              </p>
+            )}
           </div>
 
           <button
@@ -78,7 +176,7 @@ export default function UserAddressCard() {
                 fill=''
               />
             </svg>
-            Edit
+            {primaryAddress ? 'Edit' : 'Add Address'}
           </button>
         </div>
       </div>
@@ -86,42 +184,119 @@ export default function UserAddressCard() {
         <div className='relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11'>
           <div className='px-2 pr-14'>
             <h4 className='mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90'>
-              Edit Address
+              {editingAddressId ? 'Edit Address' : 'Add Address'}
             </h4>
             <p className='mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7'>
-              Update your details to keep your profile up-to-date.
+              Update your address details to keep your profile up-to-date.
             </p>
           </div>
-          <form className='flex flex-col'>
+          {error && (
+            <div className='px-2 mb-4'>
+              <p className='text-sm text-red-500'>{error}</p>
+            </div>
+          )}
+          <form onSubmit={handleSave} className='flex flex-col'>
             <div className='px-2 overflow-y-auto custom-scrollbar'>
               <div className='grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2'>
-                <div>
-                  <Label>Country</Label>
-                  <Input type='text' value='United States' />
+                <div className='col-span-2 lg:col-span-1'>
+                  <Label>Address Line 1</Label>
+                  <Input
+                    type='text'
+                    name='address_line1'
+                    value={formData.address_line1}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className='col-span-2 lg:col-span-1'>
+                  <Label>Address Line 2</Label>
+                  <Input
+                    type='text'
+                    name='address_line2'
+                    value={formData.address_line2}
+                    onChange={handleChange}
+                  />
                 </div>
 
                 <div>
-                  <Label>City/State</Label>
-                  <Input type='text' value='Arizona, United States.' />
+                  <Label>City</Label>
+                  <Input
+                    type='text'
+                    name='city'
+                    value={formData.city}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label>State</Label>
+                  <Input
+                    type='text'
+                    name='state'
+                    value={formData.state}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
 
                 <div>
                   <Label>Postal Code</Label>
-                  <Input type='text' value='ERT 2489' />
+                  <Input
+                    type='text'
+                    name='postal_code'
+                    value={formData.postal_code}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
 
                 <div>
-                  <Label>TAX ID</Label>
-                  <Input type='text' value='AS4568384' />
+                  <Label>Country</Label>
+                  <Input
+                    type='text'
+                    name='country'
+                    value={formData.country}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label>Type</Label>
+                  <Input
+                    type='text'
+                    name='type'
+                    value={formData.type}
+                    onChange={handleChange}
+                    placeholder='e.g., home, work'
+                  />
+                </div>
+
+                <div>
+                  <Label>Label</Label>
+                  <Input
+                    type='text'
+                    name='label'
+                    value={formData.label}
+                    onChange={handleChange}
+                    placeholder='e.g., Home, Office'
+                  />
                 </div>
               </div>
             </div>
             <div className='flex items-center gap-3 px-2 mt-6 lg:justify-end'>
-              <Button size='sm' variant='outline' onClick={closeModal}>
+              <Button
+                size='sm'
+                variant='outline'
+                onClick={closeModal}
+                type='button'
+              >
                 Close
               </Button>
-              <Button size='sm' onClick={handleSave}>
-                Save Changes
+              <Button size='sm' type='submit' disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </form>

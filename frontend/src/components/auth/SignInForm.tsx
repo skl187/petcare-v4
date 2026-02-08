@@ -149,16 +149,31 @@ export default function SignInForm() {
 
         // Get role for redirection
         const roles = userData.roles || [];
-        const role = roles.length > 0 ? roles[0] : userData.role;
+        let roleForRedirect: string;
+
+        if (roles.length > 0) {
+          const firstRole = roles[0];
+          // Handle both object {name: 'role', slug: 'role'} and string 'role'
+          if (typeof firstRole === 'string') {
+            roleForRedirect = firstRole;
+          } else if (firstRole && typeof firstRole === 'object') {
+            roleForRedirect =
+              firstRole.slug || firstRole.name || userData.role || 'owner';
+          } else {
+            roleForRedirect = userData.role || 'owner';
+          }
+        } else {
+          roleForRedirect = userData.role || 'owner';
+        }
 
         console.log('Roles array:', roles);
-        console.log('Role for redirect:', role);
+        console.log('Role for redirect:', roleForRedirect);
 
         // Set loading to false
         setLoading(false);
 
         // Set role for navigation (useEffect will handle the actual navigation)
-        setRoleToNavigate(role);
+        setRoleToNavigate(roleForRedirect);
       } catch (err) {
         setApiError('Network error. Please try again.');
         console.error('Error:', err);

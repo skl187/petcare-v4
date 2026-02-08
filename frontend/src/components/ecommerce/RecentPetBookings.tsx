@@ -18,10 +18,12 @@ export default function RecentPetBookings({ data }: Props) {
   const bookings = data?.appointments?.recent || [];
 
   const onButtonClick = () => {
-    navigate('/overallBookings');
+    navigate('/bookings');
   };
 
-  const getStatusColor = (status: string): 'success' | 'warning' | 'error' | 'primary' => {
+  const getStatusColor = (
+    status: string,
+  ): 'success' | 'warning' | 'error' | 'primary' => {
     switch (status.toLowerCase()) {
       case 'completed':
         return 'success';
@@ -145,7 +147,10 @@ export default function RecentPetBookings({ data }: Props) {
               ))
             ) : (
               <TableRow>
-                <TableCell className='py-8 text-center text-gray-500 dark:text-gray-400' colSpan={5}>
+                <TableCell
+                  className='py-8 text-center text-gray-500 dark:text-gray-400'
+                  colSpan={5}
+                >
                   No recent bookings found
                 </TableCell>
               </TableRow>

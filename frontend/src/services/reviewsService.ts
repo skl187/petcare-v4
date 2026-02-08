@@ -45,6 +45,46 @@ export interface ReviewStats {
   negative_reviews: string;
 }
 
+// Veterinarian Review Types (matching actual my-reviews API structure)
+export interface VeterinarianReviewFromAPI {
+  id: string;
+  rating: string;
+  review_text: string | null;
+  status: string;
+  professionalism_rating: number | null;
+  knowledge_rating: number | null;
+  communication_rating: number | null;
+  facility_rating: number | null;
+  is_anonymous: boolean;
+  is_verified: boolean;
+  created_at: string;
+  updated_at: string | null;
+  appointment_id: string | null;
+  appointment_date: string | null;
+  appointment_type: string | null;
+  owner_first_name: string | null;
+  owner_last_name: string | null;
+  pet_name: string | null;
+}
+
+export interface VeterinarianReviewStats {
+  total_reviews: string;
+  average_rating: string;
+  avg_professionalism: string;
+  avg_knowledge: string;
+  avg_communication: string;
+  avg_facility: string;
+  positive_reviews: string;
+  negative_reviews: string;
+}
+
+export interface VeterinarianReviewsResponse {
+  user_type?: string;
+  reviews: VeterinarianReviewFromAPI[];
+  stats: VeterinarianReviewStats;
+  pagination: Pagination;
+}
+
 export interface PendingReviewAppointment {
   id: string;
   appointment_number: string;
@@ -127,10 +167,13 @@ export const listReviews = async (params?: {
   if (params?.page) queryParams.set('page', params.page.toString());
   if (params?.limit) queryParams.set('limit', params.limit.toString());
   if (params?.status) queryParams.set('status', params.status);
-  if (params?.veterinarian_id) queryParams.set('veterinarian_id', params.veterinarian_id);
+  if (params?.veterinarian_id)
+    queryParams.set('veterinarian_id', params.veterinarian_id);
   if (params?.user_id) queryParams.set('user_id', params.user_id);
-  if (params?.rating_min) queryParams.set('rating_min', params.rating_min.toString());
-  if (params?.rating_max) queryParams.set('rating_max', params.rating_max.toString());
+  if (params?.rating_min)
+    queryParams.set('rating_min', params.rating_min.toString());
+  if (params?.rating_max)
+    queryParams.set('rating_max', params.rating_max.toString());
 
   const url = `${API_ENDPOINTS.REVIEWS.BASE}?${queryParams.toString()}`;
   const response = await fetch(url, {
@@ -142,7 +185,8 @@ export const listReviews = async (params?: {
     throw new Error(`Failed to fetch reviews: ${response.statusText}`);
   }
 
-  const result: ApiResponse<{ reviews: Review[]; pagination: Pagination }> = await response.json();
+  const result: ApiResponse<{ reviews: Review[]; pagination: Pagination }> =
+    await response.json();
   return result.data;
 };
 
@@ -162,11 +206,16 @@ export const getReview = async (id: string): Promise<Review> => {
 };
 
 // Get review by appointment ID
-export const getReviewByAppointment = async (appointmentId: string): Promise<Review | null> => {
-  const response = await fetch(API_ENDPOINTS.REVIEWS.BY_APPOINTMENT(appointmentId), {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
+export const getReviewByAppointment = async (
+  appointmentId: string,
+): Promise<Review | null> => {
+  const response = await fetch(
+    API_ENDPOINTS.REVIEWS.BY_APPOINTMENT(appointmentId),
+    {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    },
+  );
 
   if (!response.ok) {
     throw new Error(`Failed to fetch review: ${response.statusText}`);
@@ -179,8 +228,12 @@ export const getReviewByAppointment = async (appointmentId: string): Promise<Rev
 // Get reviews for a veterinarian
 export const getVeterinarianReviews = async (
   veterinarianId: string,
-  params?: { page?: number; limit?: number }
-): Promise<{ reviews: Review[]; stats: ReviewStats; pagination: Pagination }> => {
+  params?: { page?: number; limit?: number },
+): Promise<{
+  reviews: Review[];
+  stats: ReviewStats;
+  pagination: Pagination;
+}> => {
   const queryParams = new URLSearchParams();
   if (params?.page) queryParams.set('page', params.page.toString());
   if (params?.limit) queryParams.set('limit', params.limit.toString());
@@ -192,10 +245,45 @@ export const getVeterinarianReviews = async (
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch veterinarian reviews: ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch veterinarian reviews: ${response.statusText}`,
+    );
   }
 
-  const result: ApiResponse<{ reviews: Review[]; stats: ReviewStats; pagination: Pagination }> = await response.json();
+  const result: ApiResponse<{
+    reviews: Review[];
+    stats: ReviewStats;
+    pagination: Pagination;
+  }> = await response.json();
+  return result.data;
+};
+
+// Get reviews for a veterinarian (correct API structure)
+export const getVeterinarianReviewsNew = async (
+  veterinarianId: string,
+  params?: { page?: number; limit?: number },
+): Promise<VeterinarianReviewsResponse> => {
+  const queryParams = new URLSearchParams();
+  if (params?.page) queryParams.set('page', params.page.toString());
+  if (params?.limit) queryParams.set('limit', params.limit.toString());
+
+  const url = `${API_ENDPOINTS.REVIEWS.BY_VETERINARIAN(veterinarianId)}?${queryParams.toString()}`;
+  console.log('[reviewsService] Fetching from:', url);
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch veterinarian reviews: ${response.statusText}`,
+    );
+  }
+
+  const result: ApiResponse<VeterinarianReviewsResponse> =
+    await response.json();
+  console.log('[reviewsService] API Response:', result);
   return result.data;
 };
 
@@ -218,7 +306,8 @@ export const getMyReviews = async (params?: {
     throw new Error(`Failed to fetch your reviews: ${response.statusText}`);
   }
 
-  const result: ApiResponse<{ reviews: Review[]; pagination: Pagination }> = await response.json();
+  const result: ApiResponse<{ reviews: Review[]; pagination: Pagination }> =
+    await response.json();
   return result.data;
 };
 
@@ -233,22 +322,34 @@ export const getPendingReviewAppointments = async (): Promise<{
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch pending review appointments: ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch pending review appointments: ${response.statusText}`,
+    );
   }
 
-  const result: ApiResponse<{ appointments: PendingReviewAppointment[]; count: number }> = await response.json();
+  const result: ApiResponse<{
+    appointments: PendingReviewAppointment[];
+    count: number;
+  }> = await response.json();
   return result.data;
 };
 
 // Check if user can review an appointment
-export const canReviewAppointment = async (appointmentId: string): Promise<CanReviewResponse> => {
-  const response = await fetch(API_ENDPOINTS.REVIEWS.CAN_REVIEW(appointmentId), {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
+export const canReviewAppointment = async (
+  appointmentId: string,
+): Promise<CanReviewResponse> => {
+  const response = await fetch(
+    API_ENDPOINTS.REVIEWS.CAN_REVIEW(appointmentId),
+    {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    },
+  );
 
   if (!response.ok) {
-    throw new Error(`Failed to check review eligibility: ${response.statusText}`);
+    throw new Error(
+      `Failed to check review eligibility: ${response.statusText}`,
+    );
   }
 
   const result: ApiResponse<CanReviewResponse> = await response.json();
@@ -265,7 +366,9 @@ export const createReview = async (data: CreateReviewData): Promise<Review> => {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || `Failed to create review: ${response.statusText}`);
+    throw new Error(
+      errorData.message || `Failed to create review: ${response.statusText}`,
+    );
   }
 
   const result: ApiResponse<Review> = await response.json();
@@ -273,7 +376,10 @@ export const createReview = async (data: CreateReviewData): Promise<Review> => {
 };
 
 // Update a review
-export const updateReview = async (id: string, data: UpdateReviewData): Promise<Review> => {
+export const updateReview = async (
+  id: string,
+  data: UpdateReviewData,
+): Promise<Review> => {
   const response = await fetch(API_ENDPOINTS.REVIEWS.DETAIL(id), {
     method: 'PUT',
     headers: getAuthHeaders(),
@@ -282,7 +388,9 @@ export const updateReview = async (id: string, data: UpdateReviewData): Promise<
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || `Failed to update review: ${response.statusText}`);
+    throw new Error(
+      errorData.message || `Failed to update review: ${response.statusText}`,
+    );
   }
 
   const result: ApiResponse<Review> = await response.json();
@@ -298,6 +406,8 @@ export const deleteReview = async (id: string): Promise<void> => {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || `Failed to delete review: ${response.statusText}`);
+    throw new Error(
+      errorData.message || `Failed to delete review: ${response.statusText}`,
+    );
   }
 };

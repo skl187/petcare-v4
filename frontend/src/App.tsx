@@ -11,7 +11,6 @@ import VetLayout from './layout/VetLayout/VetLayout';
 import SignIn from './pages/AuthPages/SignIn';
 import SignUp from './pages/AuthPages/SignUp';
 import NotFound from './pages/OtherPage/NotFound';
-import UserProfiles from './pages/UserProfiles';
 import Videos from './pages/UiElements/Videos';
 import Images from './pages/UiElements/Images';
 import Badges from './pages/UiElements/Badges';
@@ -80,6 +79,7 @@ import VerifyEmail from './components/auth/VerifyEmail';
 import RegistrationSuccess from './components/auth/RegistrationSuccess';
 import ToastContainer from './components/ui/toast/ToastContainer';
 import { VeterinaryBookingsDetail } from './pages/VetPageForms/Veterinary/VeterinaryBookingsDetail';
+import ProfileWithLayout from './pages/ProfileWithLayout';
 
 export default function App() {
   return (
@@ -95,10 +95,16 @@ export default function App() {
           <Route path='/forgot-password' element={<ForgotPassword />} />
           <Route path='/reset-password' element={<ResetPasswordForm />} />
           <Route path='/verify-email' element={<VerifyEmail />} />
-          <Route path='/registration-success' element={<RegistrationSuccess />} />
+          <Route
+            path='/registration-success'
+            element={<RegistrationSuccess />}
+          />
 
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
+            {/* Profile - Accessible to all authenticated users */}
+            <Route path='/profile' element={<ProfileWithLayout />} />
+
             <Route
               element={
                 <RoleProtectedRoute allowedRoles={['admin', 'superadmin']} />
@@ -160,10 +166,12 @@ export default function App() {
                 {/* Roles Management */}
                 <Route path='/manage-roles' element={<ManageRoles />} />
                 {/* Permissions Management */}
-                <Route path='/manage-permissions' element={<ManagePermissions />} />
+                <Route
+                  path='/manage-permissions'
+                  element={<ManagePermissions />}
+                />
 
                 {/* Sample Routes */}
-                <Route path='/profile' element={<UserProfiles />} />
                 <Route path='/calendar' element={<Calendar />} />
                 <Route path='/blank' element={<Blank />} />
                 <Route path='/form-elements' element={<FormElements />} />

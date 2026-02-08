@@ -31,7 +31,7 @@ const vetNavItems: NavItem[] = [
     icon: <TbUsersGroup />,
     name: 'Users',
     subItems: [
-      { name: 'Owners and Pets', path: '/vet/owners' },
+      // { name: 'Owners and Pets', path: '/vet/owners' },
       { name: 'Booking Reviews', path: '/vet/reviews' },
     ],
   },

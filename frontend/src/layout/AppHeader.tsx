@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Link } from 'react-router';
 import { useSidebar } from '../context/SidebarContext';
+import { useAuth } from '../components/auth/AuthContext';
 import { ThemeToggleButton } from '../components/common/ThemeToggleButton';
 import NotificationDropdown from '../components/header/NotificationDropdown';
 import UserDropdown from '../components/header/UserDropdown';
 
 const AppHeader: React.FC = () => {
+  const { user } = useAuth();
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
@@ -21,6 +23,38 @@ const AppHeader: React.FC = () => {
 
   const toggleApplicationMenu = () => {
     setApplicationMenuOpen(!isApplicationMenuOpen);
+  };
+
+  // Get role-based home path
+  const getHomePath = (): string => {
+    if (!user) return '/home';
+
+    let userRole: string | undefined = user.role;
+
+    // If no direct role, extract from roles array
+    if (!userRole && user.roles && user.roles.length > 0) {
+      const firstRole = user.roles[0];
+      // Handle both object {name: 'role', slug: 'role'} and string 'role'
+      if (typeof firstRole === 'string') {
+        userRole = firstRole as any;
+      } else if (firstRole && typeof firstRole === 'object') {
+        userRole = ((firstRole as any).slug || (firstRole as any).name) as any;
+      }
+    }
+
+    const normalizedRole = (userRole || '').toLowerCase().trim();
+
+    switch (normalizedRole) {
+      case 'veterinary':
+      case 'veterinarian':
+        return '/vet/home';
+      case 'owner':
+        return '/owner/home';
+      case 'superadmin':
+      case 'admin':
+      default:
+        return '/home';
+    }
   };
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -83,7 +117,7 @@ const AppHeader: React.FC = () => {
             {/* Cross Icon */}
           </button>
 
-          <Link to='/' className='lg:hidden'>
+          <Link to={getHomePath()} className='lg:hidden'>
             <img
               className='dark:hidden h-12'
               src='./images/logo/logo.png'

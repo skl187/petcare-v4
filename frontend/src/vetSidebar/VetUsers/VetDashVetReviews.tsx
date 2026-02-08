@@ -1,17 +1,23 @@
-import PageMeta from "../../components/common/PageMeta";
-import ComponentCard from "../../components/common/ComponentCard";
-import VetBookingReviewsTable from "../../components/vetTables/Users/VetBookingReviews/VetBookingReviewsTable";
+import PageMeta from '../../components/common/PageMeta';
+import ComponentCard from '../../components/common/ComponentCard';
+import VetBookingReviewsTable from '../../components/vetTables/Users/VetBookingReviews/VetBookingReviewsTable';
+import PageBreadcrumb from '../../components/common/PageBreadCrumb';
+
 const VetDashVetReviews = () => {
   return (
     <>
-    <PageMeta title="BracePet VetDashVetReviews" description="This is BracePet VetDashVetReviews" />
-    <div className="space-y-6 p-4">
-      <ComponentCard title="VetDashVetReviews">
-      <VetBookingReviewsTable/>
-      </ComponentCard>
-    </div>
-  </>
-  )
-}
+      <PageMeta
+        title='My Reviews - BracePet'
+        description='View and manage reviews from your clients'
+      />
+      <PageBreadcrumb pageTitle='My Reviews' />
+      <div className='space-y-6'>
+        <ComponentCard title='Client Reviews'>
+          <VetBookingReviewsTable />
+        </ComponentCard>
+      </div>
+    </>
+  );
+};
 
-export default VetDashVetReviews
+export default VetDashVetReviews;

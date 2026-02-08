@@ -1,16 +1,70 @@
+import { useState, useEffect } from 'react';
 import { useModal } from '../../hooks/useModal';
 import { Modal } from '../ui/modal';
 import Button from '../ui/button/Button';
 import Input from '../form/input/InputField';
 import Label from '../form/Label';
+import { ProfileData, updateProfile } from '../../services/profileService';
 
-export default function UserInfoCard() {
+interface UserInfoCardProps {
+  profileData: ProfileData | null;
+  onUpdate: () => void;
+}
+
+export default function UserInfoCard({
+  profileData,
+  onUpdate,
+}: UserInfoCardProps) {
   const { isOpen, openModal, closeModal } = useModal();
-  const handleSave = () => {
-    // Handle save logic here
-    console.log('Saving changes...');
-    closeModal();
+  const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+    bio: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen && profileData) {
+      setFormData({
+        first_name: profileData.user.first_name || '',
+        last_name: profileData.user.last_name || '',
+        email: profileData.user.email || '',
+        phone: profileData.user.phone || '',
+        bio: profileData.user.bio || '',
+      });
+    }
+  }, [isOpen, profileData]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await updateProfile(formData);
+      onUpdate();
+      closeModal();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update profile');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!profileData) return null;
+
+  const { user } = profileData;
+
   return (
     <div className='p-5 border border-gray-200 rounded-2xl dark:border-gray-700 lg:p-6'>
       <div className='flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between'>
@@ -25,7 +79,7 @@ export default function UserInfoCard() {
                 First Name
               </p>
               <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
-                Musharof
+                {user.first_name}
               </p>
             </div>
 
@@ -34,7 +88,7 @@ export default function UserInfoCard() {
                 Last Name
               </p>
               <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
-                Chowdhury
+                {user.last_name}
               </p>
             </div>
 
@@ -43,7 +97,7 @@ export default function UserInfoCard() {
                 Email address
               </p>
               <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
-                randomuser@pimjo.com
+                {user.email}
               </p>
             </div>
 
@@ -52,7 +106,7 @@ export default function UserInfoCard() {
                 Phone
               </p>
               <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
-                +09 363 398 46
+                {user.phone || 'Not provided'}
               </p>
             </div>
 
@@ -61,7 +115,7 @@ export default function UserInfoCard() {
                 Bio
               </p>
               <p className='text-sm font-medium text-gray-800 dark:text-white/90'>
-                Team Manager
+                {user.bio || 'Not provided'}
               </p>
             </div>
           </div>
@@ -100,42 +154,14 @@ export default function UserInfoCard() {
               Update your details to keep your profile up-to-date.
             </p>
           </div>
-          <form className='flex flex-col'>
+          {error && (
+            <div className='px-2 mb-4'>
+              <p className='text-sm text-red-500'>{error}</p>
+            </div>
+          )}
+          <form onSubmit={handleSave} className='flex flex-col'>
             <div className='custom-scrollbar h-[450px] overflow-y-auto px-2 pb-3'>
               <div>
-                <h5 className='mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6'>
-                  Social Links
-                </h5>
-
-                <div className='grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2'>
-                  <div>
-                    <Label>Facebook</Label>
-                    <Input
-                      type='text'
-                      value='https://www.facebook.com/PimjoHQ'
-                    />
-                  </div>
-
-                  <div>
-                    <Label>X.com</Label>
-                    <Input type='text' value='https://x.com/PimjoHQ' />
-                  </div>
-
-                  <div>
-                    <Label>Linkedin</Label>
-                    <Input
-                      type='text'
-                      value='https://www.linkedin.com/company/pimjo'
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Instagram</Label>
-                    <Input type='text' value='https://instagram.com/PimjoHQ' />
-                  </div>
-                </div>
-              </div>
-              <div className='mt-7'>
                 <h5 className='mb-5 text-lg font-medium text-gray-800 dark:text-white/90 lg:mb-6'>
                   Personal Information
                 </h5>
@@ -143,37 +169,68 @@ export default function UserInfoCard() {
                 <div className='grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2'>
                   <div className='col-span-2 lg:col-span-1'>
                     <Label>First Name</Label>
-                    <Input type='text' value='Musharof' />
+                    <Input
+                      type='text'
+                      name='first_name'
+                      value={formData.first_name}
+                      onChange={handleChange}
+                    />
                   </div>
 
                   <div className='col-span-2 lg:col-span-1'>
                     <Label>Last Name</Label>
-                    <Input type='text' value='Chowdhury' />
+                    <Input
+                      type='text'
+                      name='last_name'
+                      value={formData.last_name}
+                      onChange={handleChange}
+                    />
                   </div>
 
                   <div className='col-span-2 lg:col-span-1'>
                     <Label>Email Address</Label>
-                    <Input type='text' value='randomuser@pimjo.com' />
+                    <Input
+                      type='email'
+                      name='email'
+                      value={formData.email}
+                      onChange={handleChange}
+                      disabled
+                    />
                   </div>
 
                   <div className='col-span-2 lg:col-span-1'>
                     <Label>Phone</Label>
-                    <Input type='text' value='+09 363 398 46' />
+                    <Input
+                      type='text'
+                      name='phone'
+                      value={formData.phone}
+                      onChange={handleChange}
+                    />
                   </div>
 
                   <div className='col-span-2'>
                     <Label>Bio</Label>
-                    <Input type='text' value='Team Manager' />
+                    <Input
+                      type='text'
+                      name='bio'
+                      value={formData.bio}
+                      onChange={handleChange}
+                    />
                   </div>
                 </div>
               </div>
             </div>
             <div className='flex items-center gap-3 px-2 mt-6 lg:justify-end'>
-              <Button size='sm' variant='outline' onClick={closeModal}>
+              <Button
+                size='sm'
+                variant='outline'
+                onClick={closeModal}
+                type='button'
+              >
                 Close
               </Button>
-              <Button size='sm' onClick={handleSave}>
-                Save Changes
+              <Button size='sm' type='submit' disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
           </form>

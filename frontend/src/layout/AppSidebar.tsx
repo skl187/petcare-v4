@@ -37,18 +37,18 @@ const navItems: NavItem[] = [
     name: 'Appointments',
     path: '/bookings',
   },
-  {
-    icon: <TbReportAnalytics />,
-    name: 'Reports',
-    path: '/reports',
-  },
+  // {
+  //   icon: <TbReportAnalytics />,
+  //   name: 'Reports',
+  //   path: '/reports',
+  // },
   {
     icon: <MdOutlinePets />,
     name: 'Veterinary',
     subItems: [
       { name: 'Veterinary Bookings', path: '/vetBookings', pro: false },
       { name: 'Veterinarian List', path: '/vetList', pro: false },
-      { name: 'Category List', path: '/categoryList', pro: false },
+      // { name: 'Category List', path: '/categoryList', pro: false },
       { name: 'Service List', path: '/serviceList', pro: false },
       { name: 'Pet Care Centers', path: '/petCenterList', pro: false },
     ],
@@ -57,29 +57,29 @@ const navItems: NavItem[] = [
     icon: <TbUsersGroup />,
     name: 'Users',
     subItems: [
-      { name: 'Employees', path: '/employees', pro: false },
-      { name: 'Employee Request List', path: '/empRequestList', pro: false },
+      // { name: 'Employees', path: '/employees', pro: false },
+      // { name: 'Employee Request List', path: '/empRequestList', pro: false },
       { name: 'Owners and pets', path: '/ownersAndPets', pro: false },
-      { name: 'Booking Reviews', path: '/bookingReviews', pro: false },
+      // { name: 'Booking Reviews', path: '/bookingReviews', pro: false },
     ],
   },
-  {
-    icon: <TbReportMoney />,
-    name: 'Finance',
-    subItems: [
-      { name: 'Tax', path: '/tax', pro: false },
-      { name: 'Employee Earnings', path: '/employeeEarnings', pro: false },
-    ],
-  },
-  {
-    icon: <TbReportAnalytics />,
-    name: 'Overall Reports',
-    subItems: [
-      { name: 'Daily Bookings', path: '/dailyBookings', pro: false },
-      { name: 'Overall Bookings', path: '/overallBookings', pro: false },
-      { name: 'Employee Payouts', path: '/employeePayouts', pro: false },
-    ],
-  },
+  // {
+  //   icon: <TbReportMoney />,
+  //   name: 'Finance',
+  //   subItems: [
+  //     { name: 'Tax', path: '/tax', pro: false },
+  //     { name: 'Employee Earnings', path: '/employeeEarnings', pro: false },
+  //   ],
+  // },
+  // {
+  //   icon: <TbReportAnalytics />,
+  //   name: 'Overall Reports',
+  //   subItems: [
+  //     { name: 'Daily Bookings', path: '/dailyBookings', pro: false },
+  //     { name: 'Overall Bookings', path: '/overallBookings', pro: false },
+  //     { name: 'Employee Payouts', path: '/employeePayouts', pro: false },
+  //   ],
+  // },
 
   // {
   //   icon: <CalenderIcon />,
@@ -112,25 +112,25 @@ const navItems: NavItem[] = [
 ];
 
 const othersItems: NavItem[] = [
-  {
-    icon: <MdOutlineSettings />,
-    name: 'Settings',
-    path: '/settings',
-  },
-  {
-    icon: <MdOutlineLocationOn />,
-    name: 'Location',
-    subItems: [
-      { name: 'City', path: '/city-locations', pro: false },
-      { name: 'State', path: '/state-locations', pro: false },
-      { name: 'Country', path: '/country-locations', pro: false },
-    ],
-  },
-  {
-    icon: <GrServices />,
-    name: 'System Services',
-    path: '/system-services',
-  },
+  // {
+  //   icon: <MdOutlineSettings />,
+  //   name: 'Settings',
+  //   path: '/settings',
+  // },
+  // {
+  //   icon: <MdOutlineLocationOn />,
+  //   name: 'Location',
+  //   subItems: [
+  //     { name: 'City', path: '/city-locations', pro: false },
+  //     { name: 'State', path: '/state-locations', pro: false },
+  //     { name: 'Country', path: '/country-locations', pro: false },
+  //   ],
+  // },
+  // {
+  //   icon: <GrServices />,
+  //   name: 'System Services',
+  //   path: '/system-services',
+  // },
   {
     icon: <MdOutlinePets />,
     name: 'Pets',
@@ -139,29 +139,29 @@ const othersItems: NavItem[] = [
       { name: 'Breed', path: '/petBreed', pro: false },
     ],
   },
-  {
-    icon: <GrDocument />,
-    name: 'Pages',
-    path: '/appPage',
-  },
-  {
-    icon: <MdOutlineNotificationsActive />,
-    name: 'Notifications',
-    subItems: [
-      { name: 'ListNotification', path: '/line-chart', pro: false },
-      { name: 'TemplateNotification', path: '/bar-chart', pro: false },
-    ],
-  },
-  {
-    icon: <TbAppWindow />,
-    name: 'App Banner',
-    path: '/appBanner',
-  },
-  {
-    icon: <GrShieldSecurity />,
-    name: 'Access-Control',
-    path: '/accessControl',
-  },
+  // {
+  //   icon: <GrDocument />,
+  //   name: 'Pages',
+  //   path: '/appPage',
+  // },
+  // {
+  //   icon: <MdOutlineNotificationsActive />,
+  //   name: 'Notifications',
+  //   subItems: [
+  //     { name: 'ListNotification', path: '/line-chart', pro: false },
+  //     { name: 'TemplateNotification', path: '/bar-chart', pro: false },
+  //   ],
+  // },
+  // {
+  //   icon: <TbAppWindow />,
+  //   name: 'App Banner',
+  //   path: '/appBanner',
+  // },
+  // {
+  //   icon: <GrShieldSecurity />,
+  //   name: 'Access-Control',
+  //   path: '/accessControl',
+  // },
   {
     icon: <GrShieldSecurity />,
     name: 'Manage Roles',
@@ -460,7 +460,7 @@ const AppSidebar: React.FC = () => {
               </h2>
               {renderMenuItems(navItems, 'main')}
             </div>
-            <div className=''>
+            <div className='mt-6'>
               <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered
