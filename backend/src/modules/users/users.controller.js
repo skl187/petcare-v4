@@ -19,24 +19,66 @@ const getAllUsers = async (req, res) => {
       });
     }
 
+    const include = (req.query.include || '').toString();
+    const includePetsCount = include === 'pets_count' || include === 'pet_count' || include === 'pets';
+
     const countResult = await query('SELECT COUNT(*) as count FROM users WHERE deleted_at IS NULL');
+
+    const sql = includePetsCount
+      ? `SELECT id, email, first_name, last_name, display_name, status, created_at,
+           COALESCE((SELECT COUNT(*) FROM pets p WHERE p.user_id = users.id AND p.deleted_at IS NULL), 0) AS pets_count
+         FROM users
+         WHERE deleted_at IS NULL
+         ORDER BY created_at DESC
+         LIMIT $1 OFFSET $2`
+      : `SELECT id, email, first_name, last_name, display_name, status, created_at
+         FROM users
+         WHERE deleted_at IS NULL
+         ORDER BY created_at DESC
+         LIMIT $1 OFFSET $2`;
+
+    const result = await query(sql, [limit, offset]);
+
+    const data = paginate(result.rows, parseInt(countResult.rows[0].count), req.query.page || 1, limit);
+    res.json(successResponse(data));
+
+  } catch (err) {
+    console.error('Fetch users error:', err.message);
+    res.status(500).json({ 
+      status: 'error',
+      message: 'Failed to fetch users' 
+    });
+  }
+};
+
+// Get full pet list for a user (admin/permission protected)
+const getUserPets = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { limit, offset } = getPaginationParams(req);
+
+    // Require permission to read pets
+    const hasPermission = await req.checkPermission('read', 'pet');
+    if (!hasPermission) {
+      return res.status(403).json({ status: 'error', message: 'Forbidden' });
+    }
+
+    const countResult = await query('SELECT COUNT(*) as count FROM pets WHERE user_id = $1 AND deleted_at IS NULL', [id]);
     const result = await query(
-      `SELECT id, email, first_name, last_name, display_name, status, created_at
-       FROM users
-       WHERE deleted_at IS NULL
+      `SELECT id, name, slug, pet_type_id, breed_id, size, gender, date_of_birth, age, weight, status, created_at
+       FROM pets
+       WHERE user_id = $1 AND deleted_at IS NULL
        ORDER BY created_at DESC
-       LIMIT $1 OFFSET $2`,
-      [limit, offset]
+       LIMIT $2 OFFSET $3`,
+      [id, limit, offset]
     );
 
     const data = paginate(result.rows, parseInt(countResult.rows[0].count), req.query.page || 1, limit);
     res.json(successResponse(data));
 
   } catch (err) {
-    res.status(500).json({ 
-      status: 'error',
-      message: 'Failed to fetch users' 
-    });
+    console.error('Get user pets error:', err.message);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch user pets' });
   }
 };
 
@@ -213,5 +255,6 @@ module.exports = {
   getUserById,
   createUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  getUserPets
 };

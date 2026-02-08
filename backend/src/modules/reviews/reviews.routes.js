@@ -12,14 +12,13 @@ const { requireAuth } = require('../../core/auth/auth.middleware');
 // PUBLIC ROUTES (with auth for user context)
 // ============================================================================
 
-// Get reviews for a specific veterinarian (public view)
-router.get('/veterinarian/:veterinarianId', reviewsController.getVeterinarianReviews);
+router.get('/veterinarians/:veterinarianId', reviewsController.getVeterinarianReviews);
 
 // ============================================================================
 // AUTHENTICATED ROUTES
 // ============================================================================
 
-// Get current user's reviews
+// Get current user's reviews (pet owner) OR veterinarian's reviews (vet)
 router.get('/my-reviews', requireAuth, reviewsController.getMyReviews);
 
 // Get appointments pending review for current user

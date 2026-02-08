@@ -4,6 +4,7 @@ const { body, param } = require('express-validator');
 const { requireAuth } = require('../../core/auth/auth.middleware');
 const usersController = require('./users.controller');
 const userRolesController = require('./user_roles.controller');
+const userAddressesController = require('./user_addresses.controller');
 
 const router = express.Router();
 
@@ -22,6 +23,14 @@ router.get('/:id', requireAuth, usersController.getUserById);
 router.post('/', requireAuth, usersController.createUser);
 router.put('/:id', requireAuth, usersController.updateUser);
 router.delete('/:id', requireAuth, usersController.deleteUser);
+
+// Get full list of pets for a user (admin only)
+router.get('/:id/pets',
+  requireAuth,
+  [ param('id').isUUID() ],
+  handleValidationErrors,
+  usersController.getUserPets
+);
 
 // ============================================================================
 // User-Role endpoints
@@ -115,6 +124,56 @@ router.delete('/:id/permissions/:permissionId',
   ],
   handleValidationErrors,
   userRolesController.removePermissionFromUser
+);
+
+// ============================================================================
+// User Address endpoints
+// ============================================================================
+
+// List addresses for a user
+router.get('/:id/addresses',
+  requireAuth,
+  [ param('id').isUUID() ],
+  handleValidationErrors,
+  userAddressesController.listAddresses
+);
+
+// Create address for a user
+router.post('/:id/addresses',
+  requireAuth,
+  [
+    param('id').isUUID(),
+    body('type').optional().isIn(['home','work','other','billing','shipping']),
+    body('label').optional().trim(),
+    body('address_line1').trim().notEmpty().withMessage('address_line1 is required'),
+    body('city').trim().notEmpty().withMessage('city is required'),
+    body('country').trim().notEmpty().withMessage('country is required'),
+    body('is_primary').optional().isBoolean()
+  ],
+  handleValidationErrors,
+  userAddressesController.createAddress
+);
+
+// Update address
+router.patch('/:id/addresses/:addressId',
+  requireAuth,
+  [
+    param('id').isUUID(),
+    param('addressId').isUUID()
+  ],
+  handleValidationErrors,
+  userAddressesController.updateAddress
+);
+
+// Delete address
+router.delete('/:id/addresses/:addressId',
+  requireAuth,
+  [
+    param('id').isUUID(),
+    param('addressId').isUUID()
+  ],
+  handleValidationErrors,
+  userAddressesController.deleteAddress
 );
 
 module.exports = router;

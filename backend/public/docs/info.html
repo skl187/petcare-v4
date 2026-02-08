@@ -14,71 +14,91 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 
                 <pre class="bg-gray-900 text-green-400 p-4 rounded overflow-auto max-h-auto font-mono text-sm">
-# POST /medical_records/vaccinations
+# GET /api/reviews/veterinarian/:veterinarianId
+``` json
 
-```json
-// Request headers
-Authorization: Bearer <access_token>
-Content-Type: application/json
-// Request body
 {
-  "pet_id": "770e8400-e29b-41d4-a716-446655440002",
-  "appointment_id": "660e8400-e29b-41d4-a716-446655440001",
-  "veterinarian_id": "880e8400-e29b-41d4-a716-446655440000",
-  "vaccinations": [
-    {
-      "vaccine_name": "Rabies",
-      "vaccine_type": "rabies",
-      "manufacturer": "Merial",
-      "batch_number": "RB2026001",
-      "site_of_injection": "Right hind leg",
-      "next_due_date": "2027-02-03",
-      "cost": 50.00
-    },
-    {
-      "vaccine_name": "DHPP",
-      "vaccine_type": "combination",
-      "manufacturer": "Zoetis",
-      "batch_number": "DHPP2026002",
-      "site_of_injection": "Left hind leg",
-      "next_due_date": "2027-02-03",
-      "cost": 75.00
-    },
-    {
-      "vaccine_name": "Bordetella",
-      "vaccine_type": "respiratory",
-      "manufacturer": "Merck",
-      "batch_number": "BORD2026003",
-      "site_of_injection": "Intranasal",
-      "cost": 30.00,
-      "notes": "Annual booster"
-    }
-  ]
-}
-// Respone
-{
-  "status": "success",
+  "success": true,
   "data": {
-    "count": 3,
-    "vaccinations": [
+    "veterinarian": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "user_id": "550e8400-e29b-41d4-a716-446655440001",
+      "license_number": "VET-2024-001",
+      "specialization": "Small Animal Surgery",
+      "experience_years": 8,
+      "rating": 4.8,
+      "total_appointments": 245,
+      "first_name": "Dr. Sarah",
+      "last_name": "Johnson",
+      "avatar_url": "https://cdn.example.com/avatars/vet-001.jpg"
+    },
+    "reviews": [
       {
-        "id": "aa0e8400-e29b-41d4-a716-446655440010",
-        "vaccine_name": "Rabies",
-        "vaccination_date": "2026-02-03"
+        "id": "660e8400-e29b-41d4-a716-446655440000",
+        "rating": 5.0,
+        "review_text": "Excellent care for my dog! Dr. Johnson was very knowledgeable and took time to explain everything.",
+        "professionalism_rating": 5,
+        "knowledge_rating": 5,
+        "communication_rating": 5,
+        "facility_rating": 4,
+        "is_verified": true,
+        "is_anonymous": false,
+        "user": {
+          "id": "550e8400-e29b-41d4-a716-446655440002",
+          "display_name": "John Doe",
+          "avatar_url": "https://cdn.example.com/avatars/user-002.jpg"
+        },
+        "appointment": {
+          "id": "770e8400-e29b-41d4-a716-446655440000",
+          "appointment_date": "2026-01-15",
+          "appointment_type": "checkup"
+        },
+        "created_at": "2026-01-20T10:30:00Z",
+        "updated_at": "2026-01-20T10:30:00Z"
       },
       {
-        "id": "bb0e8400-e29b-41d4-a716-446655440011",
-        "vaccine_name": "DHPP",
-        "vaccination_date": "2026-02-03"
-      },
-      {
-        "id": "cc0e8400-e29b-41d4-a716-446655440012",
-        "vaccine_name": "Bordetella",
-        "vaccination_date": "2026-02-03"
+        "id": "660e8400-e29b-41d4-a716-446655440001",
+        "rating": 4.5,
+        "review_text": "Great veterinarian. The facility could be cleaner though.",
+        "professionalism_rating": 5,
+        "knowledge_rating": 4,
+        "communication_rating": 5,
+        "facility_rating": 3,
+        "is_verified": true,
+        "is_anonymous": false,
+        "user": {
+          "id": "550e8400-e29b-41d4-a716-446655440003",
+          "display_name": "Jane Smith",
+          "avatar_url": "https://cdn.example.com/avatars/user-003.jpg"
+        },
+        "appointment": {
+          "id": "770e8400-e29b-41d4-a716-446655440001",
+          "appointment_date": "2026-01-10",
+          "appointment_type": "vaccination"
+        },
+        "created_at": "2026-01-18T14:20:00Z",
+        "updated_at": "2026-01-18T14:20:00Z"
       }
-    ]
+    ],
+    "pagination": {
+      "total": 24,
+      "page": 1,
+      "limit": 10,
+      "pages": 3
+    },
+    "summary": {
+      "average_rating": 4.8,
+      "total_reviews": 24,
+      "review_breakdown": {
+        "five_star": 18,
+        "four_star": 5,
+        "three_star": 1,
+        "two_star": 0,
+        "one_star": 0
+      }
+    }
   },
-  "message": "3 vaccination(s) created"
+  "message": "Reviews retrieved successfully"
 }
 ```
 </pre>

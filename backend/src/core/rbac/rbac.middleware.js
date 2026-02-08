@@ -56,4 +56,15 @@ const authorize = (action, resource) => {
   };
 };
 
-module.exports = { checkPermission, authorize };
+// Attach a helper to request so controllers can call `req.checkPermission(action, resource)`
+const attachCheckPermission = (req, res, next) => {
+  if (req.user) {
+    req.checkPermission = (action, resource) => checkPermission(req.user.id, action, resource);
+  } else {
+    // if no user, default to rejected permission
+    req.checkPermission = async () => false;
+  }
+  next();
+};
+
+module.exports = { checkPermission, authorize, attachCheckPermission };

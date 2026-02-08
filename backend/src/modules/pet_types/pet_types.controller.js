@@ -11,7 +11,7 @@ const list = async (req, res) => {
     const offset = (page - 1) * limit;
 
     const result = await query(
-      `SELECT id, name, slug, status, created_at
+      `SELECT id, name, slug, icon_url, status, created_at
        FROM pet_types
        WHERE deleted_at IS NULL
        ORDER BY created_at DESC
@@ -48,7 +48,7 @@ const getById = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const { name, slug, status } = req.body;
+    const { name, slug, icon_url, status } = req.body;
 
     // Basic validation
     if (!name || !String(name).trim()) {
@@ -59,13 +59,13 @@ const create = async (req, res) => {
       });
     }
 
-    //logger.info('Creating pet type', { userId: req.user && req.user.id, body: { name, slug } });
+    //logger.info('Creating pet type', { userId: req.user && req.user.id, body: { name, slug, icon_url } });
 
     const result = await query(
-      `INSERT INTO pet_types (name, slug, status, created_by)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, name, created_at`,
-      [name, slug || null, status || 1, (req.user && req.user.id) || null]
+      `INSERT INTO pet_types (name, slug, icon_url, status, created_by)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, name, icon_url, created_at`,
+      [name, slug || null, icon_url || null, status || 1, (req.user && req.user.id) || null]
     );
 
     //logger.info('Pet type created', { userId: req.user && req.user.id, petTypeId: result.rows[0].id });
@@ -82,7 +82,7 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-    const { name, slug, status } = req.body;
+    const { name, slug, icon_url, status } = req.body;
 
     // Validate status when provided (must be 0 or 1)
     if (status !== undefined && !['0', '1', 0, 1].includes(status)) {
@@ -99,10 +99,11 @@ const update = async (req, res) => {
       `UPDATE pet_types
        SET name = COALESCE($2, name),
            slug = COALESCE($3, slug),
-           status = COALESCE($4, status)
+           icon_url = COALESCE($4, icon_url),
+           status = COALESCE($5, status)
        WHERE id = $1 AND deleted_at IS NULL
-       RETURNING id, updated_at`,
-      [req.params.id, name === undefined ? null : name, slug === undefined ? null : slug, statusParam]
+       RETURNING id, name, icon_url, updated_at`,
+      [req.params.id, name === undefined ? null : name, slug === undefined ? null : slug, icon_url === undefined ? null : icon_url, statusParam]
     );
 
     if (result.rows.length === 0) {

@@ -41,7 +41,9 @@ app.use(async (req, res, next) => {
 // Core middleware stack
 //app.use(tenantMiddleware);
 app.use(authMiddleware);
-//app.use(rbacMiddleware);
+// Attach RBAC helper (adds req.checkPermission) so controllers can call req.checkPermission(action, resource)
+const { attachCheckPermission } = require('./core/rbac/rbac.middleware');
+app.use(attachCheckPermission);
 //app.use(auditMiddleware);
 
 // Routes
@@ -53,9 +55,6 @@ app.use('/docs', express.static(path.join(__dirname, '..', 'public', 'docs')));
 app.get('/docs', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'docs', 'index.html'));
 });
-app.get('/apis', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'docs', 'apis.html'));
-});
 app.get('/swagger', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'swagger.html'));
 });
@@ -65,6 +64,7 @@ app.get('/api-test', (req, res) => {
 app.get('/info', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public','docs', 'info.html'));
 });
+app.use("/icons", express.static(path.join(__dirname, "public/icons")));
 
 // 404 handler
 app.use((req, res) => {

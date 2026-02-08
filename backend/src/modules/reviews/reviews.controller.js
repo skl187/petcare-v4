@@ -174,13 +174,29 @@ const getReviewByAppointment = async (req, res) => {
 };
 
 // ============================================================================
-// GET REVIEWS FOR A VETERINARIAN
+// GET REVIEWS FOR A VETERINARIAN (Dashboard - Authenticated)
 // ============================================================================
 const getVeterinarianReviews = async (req, res) => {
   try {
-    const { veterinarianId } = req.params;
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ status: 'error', message: 'Unauthorized' });
+    }
+
     const { page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
+
+    // Get veterinarian ID from authenticated user_id
+    const vetResult = await query(
+      `SELECT id FROM veterinarians WHERE user_id = $1 AND deleted_at IS NULL LIMIT 1`,
+      [userId]
+    );
+
+    if (vetResult.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Veterinarian not found' });
+    }
+
+    const veterinarianId = vetResult.rows[0].id;
 
     const result = await query(
       `SELECT
@@ -244,7 +260,7 @@ const getVeterinarianReviews = async (req, res) => {
 };
 
 // ============================================================================
-// GET MY REVIEWS (Pet Owner)
+// GET MY REVIEWS (Pet Owner - reviews written) OR (Veterinarian - reviews received)
 // ============================================================================
 const getMyReviews = async (req, res) => {
   try {
@@ -256,43 +272,114 @@ const getMyReviews = async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
 
-    const result = await query(
-      `SELECT
-        r.id, r.rating, r.review_text, r.status,
-        r.professionalism_rating, r.knowledge_rating, r.communication_rating, r.facility_rating,
-        r.is_anonymous, r.is_verified,
-        r.created_at, r.updated_at,
-        a.id as appointment_id, a.appointment_number, a.appointment_date, a.appointment_type,
-        p.name as pet_name,
-        vu.first_name as vet_first_name, vu.last_name as vet_last_name,
-        c.name as clinic_name
-      FROM vet_reviews r
-      LEFT JOIN vet_appointments a ON r.appointment_id = a.id
-      LEFT JOIN pets p ON a.pet_id = p.id
-      LEFT JOIN veterinarians v ON r.veterinarian_id = v.id
-      LEFT JOIN users vu ON v.user_id = vu.id
-      LEFT JOIN vet_clinics c ON a.clinic_id = c.id
-      WHERE r.user_id = $1 AND r.deleted_at IS NULL
-      ORDER BY r.created_at DESC
-      LIMIT $2 OFFSET $3`,
-      [userId, parseInt(limit), parseInt(offset)]
-    );
-
-    const countResult = await query(
-      `SELECT COUNT(*) as total FROM vet_reviews
-       WHERE user_id = $1 AND deleted_at IS NULL`,
+    // Check if user is a veterinarian
+    const vetResult = await query(
+      `SELECT id FROM veterinarians WHERE user_id = $1 AND deleted_at IS NULL LIMIT 1`,
       [userId]
     );
 
-    res.json(successResponse({
-      reviews: result.rows,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total: parseInt(countResult.rows[0].total),
-        pages: Math.ceil(countResult.rows[0].total / limit)
-      }
-    }, 'Your reviews retrieved successfully'));
+    const isVeterinarian = vetResult.rows.length > 0;
+
+    if (isVeterinarian) {
+      // GET REVIEWS FOR VETERINARIAN (reviews about them)
+      const veterinarianId = vetResult.rows[0].id;
+
+      const result = await query(
+        `SELECT
+          r.id, r.rating, r.review_text, r.status,
+          r.professionalism_rating, r.knowledge_rating, r.communication_rating, r.facility_rating,
+          r.is_anonymous, r.is_verified,
+          r.created_at, r.updated_at,
+          a.id as appointment_id, a.appointment_date, a.appointment_type,
+          CASE WHEN r.is_anonymous THEN NULL ELSE u.first_name END as owner_first_name,
+          CASE WHEN r.is_anonymous THEN NULL ELSE u.last_name END as owner_last_name,
+          p.name as pet_name
+        FROM vet_reviews r
+        LEFT JOIN vet_appointments a ON r.appointment_id = a.id
+        LEFT JOIN users u ON r.user_id = u.id
+        LEFT JOIN pets p ON a.pet_id = p.id
+        WHERE r.veterinarian_id = $1
+          AND r.deleted_at IS NULL
+          AND r.status = 'approved'
+        ORDER BY r.created_at DESC
+        LIMIT $2 OFFSET $3`,
+        [veterinarianId, parseInt(limit), parseInt(offset)]
+      );
+
+      // Get summary statistics
+      const statsResult = await query(
+        `SELECT
+          COUNT(*) as total_reviews,
+          COALESCE(AVG(rating), 0) as average_rating,
+          COALESCE(AVG(professionalism_rating), 0) as avg_professionalism,
+          COALESCE(AVG(knowledge_rating), 0) as avg_knowledge,
+          COALESCE(AVG(communication_rating), 0) as avg_communication,
+          COALESCE(AVG(facility_rating), 0) as avg_facility,
+          COUNT(*) FILTER (WHERE rating >= 4) as positive_reviews,
+          COUNT(*) FILTER (WHERE rating < 3) as negative_reviews
+        FROM vet_reviews
+        WHERE veterinarian_id = $1 AND deleted_at IS NULL AND status = 'approved'`,
+        [veterinarianId]
+      );
+
+      const countResult = await query(
+        `SELECT COUNT(*) as total FROM vet_reviews
+         WHERE veterinarian_id = $1 AND deleted_at IS NULL AND status = 'approved'`,
+        [veterinarianId]
+      );
+
+      return res.json(successResponse({
+        user_type: 'veterinarian',
+        reviews: result.rows,
+        stats: statsResult.rows[0],
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: parseInt(countResult.rows[0].total),
+          pages: Math.ceil(countResult.rows[0].total / limit)
+        }
+      }, 'Your reviews retrieved successfully'));
+    } else {
+      // GET REVIEWS FOR PET OWNER (reviews they wrote)
+      const result = await query(
+        `SELECT
+          r.id, r.rating, r.review_text, r.status,
+          r.professionalism_rating, r.knowledge_rating, r.communication_rating, r.facility_rating,
+          r.is_anonymous, r.is_verified,
+          r.created_at, r.updated_at,
+          a.id as appointment_id, a.appointment_number, a.appointment_date, a.appointment_type,
+          p.name as pet_name,
+          vu.first_name as vet_first_name, vu.last_name as vet_last_name,
+          c.name as clinic_name
+        FROM vet_reviews r
+        LEFT JOIN vet_appointments a ON r.appointment_id = a.id
+        LEFT JOIN pets p ON a.pet_id = p.id
+        LEFT JOIN veterinarians v ON r.veterinarian_id = v.id
+        LEFT JOIN users vu ON v.user_id = vu.id
+        LEFT JOIN vet_clinics c ON a.clinic_id = c.id
+        WHERE r.user_id = $1 AND r.deleted_at IS NULL
+        ORDER BY r.created_at DESC
+        LIMIT $2 OFFSET $3`,
+        [userId, parseInt(limit), parseInt(offset)]
+      );
+
+      const countResult = await query(
+        `SELECT COUNT(*) as total FROM vet_reviews
+         WHERE user_id = $1 AND deleted_at IS NULL`,
+        [userId]
+      );
+
+      return res.json(successResponse({
+        user_type: 'pet_owner',
+        reviews: result.rows,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: parseInt(countResult.rows[0].total),
+          pages: Math.ceil(countResult.rows[0].total / limit)
+        }
+      }, 'Your reviews retrieved successfully'));
+    }
 
   } catch (err) {
     console.error('Get my reviews error:', err.message);

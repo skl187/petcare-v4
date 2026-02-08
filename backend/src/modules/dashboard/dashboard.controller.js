@@ -618,8 +618,109 @@ const getVeterinarianDashboardSummary = async (req, res) => {
   }
 };
 
+// ============================================================================
+// USER PROFILE (for dashboard) - returns authenticated user's profile (common fields: user, roles, addresses)
+// ============================================================================
+const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ status: 'error', message: 'Unauthorized' });
+    }
+
+    const userResult = await query(
+      `SELECT id, email, phone, first_name, last_name, display_name, avatar_url, bio, is_email_verified, status, last_login_at, created_at
+       FROM users
+       WHERE id = $1 AND deleted_at IS NULL`,
+      [userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'User not found' });
+    }
+
+    const user = userResult.rows[0];
+
+    const rolesResult = await query(
+      `SELECT r.id, r.name, r.slug, ur.is_primary
+       FROM user_roles ur
+       JOIN roles r ON ur.role_id = r.id
+       WHERE ur.user_id = $1`,
+      [userId]
+    );
+
+    // Get user addresses
+    const addressesResult = await query(
+      `SELECT id, type, label, address_line1, address_line2, city, state, postal_code, country, latitude, longitude, is_primary, created_at
+       FROM user_addresses
+       WHERE user_id = $1 AND deleted_at IS NULL
+       ORDER BY is_primary DESC, created_at DESC`,
+      [userId]
+    );
+
+    res.json(successResponse({
+      user,
+      roles: rolesResult.rows,
+      addresses: addressesResult.rows
+    }, 'User profile retrieved successfully'));
+
+  } catch (err) {
+    console.error('Get user profile error:', err.message);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch user profile' });
+  }
+};
+
+// PATCH /api/dashboard/profile - update authenticated user's basic profile fields
+const updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ status: 'error', message: 'Unauthorized' });
+    }
+
+    const allowed = ['first_name','last_name','display_name','avatar_url','bio','phone'];
+    const updates = [];
+    const params = [];
+    let idx = 1;
+
+    for (const field of allowed) {
+      if (Object.prototype.hasOwnProperty.call(req.body, field)) {
+        updates.push(`${field} = $${idx}`);
+        params.push(req.body[field]);
+        idx++;
+      }
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ status: 'error', message: 'No updatable fields provided' });
+    }
+
+    params.push(userId);
+
+    const q = `UPDATE users SET ${updates.join(', ')}, updated_at = now() WHERE id = $${idx} AND deleted_at IS NULL RETURNING id, email, phone, first_name, last_name, display_name, avatar_url, bio, is_email_verified, status, last_login_at, created_at, updated_at`;
+
+    const result = await query(q, params);
+
+    if (!result.rows[0]) {
+      return res.status(404).json({ status: 'error', message: 'User not found' });
+    }
+
+    // Audit log if available
+    if (typeof req.auditLog === 'function') {
+      try { req.auditLog('update', 'user', { userId, changes: req.body }); } catch (e) { /* ignore audit errors */ }
+    }
+
+    res.json(successResponse(result.rows[0], 'Profile updated successfully'));
+  } catch (err) {
+    console.error('Update user profile error:', err.message);
+    res.status(500).json({ status: 'error', message: 'Failed to update profile' });
+  }
+};
+
 module.exports = {
   getAdminDashboardSummary,
   getOwnerDashboardSummary,
-  getVeterinarianDashboardSummary
+  getVeterinarianDashboardSummary,
+  getUserProfile,
+  updateUserProfile
 };
