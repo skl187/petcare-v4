@@ -1,0 +1,1803 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Brace API",
+    "version": "2.0.0",
+    "description": "Comprehensive API documentation for Brace Pet Care Platform",
+    "contact": {
+      "name": "API Support",
+      "email": "api-support@petcare.com"
+    }
+  },
+  "servers": [
+    { "url": "/api", "description": "Local API base" },
+    { "url": "https://api.petcare.com/v1", "description": "Production API" }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "timestamp": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "User registration",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "User registered successfully", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } },
+          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "User login",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login successful", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "User logout",
+        "tags": ["Authentication"],
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Logout successful" },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/auth/refresh-token": {
+      "post": {
+        "summary": "Refresh access token",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": { "type": "string" }
+                },
+                "required": ["refreshToken"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Token refreshed", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AuthResponse" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/auth/verify-email": {
+      "post": {
+        "summary": "Verify email address",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": { "type": "string" }
+                },
+                "required": ["token"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Email verified successfully" },
+          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "summary": "Request password reset",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password reset email sent" },
+          "404": { "description": "User not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "summary": "Reset password with token",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": { "type": "string" },
+                  "password": { "type": "string" },
+                  "passwordConfirm": { "type": "string" }
+                },
+                "required": ["token", "password", "passwordConfirm"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password reset successfully" },
+          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/pets": {
+      "post": {
+        "summary": "Create a new pet",
+        "tags": ["Pets"],
+        "security": [ { "bearerAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PetCreate" },
+              "examples": {
+                "curl-example": {
+                  "summary": "Example from curl command",
+                  "value": {
+                    "name": "Test Pup",
+                    "slug": "test-pup",
+                    "petTypeId": "<PETTYPE_ID>",
+                    "breedId": "<BREED_ID>",
+                    "size": "medium",
+                    "dateOfBirth": "2020-01-01T00:00:00Z",
+                    "gender": "male",
+                    "weight": 12.5,
+                    "height": 30,
+                    "weightUnit": "kg",
+                    "heightUnit": "cm",
+                    "additionalInfo": { "notes": "test pet" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Pet" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all user's pets",
+        "tags": ["Pets"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of pets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Pet" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/pets/{pet_id}": {
+      "get": {
+        "summary": "Get single pet details",
+        "tags": ["Pets"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "pet_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Pet details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Pet" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Pet not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update pet information",
+        "tags": ["Pets"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "pet_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PetCreate" } } } },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Pet" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Pet not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "summary": "Delete pet",
+        "tags": ["Pets"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "pet_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "204": { "description": "Deleted" },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Pet not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/pets/{pet_id}/vaccinations": {
+      "get": {
+        "summary": "Get pet vaccination history",
+        "tags": ["Pets"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "pet_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Vaccination records", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Vaccination" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/pet-types": {
+      "get": {
+        "summary": "Get all pet types",
+        "tags": ["Pet Types & Breeds"],
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": {
+            "description": "List of pet types",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/PetType" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pet-types/{pet_type_id}/breeds": {
+      "get": {
+        "summary": "Get breeds by pet type",
+        "tags": ["Pet Types & Breeds"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "pet_type_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "List of breeds", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Breed" } } } } },
+          "404": { "description": "Pet type not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/veterinarians": {
+      "get": {
+        "summary": "List veterinarians",
+        "tags": ["Veterinarians"],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "perPage", "in": "query", "schema": { "type": "integer", "default": 20 } },
+          { "name": "clinicId", "in": "query", "schema": { "type": "string" } },
+          { "name": "specialization", "in": "query", "schema": { "type": "string" } },
+          { "name": "isAvailable", "in": "query", "schema": { "type": "boolean" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of veterinarians",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Veterinarian" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create veterinarian",
+        "tags": ["Veterinarians"],
+        "security": [ { "bearerAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VeterinarianCreate" },
+              "examples": {
+                "create-example": {
+                  "summary": "Create a veterinarian (explicit clinic-services mapping)",
+                  "value": {
+                    "firstName": "Jane",
+                    "lastName": "Vet",
+                    "email": "jane.vet@example.com",
+                    "mobile": "+15551234567",
+                    "licenseNumber": "LIC-12345",
+                    "specialization": "small animal",
+                    "qualification": ["DVM","MVSc"],
+                    "experienceYears": 6,
+                    "consultationFee": 25.00,
+                    "emergencyFee": 40.00,
+                    "bio": "Experienced veterinarian in small animal care",
+                    "avatarUrl": "https://example.com/avatar.jpg",
+                    "isAvailableForEmergency": true,
+                    "clinicServices": [
+                      {
+                        "clinicId": "11111111-1111-1111-1111-111111111111",
+                        "serviceId": "aaaaaaa1-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+                        "durationMinutes": 45,
+                        "fee": 55.00
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Veterinarian" } } } },
+          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/veterinarians/{id}": {
+      "get": {
+        "summary": "Get veterinarian by ID",
+        "tags": ["Veterinarians"],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Veterinarian", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Veterinarian" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update veterinarian",
+        "tags": ["Veterinarians"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VeterinarianCreate" } } } },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Veterinarian" } } } },
+          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "delete": {
+        "summary": "Delete veterinarian",
+        "tags": ["Veterinarians"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "204": { "description": "No Content" },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/veterinarians/{vet_id}/schedule": {
+      "get": {
+        "summary": "Get vet's schedule & available slots",
+        "tags": ["Veterinarians"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "vet_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "from_date", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to_date", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "Schedule and available slots", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Schedule" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/appointments": {
+      "post": {
+        "summary": "Book new appointment",
+        "tags": ["Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AppointmentCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Appointment booked", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Appointment" } } } },
+          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "get": {
+        "summary": "Get all user's appointments",
+        "tags": ["Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of appointments", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Appointment" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/appointments/{appointment_id}": {
+      "get": {
+        "summary": "Get appointment details",
+        "tags": ["Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Appointment details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Appointment" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/appointments/{appointment_id}/reschedule": {
+      "put": {
+        "summary": "Reschedule appointment",
+        "tags": ["Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "appointmentDateTime": { "type": "string", "format": "date-time" }
+                },
+                "required": ["appointmentDateTime"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Rescheduled", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Appointment" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/appointments/{appointment_id}/cancel": {
+      "post": {
+        "summary": "Cancel appointment",
+        "tags": ["Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Cancelled", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Appointment" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/appointments/{appointment_id}/cost": {
+      "get": {
+        "summary": "Get appointment cost breakdown",
+        "tags": ["Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Cost breakdown", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CostBreakdown" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/appointments/upcoming": {
+      "get": {
+        "summary": "Get vet's upcoming appointments",
+        "tags": ["Vet Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": { "description": "Upcoming appointments", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Appointment" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/appointments/today": {
+      "get": {
+        "summary": "Get vet's today's appointments",
+        "tags": ["Vet Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Today's appointments", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Appointment" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/appointments": {
+      "get": {
+        "summary": "Get all vet's appointments with filters",
+        "tags": ["Vet Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "from_date", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to_date", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "Filtered appointments", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Appointment" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/appointments/{appointment_id}/confirm": {
+      "post": {
+        "summary": "Confirm appointment",
+        "tags": ["Vet Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Confirmed", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Appointment" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/appointments/{appointment_id}/start": {
+      "post": {
+        "summary": "Mark as in-progress",
+        "tags": ["Vet Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Started", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Appointment" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/appointments/{appointment_id}/complete": {
+      "post": {
+        "summary": "Complete appointment",
+        "tags": ["Vet Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Completed", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Appointment" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/appointments/{appointment_id}/details": {
+      "get": {
+        "summary": "Get appointment details (vet view)",
+        "tags": ["Vet Appointments"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Appointment details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Appointment" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/appointments/{appointment_id}/medical-records": {
+      "post": {
+        "summary": "Create medical record",
+        "tags": ["Medical Records"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MedicalRecordCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MedicalRecord" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/pets/{pet_id}/medical-records": {
+      "get": {
+        "summary": "Get all pet's medical records",
+        "tags": ["Medical Records"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "pet_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": { "description": "Medical records", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/MedicalRecord" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/medical-records/{record_id}": {
+      "get": {
+        "summary": "Get single medical record",
+        "tags": ["Medical Records"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "record_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Medical record", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MedicalRecord" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update medical record",
+        "tags": ["Medical Records"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "record_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MedicalRecordCreate" } } } },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/MedicalRecord" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/appointments/{appointment_id}/prescriptions": {
+      "post": {
+        "summary": "Create prescription with medications",
+        "tags": ["Prescriptions"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PrescriptionCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Prescription" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/pets/{pet_id}/prescriptions": {
+      "get": {
+        "summary": "Get all pet's prescriptions",
+        "tags": ["Prescriptions"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "pet_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": { "description": "Prescriptions", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Prescription" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/prescriptions/{prescription_id}": {
+      "get": {
+        "summary": "Get single prescription",
+        "tags": ["Prescriptions"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "prescription_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Prescription", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Prescription" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update prescription status",
+        "tags": ["Prescriptions"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "prescription_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": { "type": "string", "enum": ["active", "completed", "expired"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Prescription" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/appointments/{appointment_id}/lab-tests": {
+      "post": {
+        "summary": "Create lab test order",
+        "tags": ["Lab Tests"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LabTestCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LabTest" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/pets/{pet_id}/lab-tests": {
+      "get": {
+        "summary": "Get all pet's lab tests",
+        "tags": ["Lab Tests"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "pet_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": { "description": "Lab tests", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/LabTest" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/lab-tests/{test_id}": {
+      "get": {
+        "summary": "Get single lab test details",
+        "tags": ["Lab Tests"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "test_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Lab test", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LabTest" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update lab test results/status",
+        "tags": ["Lab Tests"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "test_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LabTestCreate" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LabTest" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/appointments/{appointment_id}/vaccinations": {
+      "post": {
+        "summary": "Record vaccination",
+        "tags": ["Vaccinations"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VaccinationCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Vaccination" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/pets/{pet_id}/vaccinations": {
+      "get": {
+        "summary": "Get all pet's vaccinations",
+        "tags": ["Vaccinations"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "pet_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": { "description": "Vaccinations", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Vaccination" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vaccinations/{vaccination_id}": {
+      "get": {
+        "summary": "Get single vaccination record",
+        "tags": ["Vaccinations"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "vaccination_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Vaccination", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Vaccination" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update vaccination record",
+        "tags": ["Vaccinations"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "vaccination_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VaccinationCreate" } } } },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Vaccination" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/appointments/{appointment_id}/reviews": {
+      "post": {
+        "summary": "Submit review for vet",
+        "tags": ["Reviews"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReviewCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Review" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/veterinarians/{vet_id}/reviews": {
+      "get": {
+        "summary": "Get all reviews for vet",
+        "tags": ["Reviews"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "vet_id", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": { "description": "Reviews", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Review" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/payments/initiate": {
+      "post": {
+        "summary": "Initiate payment",
+        "tags": ["Payments"],
+        "security": [ { "bearerAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PaymentCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Payment initiated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Payment" } } } },
+          "400": { "description": "Bad Request", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/payments/{payment_id}": {
+      "get": {
+        "summary": "Get payment status",
+        "tags": ["Payments"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "payment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Payment details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Payment" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/dashboard": {
+      "get": {
+        "summary": "Get user dashboard summary",
+        "tags": ["Dashboard"],
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Dashboard data", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserDashboard" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/dashboard/medical-history": {
+      "get": {
+        "summary": "Get user's medical history summary",
+        "tags": ["Dashboard"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": { "description": "Medical history", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/MedicalRecord" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/dashboard": {
+      "get": {
+        "summary": "Get vet dashboard summary",
+        "tags": ["Dashboard"],
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Dashboard data", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VetDashboard" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/vet/dashboard/stats": {
+      "get": {
+        "summary": "Get vet performance statistics",
+        "tags": ["Dashboard"],
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Statistics", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VetStats" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/admin/dashboard": {
+      "get": {
+        "summary": "Get admin dashboard overview",
+        "tags": ["Admin"],
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "Dashboard data", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AdminDashboard" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/admin/analytics/veterinarians": {
+      "get": {
+        "summary": "Get vet analytics & performance",
+        "tags": ["Admin"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "from_date", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to_date", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "Analytics", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/VetAnalytics" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/admin/analytics/users": {
+      "get": {
+        "summary": "Get users analytics",
+        "tags": ["Admin"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "from_date", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to_date", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "Analytics", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserAnalytics" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/admin/analytics/revenue": {
+      "get": {
+        "summary": "Get revenue analytics",
+        "tags": ["Admin"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "from_date", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to_date", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "Analytics", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/RevenueAnalytics" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/admin/analytics/appointments": {
+      "get": {
+        "summary": "Get appointment analytics",
+        "tags": ["Admin"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "from_date", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "to_date", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "Analytics", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AppointmentAnalytics" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/users/profile": {
+      "get": {
+        "summary": "Get user profile",
+        "tags": ["User Profile"],
+        "security": [ { "bearerAuth": [] } ],
+        "responses": {
+          "200": { "description": "User profile", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "put": {
+        "summary": "Update user profile",
+        "tags": ["User Profile"],
+        "security": [ { "bearerAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/users/change-password": {
+      "post": {
+        "summary": "Change password",
+        "tags": ["User Profile"],
+        "security": [ { "bearerAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "currentPassword": { "type": "string" },
+                  "newPassword": { "type": "string" },
+                  "confirmPassword": { "type": "string" }
+                },
+                "required": ["currentPassword", "newPassword", "confirmPassword"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password changed" },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/users/avatar": {
+      "post": {
+        "summary": "Upload avatar image",
+        "tags": ["User Profile"],
+        "security": [ { "bearerAuth": [] } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "avatar": { "type": "string", "format": "binary" }
+                },
+                "required": ["avatar"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Avatar uploaded", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/appointments/{appointment_id}/reminders": {
+      "get": {
+        "summary": "Get appointment reminders",
+        "tags": ["Reminders"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Reminders", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Reminder" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      },
+      "post": {
+        "summary": "Set appointment reminder",
+        "tags": ["Reminders"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "appointment_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReminderCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Reminder" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/services": {
+      "get": {
+        "summary": "Get all available services",
+        "tags": ["Services"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 20 } }
+        ],
+        "responses": {
+          "200": { "description": "Services", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Service" } } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    },
+    "/clinics/{clinic_id}": {
+      "get": {
+        "summary": "Get clinic details",
+        "tags": ["Services"],
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [ { "name": "clinic_id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": {
+          "200": { "description": "Clinic details", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Clinic" } } } },
+          "401": { "description": "Unauthorized", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } },
+          "404": { "description": "Not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "PetCreate": {
+        "type": "object",
+        "required": ["name", "slug", "petTypeId", "breedId"],
+        "properties": {
+          "name": { "type": "string" },
+          "slug": { "type": "string" },
+          "petTypeId": { "type": "string" },
+          "breedId": { "type": "string" },
+          "size": { "type": "string", "description": "e.g. small, medium, large" },
+          "dateOfBirth": { "type": "string", "format": "date-time" },
+          "gender": { "type": "string", "enum": ["male", "female", "unknown"] },
+          "weight": { "type": "number" },
+          "height": { "type": "number" },
+          "weightUnit": { "type": "string" },
+          "heightUnit": { "type": "string" },
+          "additionalInfo": {
+            "type": "object",
+            "properties": {
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      },
+      "Pet": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "slug": { "type": "string" },
+          "petTypeId": { "type": "string" },
+          "breedId": { "type": "string" },
+          "size": { "type": "string" },
+          "dateOfBirth": { "type": "string", "format": "date-time" },
+          "gender": { "type": "string" },
+          "weight": { "type": "number" },
+          "height": { "type": "number" },
+          "weightUnit": { "type": "string" },
+          "heightUnit": { "type": "string" },
+          "additionalInfo": { "type": "object" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "VeterinarianCreate": {
+        "type": "object",
+        "required": ["firstName", "lastName", "email", "licenseNumber"],
+        "description": "Create a veterinarian. Either provide `clinicServices` (preferred) or provide both `clinicIds` and `serviceIds` to attach services to a single clinic.",
+        "properties": {
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "mobile": { "type": "string" },
+          "licenseNumber": { "type": "string" },
+          "specialization": { "type": "string" },
+          "qualification": { "type": "array", "items": { "type": "string" } },
+          "experienceYears": { "type": "integer" },
+          "consultationFee": { "type": "number" },
+          "emergencyFee": { "type": "number" },
+          "bio": { "type": "string" },
+          "avatarUrl": { "type": "string", "format": "uri" },
+          "isAvailableForEmergency": { "type": "boolean" },
+          "clinicServices": { "type": "array", "items": { "$ref": "#/components/schemas/ClinicServiceInput" }, "description": "Preferred: explicit list of services with clinic context (clinic_id + service_id)." },
+          "clinicIds": { "type": "array", "items": { "type": "string" }, "description": "Simplified: list of clinic ids used as context when `serviceIds` is provided (must be exactly one clinic when used with `serviceIds`)." },
+          "serviceIds": { "type": "array", "items": { "type": "string" }, "description": "Simplified: list of service ids to attach to the single clinic provided in `clinicIds`." },
+          "vet_clinic_id": { "type": "string", "description": "Single clinic id (snake_case name supported by API)" },
+          "vetClinicId": { "type": "string", "description": "Single clinic id (camelCase)" },
+          "vet_service_ids": { "type": "array", "items": { "type": "string" }, "description": "List of service ids (snake_case)" },
+          "vetServiceIds": { "type": "array", "items": { "type": "string" }, "description": "List of service ids (camelCase)" },
+          "vet_service_id1": { "type": "string" },
+          "vet_service_id2": { "type": "string" },
+          "vet_service_id3": { "type": "string" }
+        }
+      },
+      "Veterinarian": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "mobile": { "type": "string" },
+          "licenseNumber": { "type": "string" },
+          "specialization": { "type": "string" },
+          "qualification": { "type": "array", "items": { "type": "string" } },
+          "experienceYears": { "type": "integer" },
+          "consultationFee": { "type": "number" },
+          "emergencyFee": { "type": "number" },
+          "bio": { "type": "string" },
+          "avatarUrl": { "type": "string", "format": "uri" },
+          "isAvailableForEmergency": { "type": "boolean" },
+          "rating": { "type": "number" },
+          "totalAppointments": { "type": "integer" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ClinicServiceInput": {
+        "type": "object",
+        "required": ["clinicId", "serviceId"],
+        "properties": {
+          "clinicId": { "type": "string", "description": "Clinic UUID" },
+          "serviceId": { "type": "string", "description": "Service UUID from vet_services" },
+          "durationMinutes": { "type": "integer", "description": "Override duration for this vet at this clinic" },
+          "fee": { "type": "number", "description": "Override fee charged by this vet for this service at this clinic" },
+          "status": { "type": "integer", "description": "Status code for this clinic-service mapping" }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["firstName", "lastName", "email", "password"],
+        "properties": {
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string", "minLength": 8 },
+          "phoneNumber": { "type": "string" },
+          "userType": { "type": "string", "enum": ["user", "veterinarian"] }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string" }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": { "type": "string" },
+          "refreshToken": { "type": "string" },
+          "user": { "$ref": "#/components/schemas/User" }
+        }
+      },
+      "PetType": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "icon": { "type": "string" }
+        }
+      },
+      "Breed": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "petTypeId": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "Schedule": {
+        "type": "object",
+        "properties": {
+          "vetId": { "type": "string" },
+          "availableSlots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": { "type": "string", "format": "date" },
+                "times": { "type": "array", "items": { "type": "string", "format": "time" } }
+              }
+            }
+          }
+        }
+      },
+      "AppointmentCreate": {
+        "type": "object",
+        "required": ["vetId", "petId", "appointmentDateTime", "serviceId"],
+        "properties": {
+          "vetId": { "type": "string" },
+          "petId": { "type": "string" },
+          "appointmentDateTime": { "type": "string", "format": "date-time" },
+          "serviceId": { "type": "string" },
+          "clinicId": { "type": "string" },
+          "notes": { "type": "string" },
+          "type": { "type": "string", "enum": ["consultation", "checkup", "vaccination", "surgery", "emergency"] }
+        }
+      },
+      "Appointment": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "vetId": { "type": "string" },
+          "petId": { "type": "string" },
+          "userId": { "type": "string" },
+          "appointmentDateTime": { "type": "string", "format": "date-time" },
+          "serviceId": { "type": "string" },
+          "clinicId": { "type": "string" },
+          "status": { "type": "string", "enum": ["scheduled", "confirmed", "in-progress", "completed", "cancelled"] },
+          "cost": { "type": "number" },
+          "notes": { "type": "string" },
+          "type": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CostBreakdown": {
+        "type": "object",
+        "properties": {
+          "appointmentId": { "type": "string" },
+          "consultationFee": { "type": "number" },
+          "serviceFee": { "type": "number" },
+          "additionalFees": { "type": "number" },
+          "tax": { "type": "number" },
+          "total": { "type": "number" }
+        }
+      },
+      "MedicalRecordCreate": {
+        "type": "object",
+        "required": ["diagnosis"],
+        "properties": {
+          "diagnosis": { "type": "string" },
+          "treatment": { "type": "string" },
+          "notes": { "type": "string" },
+          "vitals": {
+            "type": "object",
+            "properties": {
+              "temperature": { "type": "number" },
+              "heartRate": { "type": "number" },
+              "bloodPressure": { "type": "string" },
+              "weight": { "type": "number" }
+            }
+          }
+        }
+      },
+      "MedicalRecord": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "petId": { "type": "string" },
+          "appointmentId": { "type": "string" },
+          "diagnosis": { "type": "string" },
+          "treatment": { "type": "string" },
+          "notes": { "type": "string" },
+          "vitals": { "type": "object" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "PrescriptionCreate": {
+        "type": "object",
+        "required": ["medications"],
+        "properties": {
+          "medications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "dosage": { "type": "string" },
+                "frequency": { "type": "string" },
+                "duration": { "type": "string" }
+              }
+            }
+          },
+          "instructions": { "type": "string" }
+        }
+      },
+      "Prescription": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "petId": { "type": "string" },
+          "appointmentId": { "type": "string" },
+          "medications": { "type": "array", "items": { "type": "object" } },
+          "instructions": { "type": "string" },
+          "status": { "type": "string", "enum": ["active", "completed", "expired"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "expiresAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "LabTestCreate": {
+        "type": "object",
+        "required": ["testName", "testType"],
+        "properties": {
+          "testName": { "type": "string" },
+          "testType": { "type": "string" },
+          "description": { "type": "string" },
+          "results": { "type": "string" }
+        }
+      },
+      "LabTest": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "petId": { "type": "string" },
+          "appointmentId": { "type": "string" },
+          "testName": { "type": "string" },
+          "testType": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "completed", "reviewed"] },
+          "results": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "completedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "VaccinationCreate": {
+        "type": "object",
+        "required": ["vaccineName"],
+        "properties": {
+          "vaccineName": { "type": "string" },
+          "vaccinationDate": { "type": "string", "format": "date" },
+          "nextDueDate": { "type": "string", "format": "date" },
+          "batchNumber": { "type": "string" },
+          "manufacturer": { "type": "string" }
+        }
+      },
+      "Vaccination": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "petId": { "type": "string" },
+          "appointmentId": { "type": "string" },
+          "vaccineName": { "type": "string" },
+          "vaccinationDate": { "type": "string", "format": "date" },
+          "nextDueDate": { "type": "string", "format": "date" },
+          "batchNumber": { "type": "string" },
+          "manufacturer": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ReviewCreate": {
+        "type": "object",
+        "required": ["rating", "comment"],
+        "properties": {
+          "rating": { "type": "integer", "minimum": 1, "maximum": 5 },
+          "comment": { "type": "string" },
+          "wouldRecommend": { "type": "boolean" }
+        }
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "vetId": { "type": "string" },
+          "userId": { "type": "string" },
+          "appointmentId": { "type": "string" },
+          "rating": { "type": "integer" },
+          "comment": { "type": "string" },
+          "wouldRecommend": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "PaymentCreate": {
+        "type": "object",
+        "required": ["appointmentId", "amount"],
+        "properties": {
+          "appointmentId": { "type": "string" },
+          "amount": { "type": "number" },
+          "paymentMethod": { "type": "string", "enum": ["card", "bank_transfer", "wallet"] },
+          "cardDetails": {
+            "type": "object",
+            "properties": {
+              "cardNumber": { "type": "string" },
+              "expiryMonth": { "type": "integer" },
+              "expiryYear": { "type": "integer" },
+              "cvv": { "type": "string" }
+            }
+          }
+        }
+      },
+      "Payment": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "appointmentId": { "type": "string" },
+          "userId": { "type": "string" },
+          "amount": { "type": "number" },
+          "status": { "type": "string", "enum": ["pending", "completed", "failed", "refunded"] },
+          "paymentMethod": { "type": "string" },
+          "transactionId": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "completedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "phoneNumber": { "type": "string" },
+          "avatar": { "type": "string", "format": "uri" },
+          "userType": { "type": "string", "enum": ["user", "veterinarian", "admin"] },
+          "isEmailVerified": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "UserUpdate": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "phoneNumber": { "type": "string" },
+          "email": { "type": "string", "format": "email" }
+        }
+      },
+      "UserDashboard": {
+        "type": "object",
+        "properties": {
+          "upcomingAppointments": { "type": "integer" },
+          "totalPets": { "type": "integer" },
+          "recentMedicalRecords": { "type": "integer" },
+          "appointmentHistory": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Appointment" }
+          }
+        }
+      },
+      "VetDashboard": {
+        "type": "object",
+        "properties": {
+          "upcomingAppointments": { "type": "integer" },
+          "todayAppointments": { "type": "integer" },
+          "totalPatients": { "type": "integer" },
+          "averageRating": { "type": "number" },
+          "completedAppointments": { "type": "integer" }
+        }
+      },
+      "VetStats": {
+        "type": "object",
+        "properties": {
+          "totalAppointments": { "type": "integer" },
+          "completedAppointments": { "type": "integer" },
+          "cancelledAppointments": { "type": "integer" },
+          "averageRating": { "type": "number" },
+          "totalRevenue": { "type": "number" },
+          "appointmentsByMonth": { "type": "array", "items": { "type": "object" } }
+        }
+      },
+      "AdminDashboard": {
+        "type": "object",
+        "properties": {
+          "totalUsers": { "type": "integer" },
+          "totalVeterinarians": { "type": "integer" },
+          "totalAppointments": { "type": "integer" },
+          "totalRevenue": { "type": "number" },
+          "activeAppointments": { "type": "integer" }
+        }
+      },
+      "VetAnalytics": {
+        "type": "object",
+        "properties": {
+          "vetId": { "type": "string" },
+          "name": { "type": "string" },
+          "totalAppointments": { "type": "integer" },
+          "completedAppointments": { "type": "integer" },
+          "averageRating": { "type": "number" },
+          "totalRevenue": { "type": "number" },
+          "appointmentsThisMonth": { "type": "integer" }
+        }
+      },
+      "UserAnalytics": {
+        "type": "object",
+        "properties": {
+          "totalUsers": { "type": "integer" },
+          "newUsersThisMonth": { "type": "integer" },
+          "activeUsers": { "type": "integer" },
+          "usersByType": { "type": "object" },
+          "topServices": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "RevenueAnalytics": {
+        "type": "object",
+        "properties": {
+          "totalRevenue": { "type": "number" },
+          "revenueThisMonth": { "type": "number" },
+          "revenueByService": { "type": "object" },
+          "revenueGrowth": { "type": "number" },
+          "averageTransactionValue": { "type": "number" }
+        }
+      },
+      "AppointmentAnalytics": {
+        "type": "object",
+        "properties": {
+          "totalAppointments": { "type": "integer" },
+          "completedAppointments": { "type": "integer" },
+          "cancelledAppointments": { "type": "integer" },
+          "averageDuration": { "type": "number" },
+          "appointmentsByStatus": { "type": "object" },
+          "appointmentsTrend": { "type": "array", "items": { "type": "object" } }
+        }
+      },
+      "ReminderCreate": {
+        "type": "object",
+        "required": ["reminderTime"],
+        "properties": {
+          "reminderTime": { "type": "string", "enum": ["1_hour", "3_hours", "1_day", "2_days"] },
+          "reminderMethod": { "type": "string", "enum": ["email", "sms", "push"] }
+        }
+      },
+      "Reminder": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "appointmentId": { "type": "string" },
+          "reminderTime": { "type": "string" },
+          "reminderMethod": { "type": "string" },
+          "sent": { "type": "boolean" },
+          "sentAt": { "type": "string", "format": "date-time" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Service": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "duration": { "type": "integer", "description": "Duration in minutes" },
+          "basePrice": { "type": "number" },
+          "category": { "type": "string" }
+        }
+      },
+      "Clinic": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "address": { "type": "string" },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "zipCode": { "type": "string" },
+          "phoneNumber": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "latitude": { "type": "number" },
+          "longitude": { "type": "number" },
+          "operatingHours": { "type": "object" },
+          "veterinarians": { "type": "array", "items": { "$ref": "#/components/schemas/Veterinarian" } }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "message": { "type": "string" },
+          "errors": { "type": "array", "items": { "type": "object", "properties": { "param": { "type": "string" }, "msg": { "type": "string" } } } }
+        }
+      }
+    }
+  }
+}

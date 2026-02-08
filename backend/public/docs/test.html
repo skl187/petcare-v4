@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester Pro - Postman Alternative</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .response-highlight {
+            background-color: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+        }
+        .history-item:hover {
+            background-color: #f9fafb;
+            cursor: pointer;
+        }
+        .tab-active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        .json-beautify {
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .header-row { margin-bottom: 8px; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg p-2">
+                        <i class="fas fa-bolt text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">API Tester Pro</h1>
+                        <p class="text-sm text-gray-500">Modern API Testing Tool</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="clearHistory()" class="px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors flex items-center space-x-2">
+                        <i class="fas fa-trash"></i>
+                        <span>Clear History</span>
+                    </button>
+                    <button onclick="exportData()" class="px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors flex items-center space-x-2">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Left Sidebar - Request History -->
+            <div class="lg:col-span-1 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                    <h2 class="font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-history mr-2 text-blue-600"></i>
+                        Request History
+                    </h2>
+                </div>
+                <div id="historyList" class="divide-y divide-gray-100 max-h-[calc(100vh-200px)] overflow-y-auto">
+                    <!-- History items will be populated here -->
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="lg:col-span-3">
+                <!-- Request Builder -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+                    <div class="border-b border-gray-200">
+                        <nav class="flex space-x-8 px-4" aria-label="Tabs">
+                            <button onclick="switchTab('headers')" class="py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 tab-button tab-active" id="headersTab">
+                                Headers
+                            </button>
+                            <button onclick="switchTab('body')" class="py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 tab-button" id="bodyTab">
+                                Body
+                            </button>
+                            <button onclick="switchTab('params')" class="py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 tab-button" id="paramsTab">
+                                Params
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Request Configuration -->
+                    <div class="p-6 space-y-4">
+                        <!-- Method and URL -->
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <select id="methodSelect" class="w-full sm:w-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                                <option value="PUT">PUT</option>
+                                <option value="DELETE">DELETE</option>
+                                <option value="PATCH">PATCH</option>
+                                <option value="HEAD">HEAD</option>
+                                <option value="OPTIONS">OPTIONS</option>
+                            </select>
+                            <input type="text" id="urlInput" placeholder="https://api.example.com/endpoint" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" value="https://jsonplaceholder.typicode.com/posts">
+                        </div>
+
+                        <!-- Headers Tab -->
+                        <div id="headersContent" class="tab-content">
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-medium text-gray-900">Headers</h3>
+                                    <button onclick="addHeaderRow()" class="text-sm text-blue-600 hover:text-blue-700">
+                                        <i class="fas fa-plus mr-1"></i>Add Header
+                                    </button>
+                                </div>
+                                <div id="headersContainer" class="space-y-2">
+                                    <!-- Sample headers pre-populated -->
+                                    <div class="header-row flex gap-2">
+                                        <input type="text" value="Content-Type" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                                        <input type="text" value="application/json" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                                        <button onclick="removeHeaderRow(this)" class="px-3 py-2 text-red-600 hover:text-red-700">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                    <div class="header-row flex gap-2">
+                                        <input type="text" value="Accept" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                                        <input type="text" value="application/json" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                                        <button onclick="removeHeaderRow(this)" class="px-3 py-2 text-red-600 hover:text-red-700">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Body Tab -->
+                        <div id="bodyContent" class="tab-content hidden">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Body Type</label>
+                                    <select id="bodyTypeSelect" onchange="updateBodyType()" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="none">None</option>
+                                        <option value="json" selected>JSON</option>
+                                        <option value="form-data">Form Data</option>
+                                        <option value="x-www-form-urlencoded">x-www-form-urlencoded</option>
+                                        <option value="raw">Raw Text</option>
+                                    </select>
+                                </div>
+                                
+                                <div id="jsonBody">
+                                    <textarea id="jsonBodyTextarea" placeholder='{"key": "value"}' class="w-full h-48 px-4 py-3 border border-gray-300 rounded-lg font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500" spellcheck="false">{
+  "title": "foo",
+  "body": "bar",
+  "userId": 1
+}</textarea>
+                                </div>
+                                
+                                <div id="formDataBody" class="hidden">
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between items-center">
+                                            <h3 class="font-medium text-gray-900">Form Data</h3>
+                                            <button onclick="addFormDataRow()" class="text-sm text-blue-600 hover:text-blue-700">
+                                                <i class="fas fa-plus mr-1"></i>Add Field
+                                            </button>
+                                        </div>
+                                        <div id="formDataContainer" class="space-y-2">
+                                            <div class="flex gap-2">
+                                                <input type="text" placeholder="Key" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                                                <input type="text" placeholder="Value" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                                                <button onclick="removeFormDataRow(this)" class="px-3 py-2 text-red-600 hover:text-red-700">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div id="rawBody" class="hidden">
+                                    <textarea id="rawBodyTextarea" placeholder="Enter raw text..." class="w-full h-48 px-4 py-3 border border-gray-300 rounded-lg font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500" spellcheck="false"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Params Tab -->
+                        <div id="paramsContent" class="tab-content hidden">
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="font-medium text-gray-900">Query Parameters</h3>
+                                    <button onclick="addParamRow()" class="text-sm text-blue-600 hover:text-blue-700">
+                                        <i class="fas fa-plus mr-1"></i>Add Parameter
+                                    </button>
+                                </div>
+                                <div id="paramsContainer" class="space-y-2">
+                                    <div class="flex gap-2">
+                                        <input type="text" placeholder="Key" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                                        <input type="text" placeholder="Value" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                                        <button onclick="removeParamRow(this)" class="px-3 py-2 text-red-600 hover:text-red-700">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Send Button -->
+                        <button onclick="sendRequest()" id="sendButton" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center space-x-2">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Send Request</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Response Area -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="border-b border-gray-200 px-4 py-3 bg-gray-50">
+                        <h2 class="font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-reply mr-2 text-green-600"></i>
+                            Response
+                        </h2>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div id="responseStatus" class="hidden">
+                            <div class="flex items-center space-x-3">
+                                <span id="statusCode" class="px-3 py-1 rounded-full text-sm font-medium"></span>
+                                <span id="statusText" class="text-gray-600"></span>
+                                <span id="responseTime" class="text-sm text-gray-500"></span>
+                            </div>
+                        </div>
+
+                        <div id="responseHeaders" class="hidden">
+                            <h3 class="font-medium text-gray-900 mb-2">Response Headers</h3>
+                            <div id="headersDisplay" class="bg-gray-50 p-4 rounded-lg overflow-x-auto text-sm"></div>
+                        </div>
+
+                        <div id="responseBody" class="hidden">
+                            <h3 class="font-medium text-gray-900 mb-2">Response Body</h3>
+                            <div id="bodyDisplay" class="bg-gray-50 p-4 rounded-lg overflow-x-auto max-h-96">
+                                <pre id="jsonOutput" class="json-beautify text-gray-800"></pre>
+                            </div>
+                        </div>
+
+                        <div id="responseError" class="hidden">
+                            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-r-lg">
+                                <div class="flex items-start">
+                                    <i class="fas fa-exclamation-triangle text-red-400 mt-0.5 mr-3"></i>
+                                    <div>
+                                        <h3 class="text-red-800 font-medium">Error</h3>
+                                        <p id="errorMessage" class="text-red-700 mt-1"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="emptyState" class="text-center py-12">
+                            <div class="inline-block p-4 bg-blue-50 rounded-full mb-4">
+                                <i class="fas fa-cloud-question text-blue-600 text-4xl"></i>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Response Yet</h3>
+                            <p class="text-gray-500">Send a request to see the response here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <p class="text-sm text-gray-500">API Tester Pro &copy; 2026 - Built with ❤️ using Tailwind CSS</p>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-500">Memory Usage:</span>
+                    <span id="memoryUsage" class="text-sm font-medium text-blue-600">0 KB</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHistory();
+            updateMemoryUsage();
+        });
+
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-button').forEach(el => {
+                el.classList.remove('tab-active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + 'Content').classList.remove('hidden');
+            
+            // Add active class to selected tab
+            document.getElementById(tabName + 'Tab').classList.add('tab-active');
+        }
+
+        // Update body type visibility
+        function updateBodyType() {
+            const bodyType = document.getElementById('bodyTypeSelect').value;
+            
+            // Hide all body types
+            document.getElementById('jsonBody').classList.add('hidden');
+            document.getElementById('formDataBody').classList.add('hidden');
+            document.getElementById('rawBody').classList.add('hidden');
+            
+            // Show selected body type
+            if (bodyType === 'json') {
+                document.getElementById('jsonBody').classList.remove('hidden');
+            } else if (bodyType === 'form-data' || bodyType === 'x-www-form-urlencoded') {
+                document.getElementById('formDataBody').classList.remove('hidden');
+            } else if (bodyType === 'raw') {
+                document.getElementById('rawBody').classList.remove('hidden');
+            }
+        }
+
+        // Header management
+        function addHeaderRow(key = '', value = '') {
+            const container = document.getElementById('headersContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'header-row flex gap-2';
+            newRow.innerHTML = `
+                <input type="text" value="${key}" placeholder="Key" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                <input type="text" value="${value}" placeholder="Value" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                <button onclick="removeHeaderRow(this)" class="px-3 py-2 text-red-600 hover:text-red-700">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(newRow);
+        }
+
+        function removeHeaderRow(button) {
+            const row = button.closest('.header-row');
+            if (row) {
+                row.remove();
+            }
+        }
+
+        // Form data management
+        function addFormDataRow(key = '', value = '') {
+            const container = document.getElementById('formDataContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'flex gap-2';
+            newRow.innerHTML = `
+                <input type="text" value="${key}" placeholder="Key" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                <input type="text" value="${value}" placeholder="Value" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                <button onclick="removeFormDataRow(this)" class="px-3 py-2 text-red-600 hover:text-red-700">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(newRow);
+        }
+
+        function removeFormDataRow(button) {
+            const row = button.closest('.flex');
+            if (row && document.querySelectorAll('#formDataContainer .flex').length > 1) {
+                row.remove();
+            }
+        }
+
+        // Parameter management
+        function addParamRow(key = '', value = '') {
+            const container = document.getElementById('paramsContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'flex gap-2';
+            newRow.innerHTML = `
+                <input type="text" value="${key}" placeholder="Key" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                <input type="text" value="${value}" placeholder="Value" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-blue-500">
+                <button onclick="removeParamRow(this)" class="px-3 py-2 text-red-600 hover:text-red-700">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            container.appendChild(newRow);
+        }
+
+        function removeParamRow(button) {
+            const row = button.closest('.flex');
+            if (row && document.querySelectorAll('#paramsContainer .flex').length > 1) {
+                row.remove();
+            }
+        }
+
+        // Send request function with robust error handling
+        async function sendRequest() {
+            const method = document.getElementById('methodSelect').value;
+            let url = document.getElementById('urlInput').value.trim();
+            const sendButton = document.getElementById('sendButton');
+            
+            // Validation
+            if (!url) {
+                showError('URL cannot be empty');
+                return;
+            }
+            
+            // Show loading state
+            sendButton.disabled = true;
+            sendButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+            
+            // Reset response area
+            document.getElementById('responseStatus').classList.add('hidden');
+            document.getElementById('responseHeaders').classList.add('hidden');
+            document.getElementById('responseBody').classList.add('hidden');
+            document.getElementById('responseError').classList.add('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+            
+            try {
+                // Collect headers safely
+                const headers = new Headers();
+                const headerRows = document.querySelectorAll('#headersContainer .header-row');
+                headerRows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    if (inputs.length >= 2) {
+                        const key = (inputs[0].value || '').trim();
+                        const value = (inputs[1].value || '').trim();
+                        if (key && value) {
+                            headers.append(key, value);
+                        }
+                    }
+                });
+                
+                // Collect query parameters safely
+                const params = new URLSearchParams();
+                const paramRows = document.querySelectorAll('#paramsContainer .flex');
+                paramRows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    if (inputs.length >= 2) {
+                        const key = (inputs[0].value || '').trim();
+                        const value = (inputs[1].value || '').trim();
+                        if (key && value) {
+                            params.append(key, value);
+                        }
+                    }
+                });
+                
+                // Append params to URL if any
+                if (params.toString()) {
+                    url += (url.includes('?') ? '&' : '?') + params.toString();
+                }
+                
+                // Prepare body for methods that support it
+                let body = null;
+                if (['POST', 'PUT', 'PATCH'].includes(method)) {
+                    const bodyType = document.getElementById('bodyTypeSelect').value;
+                    
+                    if (bodyType === 'json') {
+                        const jsonText = document.getElementById('jsonBodyTextarea').value.trim();
+                        if (jsonText) {
+                            try {
+                                // Validate JSON
+                                const parsed = JSON.parse(jsonText);
+                                body = JSON.stringify(parsed);
+                                if (!headers.has('Content-Type')) {
+                                    headers.append('Content-Type', 'application/json');
+                                }
+                            } catch (e) {
+                                throw new Error('Invalid JSON format: ' + e.message);
+                            }
+                        }
+                    } else if (bodyType === 'form-data' || bodyType === 'x-www-form-urlencoded') {
+                        const formData = new URLSearchParams();
+                        const formDataRows = document.querySelectorAll('#formDataContainer .flex');
+                        let hasData = false;
+                        formDataRows.forEach(row => {
+                            const inputs = row.querySelectorAll('input');
+                            if (inputs.length >= 2) {
+                                const key = (inputs[0].value || '').trim();
+                                const value = (inputs[1].value || '').trim();
+                                if (key && value) {
+                                    formData.append(key, value);
+                                    hasData = true;
+                                }
+                            }
+                        });
+                        if (hasData) {
+                            body = formData.toString();
+                            if (!headers.has('Content-Type')) {
+                                headers.append('Content-Type', 'application/x-www-form-urlencoded');
+                            }
+                        }
+                    } else if (bodyType === 'raw') {
+                        body = document.getElementById('rawBodyTextarea').value.trim() || null;
+                    }
+                }
+                
+                // Make the request
+                const startTime = Date.now();
+                const response = await fetch(url, {
+                    method: method,
+                    headers: headers,
+                    body: body,
+                    redirect: 'follow'
+                });
+                const endTime = Date.now();
+                const responseTime = endTime - startTime;
+                
+                // Process response
+                let responseData;
+                const contentType = response.headers.get('content-type');
+                try {
+                    if (contentType && contentType.includes('application/json')) {
+                        responseData = await response.json();
+                    } else {
+                        responseData = await response.text();
+                    }
+                } catch (e) {
+                    responseData = 'Non-JSON response or binary data';
+                }
+                
+                // Display response
+                displayResponse(response, responseData, responseTime);
+                
+                // Save to history
+                saveToHistory({
+                    method: method,
+                    url: url,
+                    headers: Array.from(headers.entries()),
+                    body: body,
+                    response: responseData,
+                    status: response.status,
+                    time: new Date().toISOString()
+                });
+                
+            } catch (error) {
+                showError(error.message || 'An unexpected error occurred');
+            } finally {
+                // Reset button
+                sendButton.disabled = false;
+                sendButton.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send Request';
+                updateMemoryUsage();
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('responseError').classList.remove('hidden');
+            document.getElementById('emptyState').classList.add('hidden');
+        }
+
+        // Display response function
+        function displayResponse(response, data, responseTime) {
+            // Show status
+            const statusCodeEl = document.getElementById('statusCode');
+            const statusTextEl = document.getElementById('statusText');
+            const responseTimeEl = document.getElementById('responseTime');
+            
+            statusCodeEl.textContent = response.status;
+            statusTextEl.textContent = response.statusText || 'OK';
+            responseTimeEl.textContent = `• ${responseTime}ms`;
+            
+            // Color code status
+            if (response.status >= 200 && response.status < 300) {
+                statusCodeEl.className = 'px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800';
+            } else if (response.status >= 300 && response.status < 400) {
+                statusCodeEl.className = 'px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800';
+            } else if (response.status >= 400 && response.status < 500) {
+                statusCodeEl.className = 'px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800';
+            } else {
+                statusCodeEl.className = 'px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800';
+            }
+            
+            document.getElementById('responseStatus').classList.remove('hidden');
+            
+            // Show headers
+            const headersDisplay = document.getElementById('headersDisplay');
+            headersDisplay.innerHTML = '';
+            response.headers.forEach((value, key) => {
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'flex justify-between py-1 border-b border-gray-200';
+                headerDiv.innerHTML = `
+                    <span class="font-medium text-gray-700">${key}:</span>
+                    <span class="text-gray-600 break-all max-w-md">${value}</span>
+                `;
+                headersDisplay.appendChild(headerDiv);
+            });
+            document.getElementById('responseHeaders').classList.remove('hidden');
+            
+            // Show body
+            const jsonOutput = document.getElementById('jsonOutput');
+            if (typeof data === 'object' && data !== null) {
+                jsonOutput.textContent = JSON.stringify(data, null, 2);
+            } else {
+                jsonOutput.textContent = data.toString();
+            }
+            document.getElementById('responseBody').classList.remove('hidden');
+        }
+
+        // History management
+        function saveToHistory(requestData) {
+            try {
+                const history = JSON.parse(localStorage.getItem('apiHistory') || '[]');
+                history.unshift({
+                    id: Date.now(),
+                    ...requestData
+                });
+                
+                // Keep only last 50 requests
+                if (history.length > 50) {
+                    history.length = 50;
+                }
+                
+                localStorage.setItem('apiHistory', JSON.stringify(history));
+                loadHistory();
+            } catch (e) {
+                console.error('Error saving to history:', e);
+            }
+        }
+
+        function loadHistory() {
+            try {
+                const history = JSON.parse(localStorage.getItem('apiHistory') || '[]');
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML = '';
+                
+                if (history.length === 0) {
+                    historyList.innerHTML = '<div class="p-4 text-center text-gray-500">No requests yet</div>';
+                    return;
+                }
+                
+                history.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item p-4 hover:bg-gray-50 cursor-pointer transition-colors';
+                    historyItem.onclick = () => loadHistoryItem(item);
+                    
+                    // Format time
+                    const date = new Date(item.time);
+                    const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    
+                    historyItem.innerHTML = `
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-1">
+                                    <span class="px-2 py-1 text-xs font-medium rounded ${
+                                        item.status >= 200 && item.status < 300 ? 'bg-green-100 text-green-800' :
+                                        item.status >= 400 ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
+                                    }">${item.status}</span>
+                                    <span class="text-sm font-medium text-gray-900">${item.method}</span>
+                                </div>
+                                <p class="text-sm text-gray-600 truncate">${item.url}</p>
+                                <p class="text-xs text-gray-400 mt-1">${timeString}</p>
+                            </div>
+                            <button onclick="deleteHistoryItem(${item.id}, event)" class="text-gray-400 hover:text-red-600 p-1">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                    historyList.appendChild(historyItem);
+                });
+            } catch (e) {
+                console.error('Error loading history:', e);
+                localStorage.removeItem('apiHistory');
+                historyList.innerHTML = '<div class="p-4 text-center text-gray-500">History reset due to corruption</div>';
+            }
+        }
+
+        function loadHistoryItem(item) {
+            // Load request data into form
+            document.getElementById('methodSelect').value = item.method;
+            document.getElementById('urlInput').value = item.url;
+            
+            // Load headers - clear first then add
+            const headersContainer = document.getElementById('headersContainer');
+            headersContainer.innerHTML = '';
+            item.headers.forEach(([key, value]) => {
+                addHeaderRow(key, value);
+            });
+            
+            // Try to send the request again
+            sendRequest();
+        }
+
+        function deleteHistoryItem(id, event) {
+            event.stopPropagation();
+            try {
+                const history = JSON.parse(localStorage.getItem('apiHistory') || '[]');
+                const filteredHistory = history.filter(item => item.id !== id);
+                localStorage.setItem('apiHistory', JSON.stringify(filteredHistory));
+                loadHistory();
+                updateMemoryUsage();
+            } catch (e) {
+                console.error('Error deleting history item:', e);
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all history?')) {
+                localStorage.removeItem('apiHistory');
+                loadHistory();
+                updateMemoryUsage();
+            }
+        }
+
+        // Memory usage calculation
+        function updateMemoryUsage() {
+            try {
+                const history = JSON.parse(localStorage.getItem('apiHistory') || '[]');
+                const historySize = new TextEncoder().encode(JSON.stringify(history)).length;
+                const totalSize = historySize;
+                const kb = (totalSize / 1024).toFixed(2);
+                document.getElementById('memoryUsage').textContent = `${kb} KB`;
+            } catch (e) {
+                document.getElementById('memoryUsage').textContent = 'Error';
+            }
+        }
+
+        // Export functionality
+        function exportData() {
+            try {
+                const history = JSON.parse(localStorage.getItem('apiHistory') || '[]');
+                if (history.length === 0) {
+                    alert('No history to export');
+                    return;
+                }
+                const dataStr = JSON.stringify(history, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                const exportFileDefaultName = `api-history-${new Date().toISOString().slice(0,10)}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+            } catch (e) {
+                alert('Error exporting data: ' + e.message);
+            }
+        }
+    </script>
+</body>
+</html>

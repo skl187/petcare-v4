@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Endpoints Quick Reference Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #7f8c8d;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        thead {
+            background-color: #3498db;
+            color: white;
+        }
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .method {
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 50px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        .method.post {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .method.get {
+            background-color: #3498db;
+            color: white;
+        }
+        .method.put {
+            background-color: #f39c12;
+            color: white;
+        }
+        .method.delete {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .auth-required {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        .auth-not-required {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        .endpoint {
+            font-family: 'Courier New', monospace;
+            background-color: #ecf0f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.95em;
+        }
+        .code-block {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        .code-block pre {
+            margin: 0;
+        }
+        .json {
+            color: #f39c12;
+        }
+        .summary-section {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .summary-section h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .summary-list {
+            list-style: none;
+            padding-left: 20px;
+        }
+        .summary-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #bdc3c7;
+        }
+        .summary-list li:last-child {
+            border-bottom: none;
+        }
+        .summary-list li:before {
+            content: "→ ";
+            color: #3498db;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-box {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .stat-box h4 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .stat-box p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        .breakdown {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .breakdown ul {
+            columns: 2;
+            list-style: none;
+            padding-left: 0;
+        }
+        .breakdown li {
+            padding: 8px 0;
+            padding-left: 20px;
+        }
+        .breakdown li:before {
+            content: "✓ ";
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 8px;
+            margin-left: -20px;
+        }
+        .header-info {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+        }
+        .rate-limits {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 3px;
+        }
+        .rate-limits h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        .rate-limits ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        .rate-limits li {
+            padding: 5px 0;
+            color: #856404;
+        }
+        .rate-limits li:before {
+            content: "⚡ ";
+            margin-right: 8px;
+        }
+        .footer {
+            background-color: #34495e;
+            color: #ecf0f1;
+            padding: 30px;
+            margin-top: 40px;
+            border-radius: 5px;
+        }
+        .footer h3 {
+            color: #3498db;
+            margin-top: 0;
+        }
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 768px) {
+            .breakdown ul {
+                columns: 1;
+            }
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            table {
+                font-size: 0.9em;
+            }
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 API Endpoints Quick Reference Guide</h1>
+        
+        <h2>Overview</h2>
+        <p>This document provides a quick reference for all API endpoints organized by feature/module.</p>
+
+        <hr style="margin: 30px 0; border: none; border-top: 2px solid #ecf0f1;">
+
+        <!-- Authentication Section -->
+        <h2>1. AUTHENTICATION (7 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/auth/register</span></td>
+                    <td>User registration</td>
+                    <td><span class="auth-not-required">No</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/auth/login</span></td>
+                    <td>User login</td>
+                    <td><span class="auth-not-required">No</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/auth/logout</span></td>
+                    <td>User logout</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/auth/refresh-token</span></td>
+                    <td>Refresh access token</td>
+                    <td><span class="auth-not-required">No</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/auth/verify-email</span></td>
+                    <td>Verify email address</td>
+                    <td><span class="auth-not-required">No</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/auth/forgot-password</span></td>
+                    <td>Request password reset</td>
+                    <td><span class="auth-not-required">No</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/auth/reset-password</span></td>
+                    <td>Reset password with token</td>
+                    <td><span class="auth-not-required">No</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Pet Management Section -->
+        <h2>2. PET MANAGEMENT (6 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/pets</span></td>
+                    <td>Add new pet</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/pets</span></td>
+                    <td>Get all user's pets</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/pets/{pet_id}</span></td>
+                    <td>Get single pet details</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method put">PUT</span></td>
+                    <td><span class="endpoint">/pets/{pet_id}</span></td>
+                    <td>Update pet information</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method delete">DELETE</span></td>
+                    <td><span class="endpoint">/pets/{pet_id}</span></td>
+                    <td>Delete pet</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/pets/{pet_id}/vaccinations</span></td>
+                    <td>Get pet vaccination history</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Pet Types & Breeds Section -->
+        <h2>3. PET TYPES & BREEDS (2 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/pet-types</span></td>
+                    <td>Get all pet types</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/pet-types/{pet_type_id}/breeds</span></td>
+                    <td>Get breeds by pet type</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Veterinarian & Clinic Information Section -->
+        <h2>4. VETERINARIAN & CLINIC INFORMATION (3 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/veterinarians</span></td>
+                    <td>List all vets/clinics with filters</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/veterinarians/{vet_id}</span></td>
+                    <td>Get single vet details</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/veterinarians/{vet_id}/schedule</span></td>
+                    <td>Get vet's schedule & available slots</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Appointment Booking Section -->
+        <h2>5. APPOINTMENT BOOKING (6 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/appointments</span></td>
+                    <td>Book new appointment</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/appointments</span></td>
+                    <td>Get all user's appointments</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/appointments/{appointment_id}</span></td>
+                    <td>Get appointment details</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/appointments/vet/</span></td>
+                    <td>Get all user's appointments</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/appointments/vet/list?filter=today</span></td>
+                    <td>Get all user's appointments</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method put">PUT</span></td>
+                    <td><span class="endpoint">/appointments/{appointment_id}/reschedule</span></td>
+                    <td>Reschedule appointment</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/appointments/{appointment_id}/cancel</span></td>
+                    <td>Cancel appointment</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/appointments/{appointment_id}/cost</span></td>
+                    <td>Get appointment cost breakdown</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Veterinarian Appointment Management Section -->
+        <h2>6. VETERINARIAN APPOINTMENT MANAGEMENT (7 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/vet/appointments/upcoming</span></td>
+                    <td>Get vet's upcoming appointments</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/vet/appointments/today</span></td>
+                    <td>Get vet's today's appointments</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/vet/appointments</span></td>
+                    <td>Get all vet's appointments with filters</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/vet/appointments/{appointment_id}/confirm</span></td>
+                    <td>Confirm appointment</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/vet/appointments/{appointment_id}/start</span></td>
+                    <td>Mark as in-progress</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/vet/appointments/{appointment_id}/complete</span></td>
+                    <td>Complete appointment</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/vet/appointments/{appointment_id}/details</span></td>
+                    <td>Get appointment details (vet view)</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Medical Records Section -->
+        <h2>7. MEDICAL RECORDS (4 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/vet/appointments/{appointment_id}/medical-records</span></td>
+                    <td>Create medical record</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/pets/{pet_id}/medical-records</span></td>
+                    <td>Get all pet's medical records</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/medical-records/{record_id}</span></td>
+                    <td>Get single medical record</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method put">PUT</span></td>
+                    <td><span class="endpoint">/medical-records/{record_id}</span></td>
+                    <td>Update medical record</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Prescriptions Section -->
+        <h2>8. PRESCRIPTIONS (4 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/vet/appointments/{appointment_id}/prescriptions</span></td>
+                    <td>Create prescription with medications</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/pets/{pet_id}/prescriptions</span></td>
+                    <td>Get all pet's prescriptions</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/prescriptions/{prescription_id}</span></td>
+                    <td>Get single prescription</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method put">PUT</span></td>
+                    <td><span class="endpoint">/prescriptions/{prescription_id}</span></td>
+                    <td>Update prescription status</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Lab Tests & Reports Section -->
+        <h2>9. LAB TESTS & REPORTS (4 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/vet/appointments/{appointment_id}/lab-tests</span></td>
+                    <td>Create lab test order</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/pets/{pet_id}/lab-tests</span></td>
+                    <td>Get all pet's lab tests</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/lab-tests/{test_id}</span></td>
+                    <td>Get single lab test details</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method put">PUT</span></td>
+                    <td><span class="endpoint">/lab-tests/{test_id}</span></td>
+                    <td>Update lab test results/status</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Vaccinations Section -->
+        <h2>10. VACCINATIONS (4 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/vet/appointments/{appointment_id}/vaccinations</span></td>
+                    <td>Record vaccination</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/pets/{pet_id}/vaccinations</span></td>
+                    <td>Get all pet's vaccinations</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/vaccinations/{vaccination_id}</span></td>
+                    <td>Get single vaccination record</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method put">PUT</span></td>
+                    <td><span class="endpoint">/vaccinations/{vaccination_id}</span></td>
+                    <td>Update vaccination record</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Reviews & Ratings Section -->
+        <h2>11. REVIEWS & RATINGS (2 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/vet/appointments/{appointment_id}/reviews</span></td>
+                    <td>Submit review for vet</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/veterinarians/{vet_id}/reviews</span></td>
+                    <td>Get all reviews for vet</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Payments Section -->
+        <h2>12. PAYMENTS (3 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/appointments/{appointment_id}/cost</span></td>
+                    <td>Get appointment cost</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/payments/initiate</span></td>
+                    <td>Initiate payment</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/payments/{payment_id}</span></td>
+                    <td>Get payment status</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- User Dashboard Section -->
+        <h2>13. USER DASHBOARD (2 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/dashboard</span></td>
+                    <td>Get user dashboard summary</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/dashboard/medical-history</span></td>
+                    <td>Get user's medical history summary</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Veterinarian Dashboard Section -->
+        <h2>14. VETERINARIAN DASHBOARD (2 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/vet/dashboard</span></td>
+                    <td>Get vet dashboard summary</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/vet/dashboard/stats</span></td>
+                    <td>Get vet performance statistics</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Admin Dashboard & Analytics Section -->
+        <h2>15. ADMIN DASHBOARD & ANALYTICS (5 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/admin/dashboard</span></td>
+                    <td>Get admin dashboard overview</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/admin/analytics/veterinarians</span></td>
+                    <td>Get vet analytics & performance</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/admin/analytics/users</span></td>
+                    <td>Get users analytics</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/admin/analytics/revenue</span></td>
+                    <td>Get revenue analytics</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/admin/analytics/appointments</span></td>
+                    <td>Get appointment analytics</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- User Profile & Settings Section -->
+        <h2>16. USER PROFILE & SETTINGS (4 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/users/profile</span></td>
+                    <td>Get user profile</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method put">PUT</span></td>
+                    <td><span class="endpoint">/users/profile</span></td>
+                    <td>Update user profile</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/users/change-password</span></td>
+                    <td>Change password</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/users/avatar</span></td>
+                    <td>Upload avatar image</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Appointment Reminders Section -->
+        <h2>17. APPOINTMENT REMINDERS (2 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/appointments/{appointment_id}/reminders</span></td>
+                    <td>Get appointment reminders</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method post">POST</span></td>
+                    <td><span class="endpoint">/appointments/{appointment_id}/reminders</span></td>
+                    <td>Set appointment reminder</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Services & Clinics Section -->
+        <h2>18. SERVICES & CLINICS (2 endpoints)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Method</th>
+                    <th>Endpoint</th>
+                    <th>Purpose</th>
+                    <th>Auth Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/services</span></td>
+                    <td>Get all available services</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+                <tr>
+                    <td><span class="method get">GET</span></td>
+                    <td><span class="endpoint">/clinics/{clinic_id}</span></td>
+                    <td>Get clinic details</td>
+                    <td><span class="auth-required">Yes</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #ecf0f1;">
+
+        <!-- Summary Section -->
+        <h2>SUMMARY BY FEATURE</h2>
+
+        <div class="summary-section">
+            <h3>User Registration & Auth Flow</h3>
+            <ol class="summary-list">
+                <li><span class="endpoint">POST /auth/register</span> - Register new account</li>
+                <li><span class="endpoint">POST /auth/verify-email</span> - Verify email</li>
+                <li><span class="endpoint">POST /auth/login</span> - Login to account</li>
+                <li><span class="endpoint">POST /auth/refresh-token</span> - Refresh token (if needed)</li>
+                <li><span class="endpoint">POST /auth/logout</span> - Logout</li>
+            </ol>
+        </div>
+
+        <div class="summary-section">
+            <h3>User Adding Pet & Viewing Pets</h3>
+            <ol class="summary-list">
+                <li><span class="endpoint">GET /pet-types</span> - Browse pet types</li>
+                <li><span class="endpoint">GET /pet-types/{pet_type_id}/breeds</span> - Browse breeds</li>
+                <li><span class="endpoint">POST /pets</span> - Add new pet</li>
+                <li><span class="endpoint">GET /pets</span> - View all pets</li>
+                <li><span class="endpoint">GET /pets/{pet_id}</span> - View pet details</li>
+                <li><span class="endpoint">PUT /pets/{pet_id}</span> - Update pet info</li>
+            </ol>
+        </div>
+
+        <div class="summary-section">
+            <h3>User Booking Appointment</h3>
+            <ol class="summary-list">
+                <li><span class="endpoint">GET /veterinarians</span> - Browse veterinarians/clinics</li>
+                <li><span class="endpoint">GET /veterinarians/{vet_id}</span> - View vet details</li>
+                <li><span class="endpoint">GET /veterinarians/{vet_id}/schedule</span> - Check available slots</li>
+                <li><span class="endpoint">POST /appointments</span> - Book appointment</li>
+                <li><span class="endpoint">GET /appointments</span> - View all appointments</li>
+                <li><span class="endpoint">GET /appointments/{appointment_id}</span> - View appointment details</li>
+            </ol>
+        </div>
+
+        <div class="summary-section">
+            <h3>User Viewing Medical Records After Update</h3>
+            <ol class="summary-list">
+                <li><span class="endpoint">GET /pets/{pet_id}/medical-records</span> - View all medical records</li>
+                <li><span class="endpoint">GET /medical-records/{record_id}</span> - View specific record</li>
+                <li><span class="endpoint">GET /pets/{pet_id}/prescriptions</span> - View prescriptions</li>
+                <li><span class="endpoint">GET /pets/{pet_id}/vaccinations</span> - View vaccinations</li>
+                <li><span class="endpoint">GET /pets/{pet_id}/lab-tests</span> - View lab reports</li>
+            </ol>
+        </div>
+
+        <div class="summary-section">
+            <h3>Veterinarian Confirming Appointments</h3>
+            <ol class="summary-list">
+                <li><span class="endpoint">GET /vet/appointments/upcoming</span> - View upcoming appointments</li>
+                <li><span class="endpoint">GET /vet/appointments/today</span> - View today's appointments</li>
+                <li><span class="endpoint">POST /vet/appointments/{appointment_id}/confirm</span> - Confirm appointment</li>
+                <li><span class="endpoint">POST /vet/appointments/{appointment_id}/start</span> - Start appointment</li>
+            </ol>
+        </div>
+
+        <div class="summary-section">
+            <h3>Veterinarian Updating Medical Information</h3>
+            <ol class="summary-list">
+                <li><span class="endpoint">POST /vet/appointments/{appointment_id}/medical-records</span> - Add medical record</li>
+                <li><span class="endpoint">POST /vet/appointments/{appointment_id}/prescriptions</span> - Add prescription</li>
+                <li><span class="endpoint">POST /vet/appointments/{appointment_id}/lab-tests</span> - Order lab tests</li>
+                <li><span class="endpoint">POST /vet/appointments/{appointment_id}/vaccinations</span> - Record vaccination</li>
+                <li><span class="endpoint">PUT /medical-records/{record_id}</span> - Update medical record</li>
+                <li><span class="endpoint">PUT /prescriptions/{prescription_id}</span> - Update prescription</li>
+                <li><span class="endpoint">PUT /lab-tests/{test_id}</span> - Update lab test results</li>
+                <li><span class="endpoint">POST /vet/appointments/{appointment_id}/complete</span> - Complete appointment</li>
+            </ol>
+        </div>
+
+        <div class="summary-section">
+            <h3>Veterinarian Viewing Dashboard</h3>
+            <ol class="summary-list">
+                <li><span class="endpoint">GET /vet/dashboard</span> - View dashboard overview</li>
+                <li><span class="endpoint">GET /vet/dashboard/stats</span> - View performance statistics</li>
+                <li><span class="endpoint">GET /vet/appointments</span> - View all appointments with filters</li>
+            </ol>
+        </div>
+
+        <div class="summary-section">
+            <h3>Admin Viewing Statistics</h3>
+            <ol class="summary-list">
+                <li><span class="endpoint">GET /admin/dashboard</span> - View admin dashboard</li>
+                <li><span class="endpoint">GET /admin/analytics/veterinarians</span> - Vet performance stats</li>
+                <li><span class="endpoint">GET /admin/analytics/users</span> - User analytics</li>
+                <li><span class="endpoint">GET /admin/analytics/revenue</span> - Revenue analytics</li>
+                <li><span class="endpoint">GET /admin/analytics/appointments</span> - Appointment analytics</li>
+            </ol>
+        </div>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #ecf0f1;">
+
+        <!-- Statistics Section -->
+        <h2>TOTAL ENDPOINTS: 56</h2>
+
+        <div class="stats">
+            <div class="stat-box">
+                <h4>56</h4>
+                <p>Total Endpoints</p>
+            </div>
+            <div class="stat-box">
+                <h4>18</h4>
+                <p>Categories</p>
+            </div>
+            <div class="stat-box">
+                <h4>47</h4>
+                <p>Protected Routes</p>
+            </div>
+            <div class="stat-box">
+                <h4>9</h4>
+                <p>Public Routes</p>
+            </div>
+        </div>
+
+        <h3>Breakdown by Category:</h3>
+        <div class="breakdown">
+            <ul>
+                <li>Authentication: 7</li>
+                <li>Pet Management: 6</li>
+                <li>Pet Types & Breeds: 2</li>
+                <li>Veterinarian & Clinic Info: 3</li>
+                <li>Appointment Booking: 6</li>
+                <li>Vet Appointment Management: 7</li>
+                <li>Medical Records: 4</li>
+                <li>Prescriptions: 4</li>
+                <li>Lab Tests: 4</li>
+                <li>Vaccinations: 4</li>
+                <li>Reviews: 2</li>
+                <li>Payments: 3</li>
+                <li>User Dashboard: 2</li>
+                <li>Vet Dashboard: 2</li>
+                <li>Admin Dashboard: 5</li>
+                <li>User Profile: 4</li>
+                <li>Reminders: 2</li>
+                <li>Services & Clinics: 2</li>
+            </ul>
+        </div>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #ecf0f1;">
+
+        <!-- Authentication Details Section -->
+        <h2>AUTHENTICATION</h2>
+        <p>All protected endpoints require:</p>
+        <div class="header-info">
+            Authorization: Bearer {jwt_access_token}
+        </div>
+        <p><strong>Token obtained from:</strong> <span class="endpoint">POST /auth/login</span></p>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #ecf0f1;">
+
+        <!-- Response Formats Section -->
+        <h2>RESPONSE FORMATS</h2>
+
+        <h3>Success Response (2xx)</h3>
+        <div class="code-block">
+            <pre>{
+  "data": {...},
+  "message": "Success message",
+  "status": 200
+}</pre>
+        </div>
+
+        <h3>Error Response (4xx, 5xx)</h3>
+        <div class="code-block">
+            <pre>{
+  "error": "error_code",
+  "message": "Error description",
+  "details": {}
+}</pre>
+        </div>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #ecf0f1;">
+
+        <!-- Common Query Parameters Section -->
+        <h2>COMMON QUERY PARAMETERS</h2>
+
+        <h3>Pagination:</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+            <li><span class="endpoint">page=1</span> - Page number</li>
+            <li><span class="endpoint">limit=10</span> - Items per page</li>
+        </ul>
+
+        <h3>Filtering:</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+            <li><span class="endpoint">status=active</span> - Filter by status</li>
+            <li><span class="endpoint">from_date=2026-01-01</span> - Start date filter</li>
+            <li><span class="endpoint">to_date=2026-12-31</span> - End date filter</li>
+            <li><span class="endpoint">search=keyword</span> - Search query</li>
+        </ul>
+
+        <h3>Sorting:</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+            <li><span class="endpoint">sort_by=created_at</span> - Field to sort</li>
+            <li><span class="endpoint">sort_order=desc</span> - asc or desc</li>
+        </ul>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #ecf0f1;">
+
+        <!-- Rate Limits Section -->
+        <h2>RATE LIMITS</h2>
+        <div class="rate-limits">
+            <h4>Endpoint Rate Limits</h4>
+            <ul>
+                <li><strong>General:</strong> 100 requests/minute</li>
+                <li><strong>Auth:</strong> 5 requests/minute</li>
+                <li><strong>Payments:</strong> 10 requests/minute</li>
+            </ul>
+            <p style="margin-top: 15px; font-style: italic;">Check response headers:</p>
+            <div style="background-color: rgba(0,0,0,0.2); padding: 10px; margin-top: 10px; border-radius: 3px; font-family: 'Courier New', monospace; font-size: 0.9em;">
+                X-RateLimit-Limit: 100<br>
+                X-RateLimit-Remaining: 95<br>
+                X-RateLimit-Reset: 1643645400
+            </div>
+        </div>
+
+        <hr style="margin: 40px 0; border: none; border-top: 2px solid #ecf0f1;">
+
+        <!-- Base URL & Documentation Section -->
+        <h2>BASE URL & DOCUMENTATION</h2>
+        
+        <h3>Base URL:</h3>
+        <div class="header-info">
+            https://api.petcare.com/v1
+        </div>
+
+        <h3>API Documentation:</h3>
+        <ul style="margin-left: 20px; margin-bottom: 20px;">
+            <li>Swagger UI: <a href="https://api.petcare.com/docs" style="color: #3498db;">https://api.petcare.com/docs</a></li>
+            <li>OpenAPI: <a href="https://api.petcare.com/openapi.json" style="color: #3498db;">https://api.petcare.com/openapi.json</a></li>
+            <li>Postman: <a href="https://api.petcare.com/postman.json" style="color: #3498db;">https://api.petcare.com/postman.json</a></li>
+        </ul>
+
+        <div class="footer">
+            <h3>📚 API Documentation Reference</h3>
+            <p>Last Updated: February 1, 2026</p>
+            <p>This quick reference guide provides an overview of all available endpoints in the Pet Care API v2. For detailed information about request/response payloads, parameters, and authentication, please visit the full API documentation.</p>
+            <p style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #555;">
+                <strong>Support:</strong> For questions or issues, please contact the API team at <a href="mailto:api-support@petcare.com">api-support@petcare.com</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

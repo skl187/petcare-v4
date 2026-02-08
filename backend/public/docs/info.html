@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen p-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-gray-900 mb-6">JSON Viewer</h1>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                
+                <pre class="bg-gray-900 text-green-400 p-4 rounded overflow-auto max-h-auto font-mono text-sm">
+# POST /medical_records/vaccinations
+
+```json
+// Request headers
+Authorization: Bearer <access_token>
+Content-Type: application/json
+// Request body
+{
+  "pet_id": "770e8400-e29b-41d4-a716-446655440002",
+  "appointment_id": "660e8400-e29b-41d4-a716-446655440001",
+  "veterinarian_id": "880e8400-e29b-41d4-a716-446655440000",
+  "vaccinations": [
+    {
+      "vaccine_name": "Rabies",
+      "vaccine_type": "rabies",
+      "manufacturer": "Merial",
+      "batch_number": "RB2026001",
+      "site_of_injection": "Right hind leg",
+      "next_due_date": "2027-02-03",
+      "cost": 50.00
+    },
+    {
+      "vaccine_name": "DHPP",
+      "vaccine_type": "combination",
+      "manufacturer": "Zoetis",
+      "batch_number": "DHPP2026002",
+      "site_of_injection": "Left hind leg",
+      "next_due_date": "2027-02-03",
+      "cost": 75.00
+    },
+    {
+      "vaccine_name": "Bordetella",
+      "vaccine_type": "respiratory",
+      "manufacturer": "Merck",
+      "batch_number": "BORD2026003",
+      "site_of_injection": "Intranasal",
+      "cost": 30.00,
+      "notes": "Annual booster"
+    }
+  ]
+}
+// Respone
+{
+  "status": "success",
+  "data": {
+    "count": 3,
+    "vaccinations": [
+      {
+        "id": "aa0e8400-e29b-41d4-a716-446655440010",
+        "vaccine_name": "Rabies",
+        "vaccination_date": "2026-02-03"
+      },
+      {
+        "id": "bb0e8400-e29b-41d4-a716-446655440011",
+        "vaccine_name": "DHPP",
+        "vaccination_date": "2026-02-03"
+      },
+      {
+        "id": "cc0e8400-e29b-41d4-a716-446655440012",
+        "vaccine_name": "Bordetella",
+        "vaccination_date": "2026-02-03"
+      }
+    ]
+  },
+  "message": "3 vaccination(s) created"
+}
+```
+</pre>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

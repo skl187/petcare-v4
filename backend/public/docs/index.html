@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Care Application - API Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .json-key { color: #9cdcfe; }
+        .json-string { color: #ce9178; }
+        .json-number { color: #b5cea8; }
+        .json-boolean { color: #569cd6; }
+        .json-null { color: #569cd6; }
+        
+        .code-block {
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.4;
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .expandable-section {
+            transition: all 0.3s ease;
+        }
+        
+        .rotate-90 {
+            transform: rotate(90deg);
+        }
+        
+        .active-endpoint {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-left-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-12">
+            <h1 class="text-4xl font-bold text-blue-700 mb-2">Pet Care Application API Documentation</h1>
+            <div class="flex items-center space-x-4">
+                <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg">
+                    <strong>Base URL:</strong> <code class="bg-blue-50 px-2 py-1 rounded">https://api.petcare.com/v1</code>
+                </div>
+                <div class="text-sm text-gray-600">
+                    <i class="fas fa-clock mr-1"></i> Last Updated: February 1, 2026
+                </div>
+            </div>
+            <p class="mt-4 text-gray-600 max-w-3xl">
+                Comprehensive API documentation for the Pet Care Application. This API allows you to manage pets, appointments, medical records, and more.
+                All endpoints require authentication unless otherwise specified.
+            </p>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Sidebar Navigation -->
+            <div class="lg:w-1/4">
+                <div class="bg-white rounded-xl shadow-md p-6 sticky top-8">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">API Endpoints</h2>
+                    
+                    <div class="space-y-1 mb-6">
+                        <h3 class="font-semibold text-gray-700 text-sm uppercase tracking-wider mb-2">Authentication</h3>
+                        <a href="#auth" class="block py-2 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition">Authentication Endpoints</a>
+                    </div>
+                    
+                    <div class="space-y-1 mb-6">
+                        <h3 class="font-semibold text-gray-700 text-sm uppercase tracking-wider mb-2">Pet Management</h3>
+                        <a href="#pets" class="block py-2 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition">Pet Management</a>
+                    </div>
+                    
+                    <div class="space-y-1 mb-6">
+                        <h3 class="font-semibold text-gray-700 text-sm uppercase tracking-wider mb-2">Appointments</h3>
+                        <a href="#appointments" class="block py-2 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition">Appointment Booking</a>
+                        <a href="#vet-appointments" class="block py-2 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition">Veterinarian Appointments</a>
+                    </div>
+                    
+                    <div class="space-y-1 mb-6">
+                        <h3 class="font-semibold text-gray-700 text-sm uppercase tracking-wider mb-2">Medical Records</h3>
+                        <a href="#medical" class="block py-2 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition">Medical Records</a>
+                        <a href="#prescriptions" class="block py-2 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition">Prescriptions</a>
+                        <a href="#vaccinations" class="block py-2 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition">Vaccinations</a>
+                    </div>
+                    
+                    <div class="space-y-1 mb-6">
+                        <h3 class="font-semibold text-gray-700 text-sm uppercase tracking-wider mb-2">User Management</h3>
+                        <a href="#dashboard" class="block py-2 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition">Dashboard</a>
+                        <a href="#profile" class="block py-2 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition">User Profile</a>
+                    </div>
+                    
+                    <div class="space-y-1">
+                        <h3 class="font-semibold text-gray-700 text-sm uppercase tracking-wider mb-2">Other</h3>
+                        <a href="#error-handling" class="block py-2 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition">Error Handling</a>
+                        <a href="#pagination" class="block py-2 px-3 text-blue-600 hover:bg-blue-50 rounded-lg transition">Pagination</a>
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t border-gray-200">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                            <span>Rate Limit: <strong>100 requests/minute</strong></span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600 mt-2">
+                            <i class="fas fa-lock text-green-500 mr-2"></i>
+                            <span>Auth: <strong>Bearer Token</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="lg:w-3/4">
+                <!-- Authentication Section -->
+                <section id="auth" class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">Authentication Endpoints</h2>
+                        <span class="ml-4 bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">7 endpoints</span>
+                    </div>
+                    
+                    <!-- User Registration -->
+                    <div class="expandable-section bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                        <button class="endpoint-header w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition">
+                            <div>
+                                <div class="flex items-center">
+                                    <span class="method-badge bg-green-100 text-green-800 font-bold px-3 py-1 rounded mr-4">POST</span>
+                                    <h3 class="text-xl font-semibold">User Registration</h3>
+                                </div>
+                                <p class="text-gray-600 mt-1">Register a new user account</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        
+                        <div class="endpoint-content hidden p-6 border-t border-gray-200">
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Endpoint</h4>
+                                <code class="bg-gray-100 p-3 rounded-lg block">/auth/register</code>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Request Body</h4>
+                                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                    <pre><code class="code-block">
+{
+  <span class="json-key">"email"</span>: <span class="json-string">"user@example.com"</span>,
+  <span class="json-key">"password"</span>: <span class="json-string">"securePassword123"</span>,
+  <span class="json-key">"first_name"</span>: <span class="json-string">"John"</span>,
+  <span class="json-key">"last_name"</span>: <span class="json-string">"Doe"</span>,
+  <span class="json-key">"phone"</span>: <span class="json-string">"+1234567890"</span>
+}
+                                    </code></pre>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Response (201 Created)</h4>
+                                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                    <pre><code class="code-block">
+{
+  <span class="json-key">"id"</span>: <span class="json-string">"uuid"</span>,
+  <span class="json-key">"email"</span>: <span class="json-string">"user@example.com"</span>,
+  <span class="json-key">"first_name"</span>: <span class="json-string">"John"</span>,
+  <span class="json-key">"last_name"</span>: <span class="json-string">"Doe"</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"Registration successful. Please verify your email."</span>
+}
+                                    </code></pre>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="text-lg font-semibold mb-2">Required Headers</h4>
+                                    <ul class="space-y-1">
+                                        <li class="flex items-center">
+                                            <span class="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded mr-2">Content-Type</span>
+                                            <span>application/json</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="text-lg font-semibold mb-2">Status Codes</h4>
+                                    <ul class="space-y-1">
+                                        <li class="flex items-center">
+                                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded mr-2">201</span>
+                                            <span>Created - Registration successful</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded mr-2">400</span>
+                                            <span>Bad Request - Invalid input</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded mr-2">409</span>
+                                            <span>Conflict - User already exists</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- User Login -->
+                    <div class="expandable-section bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                        <button class="endpoint-header w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition">
+                            <div>
+                                <div class="flex items-center">
+                                    <span class="method-badge bg-green-100 text-green-800 font-bold px-3 py-1 rounded mr-4">POST</span>
+                                    <h3 class="text-xl font-semibold">User Login</h3>
+                                </div>
+                                <p class="text-gray-600 mt-1">Authenticate user and get access token</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        
+                        <div class="endpoint-content hidden p-6 border-t border-gray-200">
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Endpoint</h4>
+                                <code class="bg-gray-100 p-3 rounded-lg block">/auth/login</code>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Response (200 OK)</h4>
+                                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                    <pre><code class="code-block">
+{
+  <span class="json-key">"access_token"</span>: <span class="json-string">"jwt_token"</span>,
+  <span class="json-key">"refresh_token"</span>: <span class="json-string">"refresh_jwt_token"</span>,
+  <span class="json-key">"user"</span>: {
+    <span class="json-key">"id"</span>: <span class="json-string">"uuid"</span>,
+    <span class="json-key">"email"</span>: <span class="json-string">"user@example.com"</span>,
+    <span class="json-key">"first_name"</span>: <span class="json-string">"John"</span>,
+    <span class="json-key">"role"</span>: <span class="json-string">"user"</span>
+  },
+  <span class="json-key">"expires_in"</span>: <span class="json-number">3600</span>
+}
+                                    </code></pre>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+                                        <div>
+                                            <h4 class="font-semibold text-blue-800">Authentication Note</h4>
+                                            <p class="text-blue-700 text-sm mt-1">The access token from this endpoint should be included in the Authorization header for all protected endpoints as: <code class="bg-blue-100 px-2 py-1 rounded">Authorization: Bearer {access_token}</code></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Other Authentication Endpoints Summary -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                        <h4 class="text-lg font-semibold text-blue-800 mb-3">Other Authentication Endpoints</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <span class="method-badge bg-green-100 text-green-800 font-bold px-2 py-1 rounded text-sm mr-3">POST</span>
+                                    <h5 class="font-semibold">User Logout</h5>
+                                </div>
+                                <p class="text-sm text-gray-600">/auth/logout</p>
+                            </div>
+                            
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <span class="method-badge bg-green-100 text-green-800 font-bold px-2 py-1 rounded text-sm mr-3">POST</span>
+                                    <h5 class="font-semibold">Refresh Token</h5>
+                                </div>
+                                <p class="text-sm text-gray-600">/auth/refresh-token</p>
+                            </div>
+                            
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <span class="method-badge bg-green-100 text-green-800 font-bold px-2 py-1 rounded text-sm mr-3">POST</span>
+                                    <h5 class="font-semibold">Forgot Password</h5>
+                                </div>
+                                <p class="text-sm text-gray-600">/auth/forgot-password</p>
+                            </div>
+                            
+                            <div class="bg-white p-4 rounded-lg shadow-sm">
+                                <div class="flex items-center mb-2">
+                                    <span class="method-badge bg-green-100 text-green-800 font-bold px-2 py-1 rounded text-sm mr-3">POST</span>
+                                    <h5 class="font-semibold">Reset Password</h5>
+                                </div>
+                                <p class="text-sm text-gray-600">/auth/reset-password</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Pet Management Section -->
+                <section id="pets" class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">Pet Management</h2>
+                        <span class="ml-4 bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">6 endpoints</span>
+                    </div>
+                    
+                    <!-- Add Pet -->
+                    <div class="expandable-section bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                        <button class="endpoint-header w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition">
+                            <div>
+                                <div class="flex items-center">
+                                    <span class="method-badge bg-green-100 text-green-800 font-bold px-3 py-1 rounded mr-4">POST</span>
+                                    <h3 class="text-xl font-semibold">Add Pet</h3>
+                                </div>
+                                <p class="text-gray-600 mt-1">Register a new pet for the authenticated user</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        
+                        <div class="endpoint-content hidden p-6 border-t border-gray-200">
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Endpoint</h4>
+                                <code class="bg-gray-100 p-3 rounded-lg block">/pets</code>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Request Body</h4>
+                                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                    <pre><code class="code-block">
+{
+  <span class="json-key">"name"</span>: <span class="json-string">"Buddy"</span>,
+  <span class="json-key">"pet_type_id"</span>: <span class="json-string">"uuid"</span>,
+  <span class="json-key">"breed_id"</span>: <span class="json-string">"uuid"</span>,
+  <span class="json-key">"size"</span>: <span class="json-string">"medium"</span>,
+  <span class="json-key">"gender"</span>: <span class="json-string">"male"</span>,
+  <span class="json-key">"date_of_birth"</span>: <span class="json-string">"2020-05-15"</span>,
+  <span class="json-key">"weight"</span>: <span class="json-number">25.5</span>,
+  <span class="json-key">"height"</span>: <span class="json-number">50</span>,
+  <span class="json-key">"weight_unit"</span>: <span class="json-string">"kg"</span>,
+  <span class="json-key">"height_unit"</span>: <span class="json-string">"cm"</span>,
+  <span class="json-key">"additional_info"</span>: {
+    <span class="json-key">"color"</span>: <span class="json-string">"brown"</span>,
+    <span class="json-key">"distinguishing_marks"</span>: <span class="json-string">"white paws"</span>
+  }
+}
+                                    </code></pre>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h4 class="text-lg font-semibold mb-2">Required Headers</h4>
+                                    <ul class="space-y-1">
+                                        <li class="flex items-center">
+                                            <span class="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded mr-2">Authorization</span>
+                                            <span>Bearer {access_token}</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <span class="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded mr-2">Content-Type</span>
+                                            <span>application/json</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="text-lg font-semibold mb-2">Query Parameters</h4>
+                                    <ul class="space-y-1">
+                                        <li class="flex items-center">
+                                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded mr-2">page</span>
+                                            <span>Page number (default: 1)</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded mr-2">limit</span>
+                                            <span>Items per page (default: 10)</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Get All User Pets -->
+                    <div class="expandable-section bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                        <button class="endpoint-header w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition">
+                            <div>
+                                <div class="flex items-center">
+                                    <span class="method-badge bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded mr-4">GET</span>
+                                    <h3 class="text-xl font-semibold">Get All User Pets</h3>
+                                </div>
+                                <p class="text-gray-600 mt-1">Retrieve all pets for the authenticated user</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        
+                        <div class="endpoint-content hidden p-6 border-t border-gray-200">
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Endpoint</h4>
+                                <code class="bg-gray-100 p-3 rounded-lg block">/pets</code>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Response (200 OK)</h4>
+                                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                    <pre><code class="code-block">
+{
+  <span class="json-key">"data"</span>: [
+    {
+      <span class="json-key">"id"</span>: <span class="json-string">"uuid"</span>,
+      <span class="json-key">"name"</span>: <span class="json-string">"Buddy"</span>,
+      <span class="json-key">"pet_type"</span>: <span class="json-string">"Dog"</span>,
+      <span class="json-key">"breed"</span>: <span class="json-string">"Golden Retriever"</span>,
+      <span class="json-key">"gender"</span>: <span class="json-string">"male"</span>,
+      <span class="json-key">"weight"</span>: <span class="json-number">25.5</span>,
+      <span class="json-key">"age"</span>: <span class="json-string">"5 years"</span>,
+      <span class="json-key">"created_at"</span>: <span class="json-string">"2020-05-15T00:00:00Z"</span>
+    }
+  ],
+  <span class="json-key">"pagination"</span>: {
+    <span class="json-key">"page"</span>: <span class="json-number">1</span>,
+    <span class="json-key">"limit"</span>: <span class="json-number">10</span>,
+    <span class="json-key">"total"</span>: <span class="json-number">5</span>
+  }
+}
+                                    </code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Appointment Booking Section -->
+                <section id="appointments" class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">Appointment Booking</h2>
+                        <span class="ml-4 bg-purple-100 text-purple-800 text-sm font-medium px-3 py-1 rounded-full">6 endpoints</span>
+                    </div>
+                    
+                    <!-- Book Appointment -->
+                    <div class="expandable-section bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                        <button class="endpoint-header w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition">
+                            <div>
+                                <div class="flex items-center">
+                                    <span class="method-badge bg-green-100 text-green-800 font-bold px-3 py-1 rounded mr-4">POST</span>
+                                    <h3 class="text-xl font-semibold">Book Appointment</h3>
+                                </div>
+                                <p class="text-gray-600 mt-1">Schedule a new appointment for a pet</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        
+                        <div class="endpoint-content hidden p-6 border-t border-gray-200">
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Endpoint</h4>
+                                <code class="bg-gray-100 p-3 rounded-lg block">/appointments</code>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Request Body</h4>
+                                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                    <pre><code class="code-block">
+{
+  <span class="json-key">"pet_id"</span>: <span class="json-string">"uuid"</span>,
+  <span class="json-key">"veterinarian_id"</span>: <span class="json-string">"uuid"</span>,
+  <span class="json-key">"clinic_id"</span>: <span class="json-string">"uuid"</span>,
+  <span class="json-key">"service_id"</span>: <span class="json-string">"uuid"</span>,
+  <span class="json-key">"appointment_date"</span>: <span class="json-string">"2026-02-10"</span>,
+  <span class="json-key">"appointment_time"</span>: <span class="json-string">"14:30"</span>,
+  <span class="json-key">"reason_for_visit"</span>: <span class="json-string">"Regular checkup"</span>,
+  <span class="json-key">"notes"</span>: <span class="json-string">"Pet has been limping slightly"</span>,
+  <span class="json-key">"preferred_communication"</span>: <span class="json-string">"sms"</span>
+}
+                                    </code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Get User's Appointments -->
+                    <div class="expandable-section bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                        <button class="endpoint-header w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition">
+                            <div>
+                                <div class="flex items-center">
+                                    <span class="method-badge bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded mr-4">GET</span>
+                                    <h3 class="text-xl font-semibold">Get User's All Appointments</h3>
+                                </div>
+                                <p class="text-gray-600 mt-1">Retrieve all appointments for the authenticated user</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        
+                        <div class="endpoint-content hidden p-6 border-t border-gray-200">
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Query Parameters</h4>
+                                <div class="bg-gray-100 p-4 rounded-lg">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded mb-1">page</span>
+                                            <p class="text-sm">Page number (default: 1)</p>
+                                        </div>
+                                        <div>
+                                            <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded mb-1">limit</span>
+                                            <p class="text-sm">Items per page (default: 10, max: 100)</p>
+                                        </div>
+                                        <div>
+                                            <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded mb-1">status</span>
+                                            <p class="text-sm">Filter by status (scheduled, completed, cancelled)</p>
+                                        </div>
+                                        <div>
+                                            <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded mb-1">pet_id</span>
+                                            <p class="text-sm">Filter by pet ID (optional)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Medical Records Section -->
+                <section id="medical" class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">Medical Records</h2>
+                        <span class="ml-4 bg-indigo-100 text-indigo-800 text-sm font-medium px-3 py-1 rounded-full">4 endpoints</span>
+                    </div>
+                    
+                    <!-- Create Medical Record -->
+                    <div class="expandable-section bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                        <button class="endpoint-header w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition">
+                            <div>
+                                <div class="flex items-center">
+                                    <span class="method-badge bg-green-100 text-green-800 font-bold px-3 py-1 rounded mr-4">POST</span>
+                                    <h3 class="text-xl font-semibold">Create Medical Record</h3>
+                                </div>
+                                <p class="text-gray-600 mt-1">Create a new medical record for an appointment</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        
+                        <div class="endpoint-content hidden p-6 border-t border-gray-200">
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Endpoint</h4>
+                                <code class="bg-gray-100 p-3 rounded-lg block">/vet/appointments/{appointment_id}/medical-records</code>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Request Body Example</h4>
+                                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                    <pre><code class="code-block">
+{
+  <span class="json-key">"record_type"</span>: <span class="json-string">"consultation"</span>,
+  <span class="json-key">"diagnosis"</span>: <span class="json-string">"Ear infection"</span>,
+  <span class="json-key">"symptoms"</span>: [<span class="json-string">"ear scratching"</span>, <span class="json-string">"head shaking"</span>],
+  <span class="json-key">"vital_signs"</span>: {
+    <span class="json-key">"temperature"</span>: <span class="json-number">38.5</span>,
+    <span class="json-key">"heart_rate"</span>: <span class="json-number">90</span>
+  },
+  <span class="json-key">"treatment_plan"</span>: <span class="json-string">"Antibiotic drops prescribed"</span>
+}
+                                    </code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Get Medical Records for Pet -->
+                    <div class="expandable-section bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                        <button class="endpoint-header w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition">
+                            <div>
+                                <div class="flex items-center">
+                                    <span class="method-badge bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded mr-4">GET</span>
+                                    <h3 class="text-xl font-semibold">Get Medical Records for Pet</h3>
+                                </div>
+                                <p class="text-gray-600 mt-1">Retrieve all medical records for a specific pet</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        
+                        <div class="endpoint-content hidden p-6 border-t border-gray-200">
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Endpoint</h4>
+                                <code class="bg-gray-100 p-3 rounded-lg block">/pets/{pet_id}/medical-records</code>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Query Parameters</h4>
+                                <div class="bg-gray-100 p-4 rounded-lg">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded mb-1">record_type</span>
+                                            <p class="text-sm">Filter by record type (consultation, surgery, vaccination)</p>
+                                        </div>
+                                        <div>
+                                            <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded mb-1">from_date</span>
+                                            <p class="text-sm">Filter from date (YYYY-MM-DD)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">Dashboard Endpoints</h2>
+                        <span class="ml-4 bg-yellow-100 text-yellow-800 text-sm font-medium px-3 py-1 rounded-full">6 endpoints</span>
+                    </div>
+                    
+                    <!-- Get User Dashboard Summary -->
+                    <div class="expandable-section bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                        <button class="endpoint-header w-full flex items-center justify-between p-6 text-left hover:bg-gray-50 transition">
+                            <div>
+                                <div class="flex items-center">
+                                    <span class="method-badge bg-blue-100 text-blue-800 font-bold px-3 py-1 rounded mr-4">GET</span>
+                                    <h3 class="text-xl font-semibold">Get User Dashboard Summary</h3>
+                                </div>
+                                <p class="text-gray-600 mt-1">Get summary data for user dashboard</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400 transition-transform duration-300"></i>
+                        </button>
+                        
+                        <div class="endpoint-content hidden p-6 border-t border-gray-200">
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Endpoint</h4>
+                                <code class="bg-gray-100 p-3 rounded-lg block">/dashboard</code>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <h4 class="text-lg font-semibold mb-2">Response (200 OK) - Partial</h4>
+                                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                    <pre><code class="code-block">
+{
+  <span class="json-key">"user"</span>: {
+    <span class="json-key">"id"</span>: <span class="json-string">"uuid"</span>,
+    <span class="json-key">"first_name"</span>: <span class="json-string">"John"</span>,
+    <span class="json-key">"last_name"</span>: <span class="json-string">"Doe"</span>
+  },
+  <span class="json-key">"pets_count"</span>: <span class="json-number">2</span>,
+  <span class="json-key">"upcoming_appointments_count"</span>: <span class="json-number">1</span>,
+  <span class="json-key">"pets"</span>: [
+    {
+      <span class="json-key">"id"</span>: <span class="json-string">"uuid"</span>,
+      <span class="json-key">"name"</span>: <span class="json-string">"Buddy"</span>,
+      <span class="json-key">"breed"</span>: <span class="json-string">"Golden Retriever"</span>
+    }
+  ]
+}
+                                    </code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Error Handling Section -->
+                <section id="error-handling" class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">Error Handling</h2>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+                        <div class="p-6">
+                            <p class="text-gray-700 mb-6">All endpoints return appropriate HTTP status codes and error messages. Below are the common error responses:</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- 400 Bad Request -->
+                                <div class="border-l-4 border-red-500 pl-4 py-2">
+                                    <div class="flex items-center mb-2">
+                                        <span class="bg-red-100 text-red-800 text-sm font-bold px-3 py-1 rounded">400 Bad Request</span>
+                                    </div>
+                                    <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                        <pre><code class="code-block text-sm">
+{
+  <span class="json-key">"error"</span>: <span class="json-string">"bad_request"</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"Invalid request parameters"</span>,
+  <span class="json-key">"details"</span>: {
+    <span class="json-key">"email"</span>: <span class="json-string">"Invalid email format"</span>
+  }
+}
+                                        </code></pre>
+                                    </div>
+                                </div>
+                                
+                                <!-- 401 Unauthorized -->
+                                <div class="border-l-4 border-orange-500 pl-4 py-2">
+                                    <div class="flex items-center mb-2">
+                                        <span class="bg-orange-100 text-orange-800 text-sm font-bold px-3 py-1 rounded">401 Unauthorized</span>
+                                    </div>
+                                    <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                        <pre><code class="code-block text-sm">
+{
+  <span class="json-key">"error"</span>: <span class="json-string">"unauthorized"</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"Invalid or missing authentication token"</span>
+}
+                                        </code></pre>
+                                    </div>
+                                </div>
+                                
+                                <!-- 404 Not Found -->
+                                <div class="border-l-4 border-yellow-500 pl-4 py-2">
+                                    <div class="flex items-center mb-2">
+                                        <span class="bg-yellow-100 text-yellow-800 text-sm font-bold px-3 py-1 rounded">404 Not Found</span>
+                                    </div>
+                                    <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                        <pre><code class="code-block text-sm">
+{
+  <span class="json-key">"error"</span>: <span class="json-string">"not_found"</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"Resource not found"</span>
+}
+                                        </code></pre>
+                                    </div>
+                                </div>
+                                
+                                <!-- 500 Internal Server Error -->
+                                <div class="border-l-4 border-purple-500 pl-4 py-2">
+                                    <div class="flex items-center mb-2">
+                                        <span class="bg-purple-100 text-purple-800 text-sm font-bold px-3 py-1 rounded">500 Internal Server Error</span>
+                                    </div>
+                                    <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                        <pre><code class="code-block text-sm">
+{
+  <span class="json-key">"error"</span>: <span class="json-string">"internal_server_error"</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"An unexpected error occurred"</span>
+}
+                                        </code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Pagination Section -->
+                <section id="pagination" class="mb-12">
+                    <div class="flex items-center mb-6">
+                        <h2 class="text-3xl font-bold text-gray-800">Pagination</h2>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                        <div class="p-6">
+                            <p class="text-gray-700 mb-6">List endpoints support pagination with the following parameters:</p>
+                            
+                            <div class="mb-8">
+                                <h4 class="text-lg font-semibold mb-3">Query Parameters</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <code class="text-blue-600 font-semibold">page</code>
+                                        <p class="text-sm text-gray-600 mt-1">Page number (default: 1)</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded-lg">
+                                        <code class="text-blue-600 font-semibold">limit</code>
+                                        <p class="text-sm text-gray-600 mt-1">Items per page (default: 10, max: 100)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3">Pagination Response Example</h4>
+                                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
+                                    <pre><code class="code-block">
+{
+  <span class="json-key">"data"</span>: [
+    <span class="json-comment">// Array of items</span>
+  ],
+  <span class="json-key">"pagination"</span>: {
+    <span class="json-key">"page"</span>: <span class="json-number">1</span>,
+    <span class="json-key">"limit"</span>: <span class="json-number">10</span>,
+    <span class="json-key">"total"</span>: <span class="json-number">150</span>,
+    <span class="json-key">"total_pages"</span>: <span class="json-number">15</span>
+  }
+}
+                                    </code></pre>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-lightbulb text-blue-500 mt-1 mr-3"></i>
+                                    <div>
+                                        <h4 class="font-semibold text-blue-800">Pagination Tips</h4>
+                                        <ul class="text-blue-700 text-sm mt-1 space-y-1">
+                                            <li>• Always check the <code class="bg-blue-100 px-1 py-0.5 rounded">pagination</code> object in the response</li>
+                                            <li>• Use <code class="bg-blue-100 px-1 py-0.5 rounded">total_pages</code> to determine if more pages are available</li>
+                                            <li>• The <code class="bg-blue-100 px-1 py-0.5 rounded">limit</code> parameter cannot exceed 100</li>
+                                            <li>• For performance, avoid requesting large pages unless necessary</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Footer -->
+                <footer class="mt-12 pt-8 border-t border-gray-200">
+                    <div class="flex flex-col md:flex-row justify-between items-center">
+                        <div class="mb-4 md:mb-0">
+                            <h3 class="text-lg font-bold text-gray-800">Pet Care API</h3>
+                            <p class="text-gray-600">Version 1.0.0</p>
+                        </div>
+                        
+                        <div class="text-center md:text-right">
+                            <p class="text-gray-600 mb-2">For more information and interactive documentation:</p>
+                            <div class="flex flex-wrap justify-center md:justify-end gap-4">
+                                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Swagger UI</a>
+                                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Postman Collection</a>
+                                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">OpenAPI Specification</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 text-center text-gray-500 text-sm">
+                        <p>© 2026 Pet Care Application. All rights reserved.</p>
+                        <p class="mt-1">Documentation last updated: February 1, 2026</p>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Expand/collapse functionality for endpoint sections
+            const endpointHeaders = document.querySelectorAll('.endpoint-header');
+            
+            endpointHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const content = this.nextElementSibling;
+                    const icon = this.querySelector('i');
+                    
+                    // Toggle content visibility
+                    if (content.classList.contains('hidden')) {
+                        content.classList.remove('hidden');
+                        icon.classList.add('rotate-90');
+                    } else {
+                        content.classList.add('hidden');
+                        icon.classList.remove('rotate-90');
+                    }
+                    
+                    // Close other open sections (optional)
+                    // endpointHeaders.forEach(otherHeader => {
+                    //     if (otherHeader !== this) {
+                    //         const otherContent = otherHeader.nextElementSibling;
+                    //         const otherIcon = otherHeader.querySelector('i');
+                    //         otherContent.classList.add('hidden');
+                    //         otherIcon.classList.remove('rotate-90');
+                    //     }
+                    // });
+                });
+            });
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 20,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // Method badge color coding
+            const methodBadges = document.querySelectorAll('.method-badge');
+            methodBadges.forEach(badge => {
+                const method = badge.textContent.trim();
+                if (method === 'GET') {
+                    badge.classList.add('bg-blue-100', 'text-blue-800');
+                } else if (method === 'POST') {
+                    badge.classList.add('bg-green-100', 'text-green-800');
+                } else if (method === 'PUT' || method === 'PATCH') {
+                    badge.classList.add('bg-yellow-100', 'text-yellow-800');
+                } else if (method === 'DELETE') {
+                    badge.classList.add('bg-red-100', 'text-red-800');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
