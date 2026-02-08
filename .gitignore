@@ -1,6 +1,7 @@
 # for git and rsync
 # git push -u origin main
 # rsync -avz --exclude-from='.gitignore' ./ admskl@bracevps:/home/admskl/v4
+.DS_Store
 .git/
 .claude/
 .zencoder/
