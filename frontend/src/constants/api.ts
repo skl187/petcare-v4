@@ -21,7 +21,7 @@ export const API_ENDPOINTS = {
     DETAIL: (id: string) => `${API_BASE_URL}/api/pets/${id}`,
   },
 
-  MY_PETS:{
+  MY_PETS: {
     BASE: `${API_BASE_URL}/api/pets/my-pets`,
   },
 
@@ -50,9 +50,8 @@ export const API_ENDPOINTS = {
 
   // Owner Bookings
   OWNER_BOOKINGS: {
-    //BASE: (filter: string = 'today') =>
-    //  `${API_BASE_URL}/api/appointments/vet/list?filter=${filter}`,
-    BASE: `${API_BASE_URL}/api/appointments/owner/list?filter=all`,
+    BASE: (filter: string = 'all') =>
+      `${API_BASE_URL}/api/appointments/owner/list?filter=${filter}`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/appointments/${id}`,
   },
 
@@ -97,6 +96,12 @@ export const API_ENDPOINTS = {
     ADDRESSES: (id: string) => `${API_BASE_URL}/api/users/${id}/addresses`,
     ADDRESS_DETAIL: (userId: string, addressId: string) =>
       `${API_BASE_URL}/api/users/${userId}/addresses/${addressId}`,
+  },
+
+  // Settings
+  SETTINGS: {
+    BASE: `${API_BASE_URL}/api/settings`,
+    DETAIL: (key: string) => `${API_BASE_URL}/api/settings?key=${key}`,
   },
 
   // Dashboard

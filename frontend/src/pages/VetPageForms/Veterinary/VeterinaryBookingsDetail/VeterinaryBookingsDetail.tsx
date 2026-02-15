@@ -11,6 +11,20 @@ import {
   AppointmentActionsSection,
 } from './sections';
 
+const APPOINTMENTS_BASE = API_ENDPOINTS.APPOINTMENTS.BASE;
+const API_ORIGIN = new URL(APPOINTMENTS_BASE, window.location.origin).origin;
+
+const getAppointmentPetImageUrl = (imagePath?: string | null) => {
+  const fallback = '/images/pets/placeholder.jpg';
+  const raw = imagePath?.trim();
+
+  if (!raw) return fallback;
+  if (/^https?:\/\//i.test(raw) || raw.startsWith('data:')) return raw;
+
+  const normalized = raw.startsWith('/') ? raw : `/${raw}`;
+  return `${API_ORIGIN}${normalized}`;
+};
+
 export interface AppointmentDetail {
   id: string;
   appointmentNumber: string;
@@ -148,7 +162,12 @@ export default function VeterinaryBookingsDetail({
         petWeight: data.data?.pet_weight || '',
         petColor: data.data?.pet_color || '',
         petMicrochip: data.data?.pet_microchip || '',
-        petPhoto: data.data?.pet_photo || appointment!.petPhoto,
+        petPhoto: getAppointmentPetImageUrl(
+          data.data?.pet_type_icon ||
+            data.data?.petTypeIcon ||
+            data.data?.pet_photo ||
+            appointment!.petPhoto,
+        ),
         ownerId: data.data?.user_id || '',
         ownerName:
           data.data?.first_name && data.data?.last_name
@@ -259,7 +278,12 @@ export default function VeterinaryBookingsDetail({
             petWeight: data.data?.pet_weight || '',
             petColor: data.data?.pet_color || '',
             petMicrochip: data.data?.pet_microchip || '',
-            petPhoto: data.data?.pet_photo || appointmentData.petPhoto,
+            petPhoto: getAppointmentPetImageUrl(
+              data.data?.pet_type_icon ||
+                data.data?.petTypeIcon ||
+                data.data?.pet_photo ||
+                appointmentData.petPhoto,
+            ),
             ownerId: data.data?.user_id || '',
             ownerName:
               data.data?.first_name && data.data?.last_name
@@ -382,7 +406,12 @@ export default function VeterinaryBookingsDetail({
             petColor: data.data.petColor || data.data.pet_color || '',
             petMicrochip:
               data.data.petMicrochip || data.data.pet_microchip || '',
-            petPhoto: data.data.petPhoto || data.data.pet_photo || '',
+            petPhoto: getAppointmentPetImageUrl(
+              data.data.pet_type_icon ||
+                data.data.petTypeIcon ||
+                data.data.petPhoto ||
+                data.data.pet_photo,
+            ),
             ownerId: data.data.ownerId || data.data.owner_id || '1',
             ownerName: data.data.ownerName || data.data.owner_name || 'Owner',
             ownerPhone: data.data.ownerPhone || data.data.owner_phone || '',
@@ -427,7 +456,7 @@ export default function VeterinaryBookingsDetail({
 
         {error && (
           <div className='mb-4 p-3 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded-lg'>
-            <p className='text-sm font-medium'>{error}</p>
+            <p className='text-message-sm font-medium'>{error}</p>
           </div>
         )}
 

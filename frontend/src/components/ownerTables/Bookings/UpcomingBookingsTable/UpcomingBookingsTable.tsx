@@ -15,13 +15,28 @@ import DeleteDialog from '../../../tables/tableComponents/DeleteDailog';
 import UpcomingBookingsForm from '../../../../pages/OwnerPageForms/BookingsForms/UpcomingBookingsForm/UpcomingBookingsForm';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
 import { API_ENDPOINTS } from '../../../../constants/api';
+import type { VetBooking } from '../../../vetTables/Veterinary/VeterninaryBookingsTable/VeterinaryBookingsTable';
 
 // --- API Constants ---
-const API_BASE = API_ENDPOINTS.OWNER_BOOKINGS.BASE;
 const PETS_API = API_ENDPOINTS.PETS.BASE;
 const VETERINARIANS_API = API_ENDPOINTS.VETERINARIANS.BASE;
 const CLINICS_API = API_ENDPOINTS.CLINICS.BASE;
 const VET_SERVICES_API = API_ENDPOINTS.VET_SERVICES.BASE;
+const OWNER_API_ORIGIN = new URL(
+  API_ENDPOINTS.OWNER_BOOKINGS.BASE(),
+  window.location.origin,
+).origin;
+
+const getAppointmentPetImageUrl = (imagePath?: string | null) => {
+  const fallback = '/images/pets/placeholder.jpg';
+  const raw = imagePath?.trim();
+
+  if (!raw) return fallback;
+  if (/^https?:\/\//i.test(raw) || raw.startsWith('data:')) return raw;
+
+  const normalized = raw.startsWith('/') ? raw : `/${raw}`;
+  return `${OWNER_API_ORIGIN}${normalized}`;
+};
 
 // --- Types ---
 export type AppointmentStatus =
@@ -87,14 +102,17 @@ export interface Appointment {
   services?: any[];
   appointment_number?: string;
   priority?: string;
+  petPhoto?: string;
 }
 
 interface UpcomingBookingsTableProps {
-  onSelectAppointment?: (appointmentId: string) => void;
+  onSelectAppointment?: (appointment: VetBooking) => void;
+  filter?: 'today' | 'upcoming' | 'past' | 'all';
 }
 
 export default function UpcomingBookingsTable({
   onSelectAppointment,
+  filter = 'upcoming',
 }: UpcomingBookingsTableProps) {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [pets, setPets] = useState<Pet[]>([]);
@@ -246,7 +264,7 @@ export default function UpcomingBookingsTable({
     setIsLoadingData(true);
     setFetchError('');
     try {
-      const response = await fetch(API_BASE, {
+      const response = await fetch(API_ENDPOINTS.OWNER_BOOKINGS.BASE(filter), {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${getAuthToken()}`,
@@ -324,6 +342,13 @@ export default function UpcomingBookingsTable({
           services: a.services,
           appointment_number: a.appointment_number,
           priority: a.priority,
+          petPhoto: getAppointmentPetImageUrl(
+            a.pet_type_icon ||
+              a.petTypeIcon ||
+              a.pet_photo ||
+              a.petPhoto ||
+              a.pet_image,
+          ),
         };
       });
 
@@ -334,7 +359,7 @@ export default function UpcomingBookingsTable({
     } finally {
       setIsLoadingData(false);
     }
-  }, [pets, veterinarians, clinics, vetServices]);
+  }, [pets, veterinarians, clinics, vetServices, filter]);
 
   // Initial load
   useEffect(() => {
@@ -421,7 +446,7 @@ export default function UpcomingBookingsTable({
       if (selectedRows.length > 0) {
         // Bulk delete
         for (const id of selectedRows) {
-          await fetch(`${API_BASE}/${id}`, {
+          await fetch(API_ENDPOINTS.APPOINTMENTS.DETAIL(id), {
             method: 'DELETE',
             headers: {
               Authorization: `Bearer ${getAuthToken()}`,
@@ -435,13 +460,16 @@ export default function UpcomingBookingsTable({
         setSelectedRows([]);
       } else if (appointmentToDelete) {
         // Single delete
-        const response = await fetch(`${API_BASE}/${appointmentToDelete.id}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${getAuthToken()}`,
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          API_ENDPOINTS.APPOINTMENTS.DETAIL(appointmentToDelete.id),
+          {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${getAuthToken()}`,
+              'Content-Type': 'application/json',
+            },
           },
-        });
+        );
         if (!response.ok)
           throw new Error(`Failed to delete: ${response.status}`);
         setAppointments((prev) =>
@@ -695,7 +723,21 @@ export default function UpcomingBookingsTable({
                             <button
                               onClick={() => {
                                 if (onSelectAppointment) {
-                                  onSelectAppointment(a.id);
+                                  onSelectAppointment({
+                                    id: a.id,
+                                    appointmentId: a.id,
+                                    appointmentNumber:
+                                      a.appointment_number || '',
+                                    petId: a.pet_id,
+                                    petName: a.pet_name || '',
+                                    petPhoto: a.petPhoto,
+                                    ownerName: '',
+                                    service: a.appointment_type || '',
+                                    date: a.appointment_date || '',
+                                    time: a.appointment_time || '',
+                                    status: (a.status as any) || 'scheduled',
+                                    notes: a.notes,
+                                  });
                                 }
                               }}
                               className='text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50'

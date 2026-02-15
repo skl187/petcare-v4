@@ -57,6 +57,7 @@ import OwnerLayout from './layout/OwnerLayout/OwnerLayout';
 import PetCenterList from './sidebar/veterinary/PetCenterList';
 import ManageRoles from './sidebar/roles/ManageRoles';
 import ManagePermissions from './sidebar/permissions/ManagePermissions';
+import AdminSettings from './pages/AdminSettings';
 
 // vetImports
 import VetDahboard from './vetSidebar/VetDashboard/VetDahboard';
@@ -170,6 +171,12 @@ export default function App() {
                   path='/manage-permissions'
                   element={<ManagePermissions />}
                 />
+                {/* Admin Settings */}
+                <Route
+                  path='/admin/settings/:tab'
+                  element={<AdminSettings />}
+                />
+                <Route path='/admin/settings' element={<AdminSettings />} />
 
                 {/* Sample Routes */}
                 <Route path='/calendar' element={<Calendar />} />

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { API_ENDPOINTS } from '../../../../../constants/api';
 import { MdClose } from 'react-icons/md';
+import DatePickerInput from '../../../../../components/form/DatePickerInput/DatePickerInput';
 import type { AppointmentDetail } from '../VeterinaryBookingsDetail';
 
 interface AppointmentActionsSectionProps {
@@ -420,17 +421,18 @@ export default function AppointmentActionsSection({
               </div>
             )}
             <div className='space-y-4 mb-6'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  New Date
-                </label>
-                <input
-                  type='date'
-                  value={rescheduleDate}
-                  onChange={(e) => setRescheduleDate(e.target.value)}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                />
-              </div>
+              <DatePickerInput
+                label='New Date'
+                value={rescheduleDate ? new Date(rescheduleDate) : null}
+                onChange={(date) => {
+                  if (date) {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    setRescheduleDate(`${year}-${month}-${day}`);
+                  }
+                }}
+              />
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-2'>
                   New Time

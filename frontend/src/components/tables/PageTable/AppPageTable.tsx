@@ -1,58 +1,58 @@
-import { MdEdit, MdDelete, MdContentCopy, MdAdd } from "react-icons/md";
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { MdEdit, MdDelete, MdContentCopy, MdAdd } from 'react-icons/md';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../../ui/table";
-import Badge from "../../ui/badge/Badge";
-import Checkbox from "../../form/input/Checkbox";
-import AppPageForm from "../../../pages/Forms/PageForm/AppPageForm";
-import { AppPageFormData } from "../../../pages/Forms/PageForm/AppPageForm";
-import Pagination from "../tableComponents/Pagination";
-import useSort from "../../../hooks/useSort";
-import SortableTableHeader from "../tableComponents/SortableTableHeader";
-import { TableToolbar } from "../tableComponents/TableToolbar";
-import Switch from "../../form/switch/Switch";
-import { IoIosCloseCircle, IoIosCheckmarkCircle } from "react-icons/io";
-import DeleteDialog from "../tableComponents/DeleteDailog";
+} from '../../ui/table';
+import Badge from '../../ui/badge/Badge';
+import Checkbox from '../../form/input/Checkbox';
+import AppPageForm from '../../../pages/Forms/PageForm/AppPageForm';
+import { AppPageFormData } from '../../../pages/Forms/PageForm/AppPageForm';
+import Pagination from '../tableComponents/Pagination';
+import useSort from '../../../hooks/useSort';
+import SortableTableHeader from '../tableComponents/SortableTableHeader';
+import { TableToolbar } from '../tableComponents/TableToolbar';
+import Switch from '../../form/switch/Switch';
+import { IoIosCloseCircle, IoIosCheckmarkCircle } from 'react-icons/io';
+import DeleteDialog from '../tableComponents/DeleteDailog';
 
 export interface AppPage {
   id: number;
   title: string;
   slug: string;
   content: string;
-  status: "Active" | "Inactive";
+  status: 'Active' | 'Inactive';
 }
 
 // Mock data for app pages
 const mockAppPages: AppPage[] = [
   {
     id: 1,
-    title: "Privacy Policy",
-    slug: "privacy-policy",
-    content: "<h1>Privacy Policy</h1><p>This is our privacy policy content...</p>",
-    status: "Active",
+    title: 'Privacy Policy',
+    slug: 'privacy-policy',
+    content:
+      '<h1>Privacy Policy</h1><p>This is our privacy policy content...</p>',
+    status: 'Active',
   },
   {
     id: 2,
-    title: "Terms and Conditions",
-    slug: "terms-conditions",
-    content: "<h1>Terms and Conditions</h1><p>This is our terms content...</p>",
-    status: "Active",
+    title: 'Terms and Conditions',
+    slug: 'terms-conditions',
+    content: '<h1>Terms and Conditions</h1><p>This is our terms content...</p>',
+    status: 'Active',
   },
 ];
 
 export default function AppPageTable() {
-  const navigate = useNavigate();
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [actionDropdown, setActionDropdown] = useState<string>("No actions");
-  const [statusUpdate, setStatusUpdate] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [actionDropdown, setActionDropdown] = useState<string>('No actions');
+  const [statusUpdate, setStatusUpdate] = useState<string>('');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editPage, setEditPage] = useState<AppPage | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -63,34 +63,27 @@ export default function AppPageTable() {
 
   const columns = [
     {
-      key: "id",
-      label: "ID",
-      className: "min-w-[80px] text-gray-700 font-semibold max-w-[105px]",
+      key: 'title',
+      label: 'Title',
+      className: 'min-w-[150px] text-gray-700 font-semibold max-w-[200px]',
     },
     {
-      key: "title",
-      label: "Title",
-      className: "min-w-[150px] text-gray-700 font-semibold max-w-[200px]",
-    },
-    {
-      key: "status",
-      label: "Status",
-      className: "min-w-[100px] max-w-[200px] text-gray-700 font-semibold",
+      key: 'status',
+      label: 'Status',
+      className: 'min-w-[100px] max-w-[200px] text-gray-700 font-semibold',
     },
   ] as const;
 
   // Filtered data based on search and status
   const filteredData = pages
     .filter((page) =>
-      page.title.toLowerCase().includes(searchQuery.toLowerCase())
+      page.title.toLowerCase().includes(searchQuery.toLowerCase()),
     )
-    .filter((page) =>
-      statusFilter ? page.status === statusFilter : true
-    );
+    .filter((page) => (statusFilter ? page.status === statusFilter : true));
 
   const { sortedData, requestSort, sortConfig } = useSort(filteredData, {
-    key: "id",
-    direction: "asc",
+    key: 'id',
+    direction: 'asc',
   });
 
   // Pagination logic
@@ -109,26 +102,24 @@ export default function AppPageTable() {
 
   const toggleSelectRow = (id: number) => {
     setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id],
     );
   };
 
   const toggleSelectAll = () => {
     setSelectedRows(
-      selectedRows.length === pages.length
-        ? []
-        : pages.map((row) => row.id)
+      selectedRows.length === pages.length ? [] : pages.map((row) => row.id),
     );
   };
 
   const handleApplyAction = () => {
-    if (actionDropdown === "Delete") {
+    if (actionDropdown === 'Delete') {
       handleDelete();
-    } else if (actionDropdown === "Status" && statusUpdate) {
+    } else if (actionDropdown === 'Status' && statusUpdate) {
       const updatedPages = pages.map((page) =>
         selectedRows.includes(page.id)
-          ? { ...page, status: statusUpdate as "Active" | "Inactive" }
-          : page
+          ? { ...page, status: statusUpdate as 'Active' | 'Inactive' }
+          : page,
       );
       setPages(updatedPages);
       setSelectedRows([]);
@@ -148,13 +139,9 @@ export default function AppPageTable() {
     let updatedPages: AppPage[];
 
     if (pageToDelete) {
-      updatedPages = pages.filter(
-        (page) => page.id !== pageToDelete
-      );
+      updatedPages = pages.filter((page) => page.id !== pageToDelete);
     } else {
-      updatedPages = pages.filter(
-        (page) => !selectedRows.includes(page.id)
-      );
+      updatedPages = pages.filter((page) => !selectedRows.includes(page.id));
     }
 
     setPages(updatedPages);
@@ -177,10 +164,10 @@ export default function AppPageTable() {
         page.id === id
           ? {
               ...page,
-              status: page.status === "Active" ? "Inactive" : "Active",
+              status: page.status === 'Active' ? 'Inactive' : 'Active',
             }
-          : page
-      )
+          : page,
+      ),
     );
   };
 
@@ -205,14 +192,10 @@ export default function AppPageTable() {
             content: data.content,
             status: data.status,
           }
-        : page
+        : page,
     );
     setPages(updatedPages);
     setEditPage(null);
-  };
-
-  const _handleTitleClick = (slug: string) => {
-    navigate(`/appPages/${slug}`);
   };
 
   const copyUrlToClipboard = (slug: string) => {
@@ -222,28 +205,28 @@ export default function AppPageTable() {
   };
 
   return (
-    <div className="p-4 bg-white rounded-xl shadow-md">
+    <div className='p-4 bg-white rounded-xl shadow-md'>
       {/* Header Section */}
       <TableToolbar
         onAddNew={handleAddNew}
-        addButtonLabel="Add Page"
-        addButtonIcon={<MdAdd className="w-5 h-5" />}
+        addButtonLabel='Add Page'
+        addButtonIcon={<MdAdd className='w-5 h-5' />}
         selectedRowsCount={selectedRows.length}
         bulkActionsOptions={
           <>
-            <option value="No actions">No actions</option>
-            <option value="Delete">Delete</option>
-            <option value="Status">Status</option>
+            <option value='No actions'>No actions</option>
+            <option value='Delete'>Delete</option>
+            <option value='Status'>Status</option>
           </>
         }
         statusUpdateOptions={
           <>
-            <option value="">Select Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+            <option value=''>Select Status</option>
+            <option value='Active'>Active</option>
+            <option value='Inactive'>Inactive</option>
           </>
         }
-        showStatusDropdown={actionDropdown === "Status"}
+        showStatusDropdown={actionDropdown === 'Status'}
         onBulkActionChange={setActionDropdown}
         onStatusUpdateChange={setStatusUpdate}
         onApplyAction={handleApplyAction}
@@ -251,12 +234,12 @@ export default function AppPageTable() {
         statusUpdateValue={statusUpdate}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search pages..."
+        searchPlaceholder='Search pages...'
         filterOptions={
           <>
-            <option value="">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+            <option value=''>All Status</option>
+            <option value='Active'>Active</option>
+            <option value='Inactive'>Inactive</option>
           </>
         }
         onFilterChange={setStatusFilter}
@@ -264,12 +247,12 @@ export default function AppPageTable() {
       />
 
       {/* Table */}
-      <div className="w-full overflow-x-auto rounded-lg border border-gray-200">
-        <div className="min-w-[800px]">
-          <Table className="w-full">
-            <TableHeader className="bg-gray-50">
+      <div className='w-full overflow-x-auto rounded-lg border border-gray-200'>
+        <div className='min-w-[800px]'>
+          <Table className='w-full'>
+            <TableHeader className='bg-gray-50'>
               <TableRow>
-                <TableCell className="w-10 p-2 py-3">
+                <TableCell className='w-10 p-2 py-3'>
                   <Checkbox
                     checked={selectedRows.length === pages.length}
                     onChange={toggleSelectAll}
@@ -285,7 +268,7 @@ export default function AppPageTable() {
                     className={`p-2 py-4 text-left text-sm text-gray-100 font-medium ${column.className}`}
                   />
                 ))}
-                <TableCell className="w-24 p-2 py-4 text-sm font-medium">
+                <TableCell className='w-24 p-2 py-4 text-sm font-medium'>
                   Actions
                 </TableCell>
               </TableRow>
@@ -293,59 +276,60 @@ export default function AppPageTable() {
 
             <TableBody>
               {currentItems.map((page) => (
-                <TableRow key={page.id} className="hover:bg-gray-50">
-                  <TableCell className="p-2 py-4">
+                <TableRow key={page.id} className='hover:bg-gray-50'>
+                  <TableCell className='p-2 py-4'>
                     <Checkbox
                       checked={selectedRows.includes(page.id)}
                       onChange={() => toggleSelectRow(page.id)}
                     />
                   </TableCell>
-                  <TableCell className="p-2 py-4 text-sm text-gray-900 font-medium">
-                    #{page.id}
+                  <TableCell className='p-2 py-4'>
+                    <Link
+                      to={`/app-pages/${page.slug}`}
+                      className='text-blue-600 hover:text-blue-800 font-medium'
+                    >
+                      {page.title}
+                    </Link>
                   </TableCell>
-                  <TableCell className="p-2 py-4">
-                  <Link 
-    to={`/app-pages/${page.slug}`}
-    className="text-blue-600 hover:text-blue-800 font-medium"
-  >
-    {page.title}
-  </Link>
-                  </TableCell>
-                  <TableCell className="p-2 py-4">
-                    <div className="flex items-center gap-3">
+                  <TableCell className='p-2 py-4'>
+                    <div className='flex items-center gap-3'>
                       <Badge
-                        size="sm"
-                        color={page.status === "Active" ? "success" : "error"}
+                        size='sm'
+                        color={page.status === 'Active' ? 'success' : 'error'}
                       >
-                        {page.status  === "Active" ? <IoIosCheckmarkCircle/>:<IoIosCloseCircle/>}
-                      </Badge> 
+                        {page.status === 'Active' ? (
+                          <IoIosCheckmarkCircle />
+                        ) : (
+                          <IoIosCloseCircle />
+                        )}
+                      </Badge>
                       <Switch
-                        label=""
-                        checked={page.status === "Active"}
+                        label=''
+                        checked={page.status === 'Active'}
                         onChange={() => toggleStatus(page.id)}
                       />
                     </div>
                   </TableCell>
-                  <TableCell className="p-2 py-4">
-                    <div className="flex gap-2">
+                  <TableCell className='p-2 py-4'>
+                    <div className='flex gap-2'>
                       <button
                         onClick={() => copyUrlToClipboard(page.slug)}
-                        className="text-gray-600 hover:text-gray-800 p-1 rounded hover:bg-gray-50"
-                        title="Copy URL"
+                        className='text-gray-600 hover:text-gray-800 p-1 rounded hover:bg-gray-50'
+                        title='Copy URL'
                       >
-                        <MdContentCopy className="w-5 h-5" />
+                        <MdContentCopy className='w-5 h-5' />
                       </button>
                       <button
                         onClick={() => handleEdit(page)}
-                        className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                        className='text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50'
                       >
-                        <MdEdit className="w-5 h-5" />
+                        <MdEdit className='w-5 h-5' />
                       </button>
                       <button
                         onClick={() => handleDelete(page.id)}
-                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                        className='text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50'
                       >
-                        <MdDelete className="w-5 h-5" />
+                        <MdDelete className='w-5 h-5' />
                       </button>
                     </div>
                   </TableCell>
@@ -377,17 +361,17 @@ export default function AppPageTable() {
       ) : null}
 
       {/* Delete Dialog */}
-       <DeleteDialog
-  isOpen={isDeleteDialogOpen}
-  onClose={() => setIsDeleteDialogOpen(false)}
-  onConfirm={confirmDelete}
-  itemLabel="App Page"
-  description={
-    selectedRows.length > 1
-      ? `Are you sure you want to delete ${selectedRows.length} selected pages?`
-      : "Are you sure you want to delete this page?"
-  }
-/>
+      <DeleteDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={confirmDelete}
+        itemLabel='App Page'
+        description={
+          selectedRows.length > 1
+            ? `Are you sure you want to delete ${selectedRows.length} selected pages?`
+            : 'Are you sure you want to delete this page?'
+        }
+      />
     </div>
   );
 }

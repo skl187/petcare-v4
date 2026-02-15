@@ -63,11 +63,6 @@ export default function PetBreedTable() {
 
   const columns = [
     {
-      key: 'id',
-      label: 'ID',
-      className: 'min-w-[80px] text-gray-700 font-semibold max-w-[105px]',
-    },
-    {
       key: 'name',
       label: 'Breed Name',
       className: 'min-w-[150px] text-gray-700 font-semibold max-w-[200px]',
@@ -637,9 +632,6 @@ export default function PetBreedTable() {
                         checked={selectedRows.includes(String(breed.id))}
                         onChange={() => toggleSelectRow(String(breed.id))}
                       />
-                    </TableCell>
-                    <TableCell className='p-2 py-4 text-sm text-gray-900 font-medium'>
-                      #{breed.id}
                     </TableCell>
                     <TableCell className='p-2 py-4 text-sm text-gray-900'>
                       {breed.name}

@@ -1,8 +1,8 @@
-import type React from "react";
-import type { FC } from "react";
+import type React from 'react';
+import type { FC } from 'react';
 
 interface InputProps {
-  type?: "text" | "number" | "email" | "password" | "date" | "time" | string;
+  type?: 'text' | 'number' | 'email' | 'password' | 'date' | 'time' | string;
   id?: string;
   name?: string;
   placeholder?: string;
@@ -13,23 +13,25 @@ interface InputProps {
   max?: string;
   step?: number;
   disabled?: boolean;
+  required?: boolean;
   success?: boolean;
   error?: boolean;
   hint?: string;
 }
 
 const Input: FC<InputProps> = ({
-  type = "text",
+  type = 'text',
   id,
   name,
   placeholder,
   value,
   onChange,
-  className = "",
+  className = '',
   min,
   max,
   step,
   disabled = false,
+  required = false,
   success = false,
   error = false,
   hint,
@@ -47,7 +49,7 @@ const Input: FC<InputProps> = ({
   }
 
   return (
-    <div className="relative">
+    <div className='relative'>
       <input
         type={type}
         id={id}
@@ -59,6 +61,7 @@ const Input: FC<InputProps> = ({
         max={max}
         step={step}
         disabled={disabled}
+        required={required}
         className={inputClasses}
       />
 
@@ -66,10 +69,10 @@ const Input: FC<InputProps> = ({
         <p
           className={`mt-1.5 text-xs ${
             error
-              ? "text-error-500"
+              ? 'text-error-500'
               : success
-              ? "text-success-500"
-              : "text-gray-500"
+                ? 'text-success-500'
+                : 'text-gray-500'
           }`}
         >
           {hint}

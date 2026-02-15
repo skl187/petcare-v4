@@ -51,11 +51,6 @@ export default function PetCareCenterTable() {
 
   const columns = [
     {
-      key: 'id',
-      label: 'ID',
-      className: 'min-w-[80px] text-gray-700 font-semibold max-w-[105px]',
-    },
-    {
       key: 'name',
       label: 'Clinic Name',
       className: 'min-w-[150px] text-gray-700 font-semibold max-w-[200px]',
@@ -452,9 +447,6 @@ export default function PetCareCenterTable() {
                         checked={selectedRows.includes(clinic.id)}
                         onChange={() => toggleSelectRow(clinic.id)}
                       />
-                    </TableCell>
-                    <TableCell className='p-2 py-4 text-sm text-gray-900 font-medium'>
-                      #{clinic.id}
                     </TableCell>
                     <TableCell className='p-2 py-4'>
                       <span className='text-sm text-gray-900'>

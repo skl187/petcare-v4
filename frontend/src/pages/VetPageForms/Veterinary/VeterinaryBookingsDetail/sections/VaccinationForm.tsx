@@ -1,6 +1,7 @@
 import { useState, FormEvent, useEffect, useRef } from 'react';
 import Form from '../../../../../components/form/Form';
 import Label from '../../../../../components/form/Label';
+import DatePickerInput from '../../../../../components/form/DatePickerInput/DatePickerInput';
 import { MdSave, MdAdd, MdDelete } from 'react-icons/md';
 import {
   saveVaccination,
@@ -342,17 +343,27 @@ export default function VaccinationForm({
                 />
               </div>
 
-              <div>
-                <Label htmlFor='next_due_date'>Next Due Date</Label>
-                <input
-                  type='date'
-                  id='next_due_date'
-                  name='next_due_date'
-                  value={currentVaccination.next_due_date}
-                  onChange={handleChange}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500'
-                />
-              </div>
+              <DatePickerInput
+                label='Next Due Date'
+                value={
+                  currentVaccination.next_due_date
+                    ? new Date(currentVaccination.next_due_date)
+                    : null
+                }
+                onChange={(date) => {
+                  if (date) {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    handleChange({
+                      target: {
+                        name: 'next_due_date',
+                        value: `${year}-${month}-${day}`,
+                      },
+                    } as any);
+                  }
+                }}
+              />
 
               <div>
                 <Label htmlFor='cost'>Cost ($)</Label>

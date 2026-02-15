@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import FormCard from '../../../../components/form/FormCard';
+import DatePickerInput from '../../../../components/form/DatePickerInput/DatePickerInput';
 import { MdClose } from 'react-icons/md';
 import { API_ENDPOINTS } from '../../../../constants/api';
 export interface Pet {
@@ -743,14 +744,22 @@ const UpcomingBookingsForm: React.FC<Props> = ({
                   control={control}
                   rules={{ required: 'Date is required' }}
                   render={({ field }) => (
-                    <input
-                      type='date'
-                      {...field}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.appointment_date
-                          ? 'border-red-500'
-                          : 'border-gray-300'
-                      }`}
+                    <DatePickerInput
+                      value={field.value ? new Date(field.value) : null}
+                      onChange={(date) => {
+                        if (date) {
+                          const year = date.getFullYear();
+                          const month = String(date.getMonth() + 1).padStart(
+                            2,
+                            '0',
+                          );
+                          const day = String(date.getDate()).padStart(2, '0');
+                          field.onChange(`${year}-${month}-${day}`);
+                        }
+                      }}
+                      onBlur={field.onBlur}
+                      error={errors.appointment_date?.message}
+                      required={true}
                     />
                   )}
                 />

@@ -19,6 +19,27 @@ import VeterinaryBookingsForm, {
 import { API_ENDPOINTS } from '../../../../constants/api';
 import { useAuth } from '../../../../components/auth/AuthContext';
 
+const VET_BOOKINGS_BASE = API_ENDPOINTS.VETERINARY_BOOKINGS.BASE();
+const PET_TYPES_BASE = API_ENDPOINTS.PET_TYPES.BASE;
+const VET_API_ORIGIN = new URL(VET_BOOKINGS_BASE, window.location.origin)
+  .origin;
+const PET_TYPES_API_ORIGIN = new URL(PET_TYPES_BASE, window.location.origin)
+  .origin;
+
+const getAppointmentPetImageUrl = (
+  imagePath?: string | null,
+  apiOrigin: string = VET_API_ORIGIN,
+) => {
+  const fallback = '/images/pets/placeholder.jpg';
+  const raw = imagePath?.trim();
+
+  if (!raw) return fallback;
+  if (/^https?:\/\//i.test(raw) || raw.startsWith('data:')) return raw;
+
+  const normalized = raw.startsWith('/') ? raw : `/${raw}`;
+  return `${apiOrigin}${normalized}`;
+};
+
 export type VetBookingStatus =
   | 'Pending'
   | 'Approved'
@@ -107,6 +128,14 @@ export default function VeterinaryBookingsTable({
           },
         });
 
+        const petTypesResponse = await fetch(PET_TYPES_BASE, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        });
+
         console.log('Response status:', response.status);
 
         if (!response.ok) {
@@ -117,6 +146,39 @@ export default function VeterinaryBookingsTable({
 
         const data = await response.json();
         console.log('Fetched bookings:', data);
+
+        let petTypeIconMap: Record<string, string> = {};
+        if (petTypesResponse.ok) {
+          const petTypesData = await petTypesResponse.json();
+          const petTypesList =
+            petTypesData?.data?.data ??
+            petTypesData?.data ??
+            petTypesData?.rows ??
+            [];
+
+          if (Array.isArray(petTypesList)) {
+            petTypeIconMap = petTypesList.reduce(
+              (acc: Record<string, string>, petType: any) => {
+                const key = String(petType?.name || '')
+                  .trim()
+                  .toLowerCase();
+
+                if (!key) return acc;
+
+                acc[key] = getAppointmentPetImageUrl(
+                  petType?.icon_url ||
+                    petType?.iconUrl ||
+                    petType?.iconurl ||
+                    petType?.image,
+                  PET_TYPES_API_ORIGIN,
+                );
+
+                return acc;
+              },
+              {},
+            );
+          }
+        }
 
         // Map API response to VetBooking format
         // Handle nested data structure: response.data.data is the array
@@ -141,16 +203,29 @@ export default function VeterinaryBookingsTable({
                 ? booking.services.map((s: any) => s.name).join(', ')
                 : booking.service_type || booking.service || '';
 
+              const petTypeName = String(
+                booking.pet_type_name || booking.petTypeName || '',
+              )
+                .trim()
+                .toLowerCase();
+
+              const mappedPetTypeIcon = petTypeName
+                ? petTypeIconMap[petTypeName]
+                : undefined;
+
               const mapped = {
                 id: booking.id || booking.appointment_id || '',
                 appointmentId: booking.id || booking.appointment_id || '',
                 appointmentNumber: booking.appointment_number || '',
                 petId: booking.pet_id || '',
                 petName: booking.pet_name || booking.petName || '',
-                petPhoto:
-                  booking.pet_photo ||
-                  booking.petPhoto ||
-                  '/images/pets/placeholder.jpg',
+                petPhoto: getAppointmentPetImageUrl(
+                  booking.pet_type_icon ||
+                    booking.petTypeIcon ||
+                    mappedPetTypeIcon ||
+                    booking.pet_photo ||
+                    booking.petPhoto,
+                ),
                 ownerName: ownerName,
                 service: serviceNames,
                 date: booking.appointment_date || booking.date || '',

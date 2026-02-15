@@ -1,6 +1,7 @@
 import { useState, FormEvent, useEffect, useRef } from 'react';
 import Form from '../../../../../components/form/Form';
 import Label from '../../../../../components/form/Label';
+import DatePickerInput from '../../../../../components/form/DatePickerInput/DatePickerInput';
 import { MdSave } from 'react-icons/md';
 import {
   saveMedicalRecord,
@@ -335,18 +336,28 @@ export default function MedicalRecordForm({
           </h4>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             {/* Record Date */}
-            <div>
-              <Label htmlFor='recordDate'>Record Date *</Label>
-              <input
-                type='datetime-local'
-                id='recordDate'
-                name='recordDate'
-                value={formData.recordDate}
-                onChange={handleBasicChange}
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-                required
-              />
-            </div>
+            <DatePickerInput
+              label='Record Date *'
+              value={formData.recordDate ? new Date(formData.recordDate) : null}
+              onChange={(date) => {
+                if (date) {
+                  // Format for datetime-local: YYYY-MM-DDTHH:mm
+                  const year = date.getFullYear();
+                  const month = String(date.getMonth() + 1).padStart(2, '0');
+                  const day = String(date.getDate()).padStart(2, '0');
+                  const hours = String(date.getHours()).padStart(2, '0');
+                  const minutes = String(date.getMinutes()).padStart(2, '0');
+                  handleBasicChange({
+                    target: {
+                      name: 'recordDate',
+                      value: `${year}-${month}-${day}T${hours}:${minutes}`,
+                    },
+                  } as any);
+                }
+              }}
+              showTimeSelect={true}
+              required={true}
+            />
 
             {/* Record Type */}
             <div>
@@ -587,17 +598,28 @@ export default function MedicalRecordForm({
           </div>
 
           {formData.followupRequired && (
-            <div>
-              <Label htmlFor='followupDate'>Follow-up Date</Label>
-              <input
-                type='datetime-local'
-                id='followupDate'
-                name='followupDate'
-                value={formData.followupDate}
-                onChange={handleBasicChange}
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-              />
-            </div>
+            <DatePickerInput
+              label='Follow-up Date'
+              value={
+                formData.followupDate ? new Date(formData.followupDate) : null
+              }
+              onChange={(date) => {
+                if (date) {
+                  // Format for datetime-local: YYYY-MM-DDTHH:mm
+                  const year = date.getFullYear();
+                  const month = String(date.getMonth() + 1).padStart(2, '0');
+                  const day = String(date.getDate()).padStart(2, '0');
+                  const hours = String(date.getHours()).padStart(2, '0');
+                  const minutes = String(date.getMinutes()).padStart(2, '0');
+                  handleBasicChange({
+                    target: {
+                      name: 'followupDate',
+                      value: `${year}-${month}-${day}T${hours}:${minutes}`,
+                    },
+                  } as any);
+                }
+              }}
+            />
           )}
         </div>
 

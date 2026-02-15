@@ -498,28 +498,25 @@ const MyPetsTable = () => {
                     onChange={toggleSelectAll}
                   />
                 </TableCell>
-                <TableCell className='p-2 py-4 text-left text-sm text-gray-700 font-medium min-w-[80px]'>
-                  ID
-                </TableCell>
-                <TableCell className='p-2 py-4 text-left text-sm text-gray-700 font-medium min-w-[150px]'>
+                <TableCell className='p-2 py-4 text-left text-table-header min-w-[150px]'>
                   Pet Name
                 </TableCell>
-                <TableCell className='p-2 py-4 text-left text-sm text-gray-700 font-medium min-w-[120px]'>
+                <TableCell className='p-2 py-4 text-left text-table-header min-w-[120px]'>
                   Pet Type
                 </TableCell>
-                <TableCell className='p-2 py-4 text-left text-sm text-gray-700 font-medium min-w-[120px]'>
+                <TableCell className='p-2 py-4 text-left text-table-header min-w-[120px]'>
                   Breed
                 </TableCell>
-                <TableCell className='p-2 py-4 text-left text-sm text-gray-700 font-medium min-w-[100px]'>
+                <TableCell className='p-2 py-4 text-left text-table-header min-w-[100px]'>
                   Gender
                 </TableCell>
-                <TableCell className='p-2 py-4 text-left text-sm text-gray-700 font-medium min-w-[100px]'>
+                <TableCell className='p-2 py-4 text-left text-table-header min-w-[100px]'>
                   Weight
                 </TableCell>
-                <TableCell className='p-2 py-4 text-left text-sm text-gray-700 font-medium min-w-[140px]'>
+                <TableCell className='p-2 py-4 text-left text-table-header min-w-[140px]'>
                   Status
                 </TableCell>
-                <TableCell className='p-2 py-4 text-right text-sm font-medium min-w-[100px]'>
+                <TableCell className='p-2 py-4 text-right text-table-header min-w-[100px]'>
                   Actions
                 </TableCell>
               </TableRow>
@@ -547,22 +544,19 @@ const MyPetsTable = () => {
                         onChange={() => toggleRowSelect(pet.id)}
                       />
                     </TableCell>
-                    <TableCell className='p-2 py-4 text-sm text-gray-900 font-medium'>
-                      #{pet.id}
-                    </TableCell>
-                    <TableCell className='p-2 py-4 text-sm text-gray-900 font-medium'>
+                    <TableCell className='p-2 py-4 text-table-body'>
                       {pet.name}
                     </TableCell>
-                    <TableCell className='p-2 py-4 text-sm text-gray-700'>
+                    <TableCell className='p-2 py-4 text-table-body'>
                       {pet.petTypeName || '-'}
                     </TableCell>
-                    <TableCell className='p-2 py-4 text-sm text-gray-700'>
+                    <TableCell className='p-2 py-4 text-table-body'>
                       {pet.breedName || '-'}
                     </TableCell>
-                    <TableCell className='p-2 py-4 text-sm text-gray-700 capitalize'>
+                    <TableCell className='p-2 py-4 text-table-body capitalize'>
                       {pet.gender}
                     </TableCell>
-                    <TableCell className='p-2 py-4 text-sm text-gray-700'>
+                    <TableCell className='p-2 py-4 text-table-body'>
                       {pet.weight} {pet.weightUnit}
                     </TableCell>
                     <TableCell className='p-2 py-4'>

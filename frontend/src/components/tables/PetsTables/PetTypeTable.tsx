@@ -22,6 +22,7 @@ import { IoIosCloseCircle, IoIosCheckmarkCircle } from 'react-icons/io';
 import { API_ENDPOINTS } from '../../../constants/api';
 
 const API_BASE = API_ENDPOINTS.PET_TYPES.BASE;
+const API_ORIGIN = new URL(API_BASE, window.location.origin).origin;
 
 export interface PetType {
   id: string;
@@ -30,6 +31,20 @@ export interface PetType {
   breedCount: number;
   status: number; // 1 = Active, 0 = Inactive
 }
+
+const getPetTypeIconUrl = (iconPath?: string | null, petTypeName?: string) => {
+  const fallback = `/images/pets/${(petTypeName ?? 'pet').toLowerCase()}.jpg`;
+  const raw = iconPath?.trim();
+
+  if (!raw) return fallback;
+
+  if (/^https?:\/\//i.test(raw) || raw.startsWith('data:')) {
+    return raw;
+  }
+
+  const normalized = raw.startsWith('/') ? raw : `/${raw}`;
+  return `${API_ORIGIN}${normalized}`;
+};
 
 export default function PetTypeTable() {
   const navigate = useNavigate();
@@ -52,11 +67,6 @@ export default function PetTypeTable() {
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
   const columns = [
-    {
-      key: 'id',
-      label: 'ID',
-      className: 'min-w-[80px] text-gray-700 font-semibold max-w-[105px]',
-    },
     {
       key: 'name',
       label: 'Pet Type',
@@ -266,7 +276,13 @@ export default function PetTypeTable() {
       const editData: PetType = {
         id: String(fetchedData.id),
         name: fetchedData.name ?? '',
-        image: fetchedData.image ?? '',
+        image: getPetTypeIconUrl(
+          fetchedData.icon_url ??
+            fetchedData.iconUrl ??
+            fetchedData.iconurl ??
+            fetchedData.image,
+          fetchedData.name,
+        ),
         breedCount: fetchedData.breedCount ?? fetchedData.breed_count ?? 0,
         status: Number(fetchedData.status),
       };
@@ -374,8 +390,10 @@ export default function PetTypeTable() {
       const items: PetType[] = list.map((it: any) => ({
         id: String(it.id),
         name: it.name ?? '',
-        image:
-          it.image ?? `/images/pets/${(it.name ?? 'pet').toLowerCase()}.jpg`,
+        image: getPetTypeIconUrl(
+          it.icon_url ?? it.iconUrl ?? it.iconurl ?? it.image,
+          it.name,
+        ),
         breedCount: it.breedCount ?? it.breed_count ?? 0,
         status: Number(it.status), // Ensure status is a number
       }));
@@ -594,9 +612,6 @@ export default function PetTypeTable() {
                         checked={selectedRows.includes(String(petType.id))}
                         onChange={() => toggleSelectRow(String(petType.id))}
                       />
-                    </TableCell>
-                    <TableCell className='p-2 py-4 text-sm text-gray-900 font-medium'>
-                      #{petType.id}
                     </TableCell>
                     <TableCell className='p-2 py-4'>
                       <div className='flex items-center gap-3'>
