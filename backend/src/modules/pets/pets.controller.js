@@ -159,4 +159,24 @@ const delete_pet = async (req, res) => {
   }
 };
 
-module.exports = { list, getById, create, update, delete: delete_pet };
+const my_pets = async (req, res) => {
+  try {
+    const result = await query(
+      `SELECT p.id, p.name, p.slug, p.size, p.date_of_birth, p.age, p.gender, p.weight, p.height, p.status,
+              pt.name AS pet_type, b.name AS breed
+       FROM pets p
+       LEFT JOIN pet_types pt ON p.pet_type_id = pt.id
+       LEFT JOIN breeds b ON p.breed_id = b.id
+       WHERE p.user_id = $1 AND p.deleted_at IS NULL
+       ORDER BY p.created_at DESC`,
+      [req.user.id]
+    );
+
+    res.json(successResponse({ data: result.rows }));
+  } catch (err) {
+    //logger.error('My pets fetch failed', { error: err.message });
+    res.status(500).json({ status: 'error', message: 'Failed to fetch' });
+  }
+};
+
+module.exports = { list, getById, create, update, delete: delete_pet, my_pets };

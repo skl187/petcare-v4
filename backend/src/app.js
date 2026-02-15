@@ -3,18 +3,31 @@ const express = require('express');
 const cors = require('cors');
 const { initializeDatabase } = require('./core/db/pool');
 const { errorHandler } = require('./core/utils/response');
-const authMiddleware = require('./core/auth/auth.middleware');
-const rbacMiddleware = require('./core/rbac/rbac.middleware');
-//const tenantMiddleware = require('./core/tenant/tenant.middleware');
-//const auditMiddleware = require('./core/audit/audit.middleware');
+const { authMiddleware } = require('./core/auth/auth.middleware');
+const { loadSettings } = require("./core/settings/settings.service");
+// const rbacMiddleware = require('./core/rbac/rbac.middleware');
+// const tenantMiddleware = require('./core/tenant/tenant.middleware');
+// const auditMiddleware = require('./core/audit/audit.middleware');
 const routes = require('./routes');
 
+loadSettings();
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Root info
+app.get('/', (req, res) => {
+  res.json({
+    message: 'api running',
+    name: 'pet care api',
+    version: '1.0.0',
+    env: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Health check
 app.get('/health', (req, res) => {
@@ -33,8 +46,7 @@ app.use(async (req, res, next) => {
     await initializeDatabase();
     next();
   } catch (err) {
-    console.error('DB init error:', err);
-    res.status(503).json({ error: 'Database unavailable' });
+    res.status(503).json({ error: '✗ Database unavailable/ DATABASE_URL is missing in .env' });
   }
 });
 

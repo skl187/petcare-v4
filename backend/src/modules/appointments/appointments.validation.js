@@ -41,6 +41,7 @@ const validateAppointmentStatus = (value) => {
 
 const validateCreateAppointment = [
   body('user_id')
+    .optional()
     .isUUID('4').withMessage('Invalid user ID format'),
   body('pet_id')
     .isUUID('4').withMessage('Invalid pet ID format'),

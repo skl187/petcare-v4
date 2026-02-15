@@ -17,7 +17,7 @@ import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
 import { API_ENDPOINTS } from '../../../../constants/api';
 
 // --- API Constants ---
-const API_BASE = API_ENDPOINTS.APPOINTMENTS.BASE;
+const API_BASE = API_ENDPOINTS.OWNER_BOOKINGS.BASE;
 const PETS_API = API_ENDPOINTS.PETS.BASE;
 const VETERINARIANS_API = API_ENDPOINTS.VETERINARIANS.BASE;
 const CLINICS_API = API_ENDPOINTS.CLINICS.BASE;

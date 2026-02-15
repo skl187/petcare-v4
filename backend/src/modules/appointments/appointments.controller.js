@@ -1,7 +1,4 @@
 // src/modules/appointments/appointments.controller.js
-// ============================================================================
-// Veterinary Appointments Controller with Payment & Transaction Handling
-// ============================================================================
 
 const { query, getConnection, transaction } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
@@ -692,9 +689,10 @@ const createAppointment = async (req, res) => {
     }, 'Appointment created', 201));
 
   } catch (err) {
+    
     await client.query('ROLLBACK');
     //logger.error('Create appointment failed', { error: err.message, stack: err.stack });
-
+console.log(err.message);
     const isProd = process.env.NODE_ENV === 'production';
     res.status(500).json({
       status: 'error',

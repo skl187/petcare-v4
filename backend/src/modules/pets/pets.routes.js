@@ -23,6 +23,9 @@ router.delete('/:id', requireAuth, authorize('delete', 'pet'), controller.delete
 */
 // Public listing and retrieve
 router.get('/', requireAuth, controller.list);
+
+router.get('/my-pets', requireAuth, controller.my_pets);
+
 router.get('/:id', requireAuth, controller.getById);
 
 // Create
@@ -33,5 +36,6 @@ router.put('/:id', requireAuth, controller.update);
 
 // Delete (soft delete)
 router.delete('/:id', requireAuth, controller.delete);
+
 
 module.exports = router;

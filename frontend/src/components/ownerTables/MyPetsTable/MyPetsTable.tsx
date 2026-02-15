@@ -15,7 +15,7 @@ import { IoIosCloseCircle, IoIosCheckmarkCircle } from 'react-icons/io';
 import Switch from '../../form/switch/Switch';
 import { API_ENDPOINTS } from '../../../constants/api';
 
-const API_BASE = API_ENDPOINTS.PETS.BASE;
+const API_BASE = API_ENDPOINTS.MY_PETS.BASE;
 const PET_TYPES_API = API_ENDPOINTS.PET_TYPES.BASE;
 const BREEDS_API = API_ENDPOINTS.BREEDS.BASE;
 
