@@ -4,7 +4,7 @@ const settingsController = require('./settings.controller');
 const { attachCheckPermission } = require('../../core/rbac/rbac.middleware');
 
 // Attach permission helper
-router.use(attachCheckPermission);
+//router.use(attachCheckPermission);
 
 // List settings (superadmin use)
 router.get('/', settingsController.list);

@@ -7,7 +7,7 @@ const list = async (req, res) => {
     const offset = (page - 1) * limit;
     const result = await query(
       `SELECT id, namespace, key, value, description, is_secret, is_active, created_at, updated_at
-       FROM project_settings
+       FROM app_settings
        ORDER BY created_at DESC
        LIMIT $1 OFFSET $2`,
       [limit, offset]
@@ -23,7 +23,7 @@ const getByKey = async (req, res) => {
     const { namespace = 'global' } = req.query;
     const result = await query(
       `SELECT id, namespace, key, value, description, is_secret, is_active, created_at, updated_at
-       FROM project_settings
+       FROM app_settings
        WHERE namespace = $1 AND lower(key) = lower($2)`,
       [namespace, req.params.key]
     );
@@ -41,7 +41,7 @@ const create = async (req, res) => {
     if (!key) return res.status(400).json({ status: 'error', message: 'Key is required' });
 
     const result = await query(
-      `INSERT INTO project_settings (namespace, key, value, description, is_secret, is_active, created_by)
+      `INSERT INTO app_settings (namespace, key, value, description, is_secret, is_active, created_by)
        VALUES ($1,$2,$3,$4,$5,$6,$7)
        RETURNING id, namespace, key, value, description, is_secret, is_active, created_at`,
       [namespace, key, value || null, description || null, is_secret === true, is_active === undefined ? true : is_active, (req.user && req.user.id) || null]
@@ -55,21 +55,56 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-    const { namespace = 'global' } = req.query;
+    const namespace = req.query.namespace || req.body.namespace || null;
     const { value, description, is_secret, is_active } = req.body;
+    let result;
 
-    const result = await query(
-      `UPDATE project_settings
-       SET value = COALESCE($3, value), description = COALESCE($4, description), is_secret = COALESCE($5, is_secret), is_active = COALESCE($6, is_active)
-       WHERE namespace = $1 AND lower(key) = lower($2)
-       RETURNING id, namespace, key, value, description, is_secret, is_active, updated_at`,
-      [namespace, req.params.key, value === undefined ? null : value, description === undefined ? null : description, is_secret === undefined ? null : is_secret, is_active === undefined ? null : is_active]
-    );
+    if (namespace) {
+      result = await query(
+        `UPDATE app_settings
+         SET value = COALESCE($3, value),
+             description = COALESCE($4, description),
+             is_secret = COALESCE($5, is_secret),
+             is_active = COALESCE($6, is_active),
+             updated_at = now()
+         WHERE namespace = $1 AND lower(key) = lower($2)
+         RETURNING id, namespace, key, value, description, is_secret, is_active, updated_at`,
+        [namespace, req.params.key, value === undefined ? null : value, description === undefined ? null : description, is_secret === undefined ? null : is_secret, is_active === undefined ? null : is_active]
+      );
+    } else {
+      const matches = await query(
+        `SELECT id, namespace FROM app_settings WHERE lower(key) = lower($1) LIMIT 2`,
+        [req.params.key]
+      );
+
+      if (matches.rows.length === 0) {
+        return res.status(404).json({ status: 'error', message: 'Not found' });
+      }
+
+      if (matches.rows.length > 1) {
+        return res.status(409).json({
+          status: 'error',
+          message: 'Multiple settings found for this key. Provide ?namespace=... or namespace in body.'
+        });
+      }
+
+      result = await query(
+        `UPDATE app_settings
+         SET value = COALESCE($2, value),
+             description = COALESCE($3, description),
+             is_secret = COALESCE($4, is_secret),
+             is_active = COALESCE($5, is_active),
+             updated_at = now()
+         WHERE id = $1
+         RETURNING id, namespace, key, value, description, is_secret, is_active, updated_at`,
+        [matches.rows[0].id, value === undefined ? null : value, description === undefined ? null : description, is_secret === undefined ? null : is_secret, is_active === undefined ? null : is_active]
+      );
+    }
 
     if (result.rows.length === 0) return res.status(404).json({ status: 'error', message: 'Not found' });
     res.json(successResponse(result.rows[0], 'Updated'));
   } catch (err) {
-    res.status(500).json({ status: 'error', message: 'Failed to update' });
+    res.status(500).json({ status: 'error', message: `Failed to update: ${err.message}` });
   }
 };
 
@@ -77,7 +112,7 @@ const remove = async (req, res) => {
   try {
     const { namespace = 'global' } = req.query;
     const result = await query(
-      `DELETE FROM project_settings WHERE namespace = $1 AND lower(key) = lower($2) RETURNING id`,
+      `DELETE FROM app_settings WHERE namespace = $1 AND lower(key) = lower($2) RETURNING id`,
       [namespace, req.params.key]
     );
 

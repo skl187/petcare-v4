@@ -36,6 +36,7 @@ router.use('/medical-records', medicalRecordsRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/reviews', reviewsRoutes);
 router.use('/settings', settingsRoutes);
+router.use('/setting', settingsRoutes);
 router.use('/notification-channels', notificationChannelsRoutes);
 router.use('/notifications', notificationsRoutes);
 

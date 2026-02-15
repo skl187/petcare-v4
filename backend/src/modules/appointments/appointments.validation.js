@@ -1,13 +1,9 @@
 // src/modules/appointments/appointments.validation.js
-// ============================================================================
-// Validation Schemas for Appointments
-// ============================================================================
 
+// ============= Validation Schemas for Appointments =======================
 const { body, param, query, validationResult } = require('express-validator');
 
-// ============================================================================
-// CUSTOM VALIDATORS
-// ============================================================================
+// ============ CUSTOM VALIDATORS ==========================================
 
 const validateAppointmentDate = (value) => {
   const date = new Date(value);
@@ -35,9 +31,7 @@ const validateAppointmentStatus = (value) => {
   return true;
 };
 
-// ============================================================================
-// VALIDATION MIDDLEWARE
-// ============================================================================
+// ============= VALIDATION MIDDLEWARE ====================================
 
 const validateCreateAppointment = [
   body('user_id')
@@ -148,9 +142,7 @@ const validateListAppointments = [
     .isISO8601().withMessage('Invalid date format')
 ];
 
-// ============================================================================
-// VALIDATION ERROR HANDLER
-// ============================================================================
+// ======== VALIDATION ERROR HANDLER ===================================
 
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
