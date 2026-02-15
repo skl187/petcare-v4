@@ -172,6 +172,11 @@ const othersItems: NavItem[] = [
     name: 'Manage Permissions',
     path: '/manage-permissions',
   },
+  {
+    icon: <MdOutlineSettings />,
+    name: 'Settings',
+    path: '/admin/settings/mail',
+  },
   // {
   //   icon: <PieChartIcon />,
   //   name: "Charts",

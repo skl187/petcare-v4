@@ -1,6 +1,7 @@
 import { useState, FormEvent, useEffect, useRef } from 'react';
 import Form from '../../../../../components/form/Form';
 import Label from '../../../../../components/form/Label';
+import DatePickerInput from '../../../../../components/form/DatePickerInput/DatePickerInput';
 import { MdSave, MdAdd, MdDelete } from 'react-icons/md';
 import {
   savePrescription,
@@ -278,17 +279,29 @@ export default function PrescriptionForm({
               />
             </div>
 
-            <div>
-              <Label htmlFor='valid_until'>Valid Until</Label>
-              <input
-                type='datetime-local'
-                id='valid_until'
-                name='valid_until'
-                value={formData.valid_until}
-                onChange={handleBasicChange}
-                className='w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-              />
-            </div>
+            <DatePickerInput
+              label='Valid Until'
+              value={
+                formData.valid_until ? new Date(formData.valid_until) : null
+              }
+              onChange={(date) => {
+                if (date) {
+                  // Format for datetime-local: YYYY-MM-DDTHH:mm
+                  const year = date.getFullYear();
+                  const month = String(date.getMonth() + 1).padStart(2, '0');
+                  const day = String(date.getDate()).padStart(2, '0');
+                  const hours = String(date.getHours()).padStart(2, '0');
+                  const minutes = String(date.getMinutes()).padStart(2, '0');
+                  handleBasicChange({
+                    target: {
+                      name: 'valid_until',
+                      value: `${year}-${month}-${day}T${hours}:${minutes}`,
+                    },
+                  } as any);
+                }
+              }}
+              showTimeSelect={true}
+            />
           </div>
 
           {/* Notes */}

@@ -1,28 +1,34 @@
-import { MdEdit, MdDelete, MdLock, MdNotifications, MdAdd } from "react-icons/md";
-import { useState } from "react";
+import {
+  MdEdit,
+  MdDelete,
+  MdLock,
+  MdNotifications,
+  MdAdd,
+} from 'react-icons/md';
+import { useState } from 'react';
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../../ui/table";
-import Badge from "../../ui/badge/Badge";
-import Checkbox from "../../form/input/Checkbox";
-import EmployeeForm from "../../../pages/Forms/UserForms/EmployeeForm";
-import { EmployeeFormData } from "../../../pages/Forms/UserForms/EmployeeForm";
-import Pagination from "../tableComponents/Pagination";
-import ChangePasswordForm from "../../../pages/Forms/VetForms/vetformComponents/ChangePasswordForm";
-import { ChangePasswordFormData } from "../../../pages/Forms/VetForms/vetformComponents/ChangePasswordForm";
-import { PushNotificationFormData } from "../../../pages/Forms/VetForms/vetformComponents/PushNotificationForm";
-import PushNotificationForm from "../../../pages/Forms/VetForms/vetformComponents/PushNotificationForm";
-import useSort from "../../../hooks/useSort";
-import SortableTableHeader from "../tableComponents/SortableTableHeader";
-import { TableToolbar } from "../tableComponents/TableToolbar";
-import Switch from "../../form/switch/Switch";
-import { IoIosCloseCircle, IoIosCheckmarkCircle } from "react-icons/io";
-import ImageHoverPreview from "../tableComponents/ImageHoverPreview";
-import DeleteDialog from "../tableComponents/DeleteDailog";
+} from '../../ui/table';
+import Badge from '../../ui/badge/Badge';
+import Checkbox from '../../form/input/Checkbox';
+import EmployeeForm from '../../../pages/Forms/UserForms/EmployeeForm';
+import { EmployeeFormData } from '../../../pages/Forms/UserForms/EmployeeForm';
+import Pagination from '../tableComponents/Pagination';
+import ChangePasswordForm from '../../../pages/Forms/VetForms/vetformComponents/ChangePasswordForm';
+import { ChangePasswordFormData } from '../../../pages/Forms/VetForms/vetformComponents/ChangePasswordForm';
+import { PushNotificationFormData } from '../../../pages/Forms/VetForms/vetformComponents/PushNotificationForm';
+import PushNotificationForm from '../../../pages/Forms/VetForms/vetformComponents/PushNotificationForm';
+import useSort from '../../../hooks/useSort';
+import SortableTableHeader from '../tableComponents/SortableTableHeader';
+import { TableToolbar } from '../tableComponents/TableToolbar';
+import Switch from '../../form/switch/Switch';
+import { IoIosCloseCircle, IoIosCheckmarkCircle } from 'react-icons/io';
+import ImageHoverPreview from '../tableComponents/ImageHoverPreview';
+import DeleteDialog from '../tableComponents/DeleteDailog';
 
 export interface Employee {
   id: number;
@@ -30,10 +36,10 @@ export interface Employee {
   email: string;
   image: string;
   contactNumber: string;
-  role: "Boarder" | "Walker" | "Petsitter" | "Groomer" | "Trainer" | "Admin";
-  verificationStatus: "Verified" | "Unverified";
+  role: 'Boarder' | 'Walker' | 'Petsitter' | 'Groomer' | 'Trainer' | 'Admin';
+  verificationStatus: 'Verified' | 'Unverified';
   blocked: boolean;
-  status: "Active" | "Inactive";
+  status: 'Active' | 'Inactive';
 }
 
 // Mock data for employees
@@ -43,21 +49,24 @@ const mockEmployees: Employee[] = Array.from({ length: 50 }, (_, i) => ({
   email: `employee${i + 1}@example.com`,
   image: `/images/employees/employee-${(i % 5) + 1}.jpg`,
   contactNumber: `+1${Math.floor(1000000000 + Math.random() * 9000000000)}`,
-  role: ["Boarder", "Walker", "Petsitter", "Groomer", "Trainer", "Admin"][i % 6] as 
-    "Boarder" | "Walker" | "Petsitter" | "Groomer" | "Trainer" | "Admin",
-  verificationStatus: i % 3 === 0 ? "Verified" : "Unverified",
+  role: ['Boarder', 'Walker', 'Petsitter', 'Groomer', 'Trainer', 'Admin'][
+    i % 6
+  ] as 'Boarder' | 'Walker' | 'Petsitter' | 'Groomer' | 'Trainer' | 'Admin',
+  verificationStatus: i % 3 === 0 ? 'Verified' : 'Unverified',
   blocked: i % 4 === 0,
-  status: i % 3 !== 0 ? "Active" : "Inactive",
+  status: i % 3 !== 0 ? 'Active' : 'Inactive',
 }));
 
 export default function EmployeeTable() {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [isPushNotificationDialogOpen, setIsPushNotificationDialogOpen] = useState(false);
-  const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] = useState(false);
-  const [actionDropdown, setActionDropdown] = useState<string>("No actions");
-  const [statusUpdate, setStatusUpdate] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [isPushNotificationDialogOpen, setIsPushNotificationDialogOpen] =
+    useState(false);
+  const [isChangePasswordDialogOpen, setIsChangePasswordDialogOpen] =
+    useState(false);
+  const [actionDropdown, setActionDropdown] = useState<string>('No actions');
+  const [statusUpdate, setStatusUpdate] = useState<string>('');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editEmployee, setEditEmployee] = useState<Employee | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -68,56 +77,52 @@ export default function EmployeeTable() {
 
   const columns = [
     {
-      key: "id",
-      label: "ID",
-      className: "min-w-[80px] text-gray-700 font-semibold max-w-[105px]",
+      key: 'name',
+      label: 'Name',
+      className: 'min-w-[200px] text-gray-700 font-semibold max-w-[250px]',
     },
     {
-      key: "name",
-      label: "Name",
-      className: "min-w-[200px] text-gray-700 font-semibold max-w-[250px]",
+      key: 'contactNumber',
+      label: 'Contact Number',
+      className: 'min-w-[120px] text-gray-700 max-w-[180px]',
     },
     {
-      key: "contactNumber",
-      label: "Contact Number",
-      className: "min-w-[120px] text-gray-700 max-w-[180px]",
+      key: 'role',
+      label: 'Role',
+      className: 'min-w-[120px] text-gray-700 max-w-[180px]',
     },
     {
-      key: "role",
-      label: "Role",
-      className: "min-w-[120px] text-gray-700 max-w-[180px]",
+      key: 'verificationStatus',
+      label: 'Verification',
+      className: 'min-w-[120px] text-gray-700 max-w-[180px]',
     },
     {
-      key: "verificationStatus",
-      label: "Verification",
-      className: "min-w-[120px] text-gray-700 max-w-[180px]",
+      key: 'blocked',
+      label: 'Blocked',
+      className: 'min-w-[100px] max-w-[150px] text-gray-700 font-semibold',
     },
     {
-      key: "blocked",
-      label: "Blocked",
-      className: "min-w-[100px] max-w-[150px] text-gray-700 font-semibold",
-    },
-    {
-      key: "status",
-      label: "Status",
-      className: "min-w-[100px] max-w-[150px] text-gray-700 font-semibold",
+      key: 'status',
+      label: 'Status',
+      className: 'min-w-[100px] max-w-[150px] text-gray-700 font-semibold',
     },
   ] as const;
 
   // Filtered data based on search and filters
   const filteredData = employees
-    .filter((employee) =>
-      employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.contactNumber.includes(searchQuery)
+    .filter(
+      (employee) =>
+        employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.contactNumber.includes(searchQuery),
     )
     .filter((employee) =>
-      statusFilter ? employee.status === statusFilter : true
+      statusFilter ? employee.status === statusFilter : true,
     );
 
   const { sortedData, requestSort, sortConfig } = useSort(filteredData, {
-    key: "id",
-    direction: "asc",
+    key: 'id',
+    direction: 'asc',
   });
 
   // Pagination logic
@@ -136,7 +141,7 @@ export default function EmployeeTable() {
 
   const toggleSelectRow = (id: number) => {
     setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id],
     );
   };
 
@@ -144,18 +149,18 @@ export default function EmployeeTable() {
     setSelectedRows(
       selectedRows.length === employees.length
         ? []
-        : employees.map((row) => row.id)
+        : employees.map((row) => row.id),
     );
   };
 
   const handleApplyAction = () => {
-    if (actionDropdown === "Delete") {
+    if (actionDropdown === 'Delete') {
       handleDelete();
-    } else if (actionDropdown === "Status" && statusUpdate) {
+    } else if (actionDropdown === 'Status' && statusUpdate) {
       const updatedEmployees = employees.map((employee) =>
         selectedRows.includes(employee.id)
-          ? { ...employee, status: statusUpdate as "Active" | "Inactive" }
-          : employee
+          ? { ...employee, status: statusUpdate as 'Active' | 'Inactive' }
+          : employee,
       );
       setEmployees(updatedEmployees);
       setSelectedRows([]);
@@ -176,11 +181,11 @@ export default function EmployeeTable() {
 
     if (employeeToDelete) {
       updatedEmployees = employees.filter(
-        (employee) => employee.id !== employeeToDelete
+        (employee) => employee.id !== employeeToDelete,
       );
     } else {
       updatedEmployees = employees.filter(
-        (employee) => !selectedRows.includes(employee.id)
+        (employee) => !selectedRows.includes(employee.id),
       );
     }
 
@@ -203,8 +208,8 @@ export default function EmployeeTable() {
       prev.map((employee) =>
         employee.id === id
           ? { ...employee, blocked: !employee.blocked }
-          : employee
-      )
+          : employee,
+      ),
     );
   };
 
@@ -214,13 +219,13 @@ export default function EmployeeTable() {
         employee.id === id
           ? {
               ...employee,
-              status: employee.status === "Active" ? "Inactive" : "Active",
+              status: employee.status === 'Active' ? 'Inactive' : 'Active',
             }
-          : employee
-      )
+          : employee,
+      ),
     );
   };
-// Additional actions
+  // Additional actions
   const handlePushNotification = () => {
     setIsPushNotificationDialogOpen(true);
   };
@@ -230,12 +235,12 @@ export default function EmployeeTable() {
   };
 
   const handlePushNotificationSubmit = (data: PushNotificationFormData) => {
-    console.log("Push Notification Sent:", data);
+    console.log('Push Notification Sent:', data);
     setIsPushNotificationDialogOpen(false);
   };
 
   const handleChangePasswordSubmit = (data: ChangePasswordFormData) => {
-    console.log("Password Changed:", data);
+    console.log('Password Changed:', data);
     setIsChangePasswordDialogOpen(false);
   };
 
@@ -275,35 +280,35 @@ export default function EmployeeTable() {
             blocked: data.blocked,
             status: data.status,
           }
-        : employee
+        : employee,
     );
     setEmployees(updatedEmployees);
     setEditEmployee(null);
   };
 
   return (
-    <div className="p-4 bg-white rounded-xl shadow-md">
+    <div className='p-4 bg-white rounded-xl shadow-md'>
       {/* Header Section */}
       <TableToolbar
         onAddNew={handleAddNew}
-        addButtonLabel="Add Employee"
-        addButtonIcon={<MdAdd className="w-5 h-5" />}
+        addButtonLabel='Add Employee'
+        addButtonIcon={<MdAdd className='w-5 h-5' />}
         selectedRowsCount={selectedRows.length}
         bulkActionsOptions={
           <>
-            <option value="No actions">No actions</option>
-            <option value="Delete">Delete</option>
-            <option value="Status">Status</option>
+            <option value='No actions'>No actions</option>
+            <option value='Delete'>Delete</option>
+            <option value='Status'>Status</option>
           </>
         }
         statusUpdateOptions={
           <>
-            <option value="">Select Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+            <option value=''>Select Status</option>
+            <option value='Active'>Active</option>
+            <option value='Inactive'>Inactive</option>
           </>
         }
-        showStatusDropdown={actionDropdown === "Status"}
+        showStatusDropdown={actionDropdown === 'Status'}
         onBulkActionChange={setActionDropdown}
         onStatusUpdateChange={setStatusUpdate}
         onApplyAction={handleApplyAction}
@@ -313,9 +318,9 @@ export default function EmployeeTable() {
         onSearchChange={setSearchQuery}
         filterOptions={
           <>
-            <option value="">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+            <option value=''>All Status</option>
+            <option value='Active'>Active</option>
+            <option value='Inactive'>Inactive</option>
           </>
         }
         onFilterChange={setStatusFilter}
@@ -323,12 +328,12 @@ export default function EmployeeTable() {
       />
 
       {/* Table */}
-      <div className="w-full overflow-x-auto rounded-lg border border-gray-200">
-        <div className="min-w-[1100px]">
-          <Table className="w-full">
-            <TableHeader className="bg-gray-50">
+      <div className='w-full overflow-x-auto rounded-lg border border-gray-200'>
+        <div className='min-w-[1100px]'>
+          <Table className='w-full'>
+            <TableHeader className='bg-gray-50'>
               <TableRow>
-                <TableCell className="w-10 p-2 py-3">
+                <TableCell className='w-10 p-2 py-3'>
                   <Checkbox
                     checked={selectedRows.length === employees.length}
                     onChange={toggleSelectAll}
@@ -341,10 +346,10 @@ export default function EmployeeTable() {
                     label={column.label}
                     sortConfig={sortConfig}
                     requestSort={requestSort}
-                    className={`p-2 py-4 text-left text-sm text-gray-100 font-medium ${column.className}`}
+                    className={`p-2 py-4 text-left text-table-header ${column.className}`}
                   />
                 ))}
-                <TableCell className="w-32 p-2 py-4 text-sm font-medium">
+                <TableCell className='w-32 p-2 py-4 text-table-header'>
                   Actions
                 </TableCell>
               </TableRow>
@@ -352,112 +357,120 @@ export default function EmployeeTable() {
 
             <TableBody>
               {currentItems.map((employee) => (
-                <TableRow key={employee.id} className="hover:bg-gray-50">
-                  <TableCell className="p-2 py-4">
+                <TableRow key={employee.id} className='hover:bg-gray-50'>
+                  <TableCell className='p-2 py-4'>
                     <Checkbox
                       checked={selectedRows.includes(employee.id)}
                       onChange={() => toggleSelectRow(employee.id)}
                     />
                   </TableCell>
-                  <TableCell className="p-2 py-4 text-sm text-gray-900 font-medium">
-                    #{employee.id}
-                  </TableCell>
-                  <TableCell className="p-2 py-4">
-                    <div className="flex items-center gap-3">
+                  <TableCell className='p-2 py-4'>
+                    <div className='flex items-center gap-3'>
                       <ImageHoverPreview
                         src={employee.image}
                         alt={employee.name}
-                        className="w-8 h-8 rounded-full object-cover"
+                        className='w-8 h-8 rounded-full object-cover'
                       />
                       <div>
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className='text-table-body font-medium'>
                           {employee.name}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className='text-table-body-secondary'>
                           {employee.email}
                         </div>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="p-2 py-4 text-sm text-gray-500">
+                  <TableCell className='p-2 py-4 text-table-body-secondary'>
                     {employee.contactNumber}
                   </TableCell>
-                  <TableCell className="p-2 py-4">
-                    <Badge
-                      size="sm"
-                      color='success'
-                    >
+                  <TableCell className='p-2 py-4'>
+                    <Badge size='sm' color='success'>
                       {employee.role}
                     </Badge>
                   </TableCell>
-                  <TableCell className="p-2 py-4">
+                  <TableCell className='p-2 py-4'>
                     <Badge
-                      size="sm"
-                      color={employee.verificationStatus === "Verified" ? "success" : "warning"}
+                      size='sm'
+                      color={
+                        employee.verificationStatus === 'Verified'
+                          ? 'success'
+                          : 'warning'
+                      }
                     >
                       {employee.verificationStatus}
                     </Badge>
                   </TableCell>
-                  <TableCell className="p-2 py-4">
-                  <div className="flex items-center gap-3">
+                  <TableCell className='p-2 py-4'>
+                    <div className='flex items-center gap-3'>
                       <Badge
-                        size="sm"
-                        color={employee.blocked === true ? "success" : "error"}
+                        size='sm'
+                        color={employee.blocked === true ? 'success' : 'error'}
                       >
-                        {employee.blocked === true ? <IoIosCheckmarkCircle/>:<IoIosCloseCircle/>}
-                      </Badge>
-                    <Switch
-                      label=""
-                      checked={employee.blocked === true}
-                      onChange={() => toggleBlocked(employee.id)}
-                    />
-                    </div>
-                  </TableCell>
-                  <TableCell className="p-2 py-4">
-                    <div className="flex items-center gap-3">
-                      <Badge
-                        size="sm"
-                        color={employee.status === "Active" ? "success" : "error"}
-                      >
-                        {employee.status === "Active" ? <IoIosCheckmarkCircle/>:<IoIosCloseCircle/>}
+                        {employee.blocked === true ? (
+                          <IoIosCheckmarkCircle />
+                        ) : (
+                          <IoIosCloseCircle />
+                        )}
                       </Badge>
                       <Switch
-                        label=""
-                        checked={employee.status === "Active"}
+                        label=''
+                        checked={employee.blocked === true}
+                        onChange={() => toggleBlocked(employee.id)}
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell className='p-2 py-4'>
+                    <div className='flex items-center gap-3'>
+                      <Badge
+                        size='sm'
+                        color={
+                          employee.status === 'Active' ? 'success' : 'error'
+                        }
+                      >
+                        {employee.status === 'Active' ? (
+                          <IoIosCheckmarkCircle />
+                        ) : (
+                          <IoIosCloseCircle />
+                        )}
+                      </Badge>
+                      <Switch
+                        label=''
+                        checked={employee.status === 'Active'}
                         onChange={() => toggleStatus(employee.id)}
                       />
                     </div>
                   </TableCell>
-                  <TableCell className="p-2 py-4">
-                    <div className="flex gap-2">
+                  <TableCell className='p-2 py-4'>
+                    <div className='flex gap-2'>
                       <button
                         onClick={handlePushNotification}
-                        className="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50"
-                        title="Send Notification"
+                        className='text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50'
+                        title='Send Notification'
                       >
-                        <MdNotifications className="w-5 h-5" />
+                        <MdNotifications className='w-5 h-5' />
                       </button>
                       <button
                         onClick={handleChangePassword}
-                        className="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50"
-                        title="Change Password"
+                        className='text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50'
+                        title='Change Password'
                       >
-                        <MdLock className="w-5 h-5" />
+                        <MdLock className='w-5 h-5' />
                       </button>
-                      
+
                       <button
                         onClick={() => handleEdit(employee)}
-                        className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
-                        title="Edit"
+                        className='text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50'
+                        title='Edit'
                       >
-                        <MdEdit className="w-5 h-5" />
+                        <MdEdit className='w-5 h-5' />
                       </button>
                       <button
                         onClick={() => handleDelete(employee.id)}
-                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-                        title="Delete"
+                        className='text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50'
+                        title='Delete'
                       >
-                        <MdDelete className="w-5 h-5" />
+                        <MdDelete className='w-5 h-5' />
                       </button>
                     </div>
                   </TableCell>
@@ -488,8 +501,8 @@ export default function EmployeeTable() {
         />
       ) : null}
 
-       {/* Push Notification Dialog */}
-       {isPushNotificationDialogOpen && (
+      {/* Push Notification Dialog */}
+      {isPushNotificationDialogOpen && (
         <PushNotificationForm
           onSubmit={handlePushNotificationSubmit}
           onCancel={() => setIsPushNotificationDialogOpen(false)}
@@ -505,17 +518,17 @@ export default function EmployeeTable() {
       )}
 
       {/* Delete Dialog */}
-        <DeleteDialog
-  isOpen={isDeleteDialogOpen}
-  onClose={() => setIsDeleteDialogOpen(false)}
-  onConfirm={confirmDelete}
-  itemLabel="Employee"
-  description={
-    selectedRows.length > 1
-      ? `Are you sure you want to delete ${selectedRows.length} selected employees?`
-      : "Are you sure you want to delete this employee?"
-  }
-/>
+      <DeleteDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={confirmDelete}
+        itemLabel='Employee'
+        description={
+          selectedRows.length > 1
+            ? `Are you sure you want to delete ${selectedRows.length} selected employees?`
+            : 'Are you sure you want to delete this employee?'
+        }
+      />
     </div>
   );
 }

@@ -1,19 +1,32 @@
 // src/modules/appointments/appointments.controller.js
-// ============================================================================
-// Veterinary Appointments Controller with Payment & Transaction Handling
-// ============================================================================
 
 const { query, getConnection, transaction } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
 //const logger = require('../../core/utils/logger');
 
 // ==================ADMIN - APPOINTMENT LISTING & RETRIEVAL==========================
+// Admin-specific: list appointments with filter (today, past, upcoming, all), status, user_id, veterinarian_id, clinic_id
 const listAppointments = async (req, res) => {
   try {
-    const { page = 1, limit = 10, status, user_id, veterinarian_id, clinic_id, date_from, date_to } = req.query;
+    const { page = 1, limit = 10, filter = 'all', status, user_id, veterinarian_id, clinic_id, date_from, date_to } = req.query;
     const offset = (page - 1) * limit;
 
+    // Validate filter
+    if (!['today','past','upcoming','all'].includes(filter)) {
+      return res.status(400).json({ status: 'error', message: 'Invalid filter. Allowed values: today, past, upcoming, all' });
+    }
+
     let where = 'a.deleted_at IS NULL';
+
+    // Apply date filter (today / past / upcoming / all)
+    if (filter === 'today') {
+      where += ` AND a.appointment_date = CURRENT_DATE`;
+    } else if (filter === 'past') {
+      where += ` AND a.appointment_date < CURRENT_DATE`;
+    } else if (filter === 'upcoming') {
+      where += ` AND a.appointment_date > CURRENT_DATE`;
+    }
+
     const params = [];
     let paramIndex = 1;
 
@@ -100,6 +113,8 @@ const listAppointments = async (req, res) => {
 
     res.json(successResponse({
       data: result.rows,
+      filter,
+      status: status || 'all',
       page: parseInt(page),
       limit: parseInt(limit),
       total: parseInt(countResult.rows[0].total)
@@ -110,17 +125,267 @@ const listAppointments = async (req, res) => {
   }
 };
 
+// ==================VETERINARIAN - APPOINTMENT LISTING & RETRIEVAL==========================
+// Vet-specific: list appointments for the authenticated veterinarian with filter (today, past, upcoming, all)
+const getVetAppointmentsByFilter = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ status: 'error', message: 'Unauthorized' });
+    }
+
+    const vetRes = await query('SELECT id FROM veterinarians WHERE user_id = $1 AND deleted_at IS NULL', [userId]);
+    if (vetRes.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Veterinarian profile not found' });
+    }
+    const vetId = vetRes.rows[0].id;
+
+    const { filter = 'all', page = 1, limit = 20, status } = req.query;
+    const offset = (page - 1) * limit;
+
+    // Validate filter
+    if (!['today', 'past', 'upcoming', 'all'].includes(filter)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid filter. Allowed values: today, past, upcoming, all'
+      });
+    }
+
+    let where = 'a.deleted_at IS NULL AND a.veterinarian_id = $1';
+    const params = [vetId];
+    let paramIndex = 2;
+
+    // Apply date filters based on filter type
+    if (filter === 'today') {
+      where += ` AND a.appointment_date = CURRENT_DATE`;
+    } else if (filter === 'past') {
+      where += ` AND a.appointment_date < CURRENT_DATE`;
+    } else if (filter === 'upcoming') {
+      where += ` AND a.appointment_date > CURRENT_DATE`;
+    }
+    // 'all' has no additional date filter
+
+    // Apply status filter if provided
+    if (status) {
+      where += ` AND a.status = $${paramIndex}`;
+      params.push(status);
+      paramIndex++;
+    }
+
+    params.push(parseInt(limit));
+    params.push(parseInt(offset));
+    const limitIndex = paramIndex;
+    const offsetIndex = paramIndex + 1;
+
+    const result = await query(
+      `SELECT 
+        a.id, a.appointment_number, a.appointment_date, a.appointment_time, 
+        a.status, a.priority, a.appointment_type, a.chief_complaint, a.notes, a.symptoms,
+        a.consultation_fee, a.service_fee, a.total_amount, a.payment_status,
+        a.vet_service_ids,
+        u.id as user_id, u.first_name as user_first_name, u.last_name as user_last_name, u.email as user_email,
+        p.id as pet_id, p.name as pet_name,
+        pt.name as pet_type_name, pt.icon_url as pet_type_icon,
+        b.name as breed_name,
+        c.id as clinic_id, c.name as clinic_name, c.contact_number as clinic_phone,
+        jsonb_build_object(
+          'id', pay.id,
+          'payment_method', pay.payment_method,
+          'total_amount', pay.total_amount,
+          'paid_amount', pay.paid_amount,
+          'payment_status', pay.payment_status
+        ) as payment_info,
+        (
+          SELECT jsonb_agg(jsonb_build_object('id', vs.id, 'name', vs.name, 'code', vs.code, 'default_fee', vs.default_fee))
+          FROM vet_services vs
+          WHERE vs.deleted_at IS NULL AND vs.id = ANY(
+            SELECT (jsonb_array_elements(a.vet_service_ids)->>'service_id')::uuid
+          )
+        ) as services
+       FROM vet_appointments a
+       LEFT JOIN users u ON a.user_id = u.id
+       LEFT JOIN pets p ON a.pet_id = p.id
+       LEFT JOIN pet_types pt ON p.pet_type_id = pt.id
+       LEFT JOIN breeds b ON p.breed_id = b.id
+       LEFT JOIN vet_clinics c ON a.clinic_id = c.id
+       LEFT JOIN vet_appointment_payments pay ON a.id = pay.appointment_id
+       WHERE ${where}
+       ORDER BY a.appointment_date DESC, a.appointment_time DESC
+       LIMIT $${limitIndex} OFFSET $${offsetIndex}`,
+      params
+    );
+
+    // Count query
+    const countParams = [vetId];
+    let countWhere = 'a.deleted_at IS NULL AND a.veterinarian_id = $1';
+    
+    if (filter === 'today') {
+      countWhere += ` AND a.appointment_date = CURRENT_DATE`;
+    } else if (filter === 'past') {
+      countWhere += ` AND a.appointment_date < CURRENT_DATE`;
+    } else if (filter === 'upcoming') {
+      countWhere += ` AND a.appointment_date > CURRENT_DATE`;
+    }
+
+    if (status) {
+      countWhere += ` AND a.status = $2`;
+      countParams.push(status);
+    }
+
+    const countResult = await query(
+      `SELECT COUNT(*) as total FROM vet_appointments a WHERE ${countWhere}`,
+      countParams
+    );
+
+    res.json(successResponse({
+      data: result.rows,
+      filter,
+      status: status || 'all',
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total: parseInt(countResult.rows[0].total)
+    }));
+  } catch (err) {
+    console.error('Get vet appointments by filter error:', err.message);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch appointments' });
+  }
+};
+
+// ==================OWNER - APPOINTMENT LISTING & RETRIEVAL==========================
+// Owner-specific: list appointments for the authenticated owner with filter (today, past, upcoming, all)
+const getOwnerAppointmentsByFilter = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ status: 'error', message: 'Unauthorized' });
+    }
+
+    const { filter = 'all', page = 1, limit = 20, status } = req.query;
+    const offset = (page - 1) * limit;
+
+    // Validate filter
+    if (!['today', 'past', 'upcoming', 'all'].includes(filter)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid filter. Allowed values: today, past, upcoming, all'
+      });
+    }
+
+    let where = 'a.deleted_at IS NULL AND a.user_id = $1';
+    const params = [userId];
+    let paramIndex = 2;
+
+    // Apply date filters based on filter type
+    if (filter === 'today') {
+      where += ` AND a.appointment_date = CURRENT_DATE`;
+    } else if (filter === 'past') {
+      where += ` AND a.appointment_date < CURRENT_DATE`;
+    } else if (filter === 'upcoming') {
+      where += ` AND a.appointment_date > CURRENT_DATE`;
+    }
+    // 'all' has no additional date filter
+
+    // Apply status filter if provided
+    if (status) {
+      where += ` AND a.status = $${paramIndex}`;
+      params.push(status);
+      paramIndex++;
+    }
+
+    params.push(parseInt(limit));
+    params.push(parseInt(offset));
+    const limitIndex = paramIndex;
+    const offsetIndex = paramIndex + 1;
+
+    const result = await query(
+      `SELECT 
+        a.id, a.appointment_number, a.appointment_date, a.appointment_time, 
+        a.status, a.priority, a.appointment_type, a.chief_complaint, a.notes, a.symptoms,
+        a.consultation_fee, a.service_fee, a.total_amount, a.payment_status,
+        a.vet_service_ids,
+        vu.id as vet_id, vu.first_name as vet_first_name, vu.last_name as vet_last_name,
+        p.id as pet_id, p.name as pet_name,
+        pt.name as pet_type_name, pt.icon_url as pet_type_icon,
+        b.name as breed_name,
+        c.id as clinic_id, c.name as clinic_name, c.contact_number as clinic_phone,
+        jsonb_build_object(
+          'id', pay.id,
+          'payment_method', pay.payment_method,
+          'total_amount', pay.total_amount,
+          'paid_amount', pay.paid_amount,
+          'payment_status', pay.payment_status
+        ) as payment_info,
+        (
+          SELECT jsonb_agg(jsonb_build_object('id', vs.id, 'name', vs.name, 'code', vs.code, 'default_fee', vs.default_fee))
+          FROM vet_services vs
+          WHERE vs.deleted_at IS NULL AND vs.id = ANY(
+            SELECT (jsonb_array_elements(a.vet_service_ids)->>'service_id')::uuid
+          )
+        ) as services
+       FROM vet_appointments a
+       LEFT JOIN veterinarians v ON a.veterinarian_id = v.id
+       LEFT JOIN users vu ON v.user_id = vu.id
+       LEFT JOIN pets p ON a.pet_id = p.id
+       LEFT JOIN pet_types pt ON p.pet_type_id = pt.id
+       LEFT JOIN breeds b ON p.breed_id = b.id
+       LEFT JOIN vet_clinics c ON a.clinic_id = c.id
+       LEFT JOIN vet_appointment_payments pay ON a.id = pay.appointment_id
+       WHERE ${where}
+       ORDER BY a.appointment_date DESC, a.appointment_time DESC
+       LIMIT $${limitIndex} OFFSET $${offsetIndex}`,
+      params
+    );
+
+    // Count query
+    const countParams = [userId];
+    let countWhere = 'a.deleted_at IS NULL AND a.user_id = $1';
+    
+    if (filter === 'today') {
+      countWhere += ` AND a.appointment_date = CURRENT_DATE`;
+    } else if (filter === 'past') {
+      countWhere += ` AND a.appointment_date < CURRENT_DATE`;
+    } else if (filter === 'upcoming') {
+      countWhere += ` AND a.appointment_date > CURRENT_DATE`;
+    }
+
+    if (status) {
+      countWhere += ` AND a.status = $2`;
+      countParams.push(status);
+    }
+
+    const countResult = await query(
+      `SELECT COUNT(*) as total FROM vet_appointments a WHERE ${countWhere}`,
+      countParams
+    );
+
+    res.json(successResponse({
+      data: result.rows,
+      filter,
+      status: status || 'all',
+      page: parseInt(page),
+      limit: parseInt(limit),
+      total: parseInt(countResult.rows[0].total)
+    }));
+  } catch (err) {
+    console.error('Get owner appointments by filter error:', err.message);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch appointments' });
+  }
+};
+
+// ===== Get Appointment By Id ========================================
 const getAppointmentById = async (req, res) => {
   try {
     const result = await query(
       `SELECT a.*, 
               u.email as user_email, u.phone as user_phone, u.first_name, u.last_name,
               p.name as pet_name, p.age as pet_age,
+              pt.name as pet_type_name, pt.icon_url as pet_type_icon,
               vu.first_name as vet_first_name, vu.last_name as vet_last_name, v.specialization,
               c.name as clinic_name, c.contact_number as clinic_phone
        FROM vet_appointments a
        LEFT JOIN users u ON a.user_id = u.id
        LEFT JOIN pets p ON a.pet_id = p.id
+       LEFT JOIN pet_types pt ON p.pet_type_id = pt.id
        LEFT JOIN veterinarians v ON a.veterinarian_id = v.id
        LEFT JOIN users vu ON v.user_id = vu.id
        LEFT JOIN vet_clinics c ON a.clinic_id = c.id
@@ -214,279 +479,6 @@ const getAppointmentById = async (req, res) => {
   }
 };
 
-// ==================VETERINARIAN - APPOINTMENT LISTING & RETRIEVAL==========================
-// Vet-specific: list appointments for the authenticated veterinarian with filter (today, past, upcoming, all)
-const getVetAppointmentsByFilter = async (req, res) => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ status: 'error', message: 'Unauthorized' });
-    }
-
-    const vetRes = await query('SELECT id FROM veterinarians WHERE user_id = $1 AND deleted_at IS NULL', [userId]);
-    if (vetRes.rows.length === 0) {
-      return res.status(404).json({ status: 'error', message: 'Veterinarian profile not found' });
-    }
-    const vetId = vetRes.rows[0].id;
-
-    const { filter = 'all', page = 1, limit = 20, status } = req.query;
-    const offset = (page - 1) * limit;
-
-    // Validate filter
-    if (!['today', 'past', 'upcoming', 'all'].includes(filter)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Invalid filter. Allowed values: today, past, upcoming, all'
-      });
-    }
-
-    let where = 'a.deleted_at IS NULL AND a.veterinarian_id = $1';
-    const params = [vetId];
-    let paramIndex = 2;
-
-    // Apply date filters based on filter type
-    if (filter === 'today') {
-      where += ` AND a.appointment_date = CURRENT_DATE`;
-    } else if (filter === 'past') {
-      where += ` AND a.appointment_date < CURRENT_DATE`;
-    } else if (filter === 'upcoming') {
-      where += ` AND a.appointment_date > CURRENT_DATE`;
-    }
-    // 'all' has no additional date filter
-
-    // Apply status filter if provided
-    if (status) {
-      where += ` AND a.status = $${paramIndex}`;
-      params.push(status);
-      paramIndex++;
-    }
-
-    params.push(parseInt(limit));
-    params.push(parseInt(offset));
-    const limitIndex = paramIndex;
-    const offsetIndex = paramIndex + 1;
-
-    const result = await query(
-      `SELECT 
-        a.id, a.appointment_number, a.appointment_date, a.appointment_time, 
-        a.status, a.priority, a.appointment_type, a.chief_complaint, a.notes, a.symptoms,
-        a.consultation_fee, a.service_fee, a.total_amount, a.payment_status,
-        a.vet_service_ids,
-        u.id as user_id, u.first_name as user_first_name, u.last_name as user_last_name, u.email as user_email,
-        p.id as pet_id, p.name as pet_name,
-        pt.name as pet_type_name,
-        b.name as breed_name,
-        c.id as clinic_id, c.name as clinic_name, c.contact_number as clinic_phone,
-        jsonb_build_object(
-          'id', pay.id,
-          'payment_method', pay.payment_method,
-          'total_amount', pay.total_amount,
-          'paid_amount', pay.paid_amount,
-          'payment_status', pay.payment_status
-        ) as payment_info,
-        (
-          SELECT jsonb_agg(jsonb_build_object('id', vs.id, 'name', vs.name, 'code', vs.code, 'default_fee', vs.default_fee))
-          FROM vet_services vs
-          WHERE vs.deleted_at IS NULL AND vs.id = ANY(
-            SELECT (jsonb_array_elements(a.vet_service_ids)->>'service_id')::uuid
-          )
-        ) as services
-       FROM vet_appointments a
-       LEFT JOIN users u ON a.user_id = u.id
-       LEFT JOIN pets p ON a.pet_id = p.id
-       LEFT JOIN pet_types pt ON p.pet_type_id = pt.id
-       LEFT JOIN breeds b ON p.breed_id = b.id
-       LEFT JOIN vet_clinics c ON a.clinic_id = c.id
-       LEFT JOIN vet_appointment_payments pay ON a.id = pay.appointment_id
-       WHERE ${where}
-       ORDER BY a.appointment_date DESC, a.appointment_time DESC
-       LIMIT $${limitIndex} OFFSET $${offsetIndex}`,
-      params
-    );
-
-    // Count query
-    const countParams = [vetId];
-    let countWhere = 'a.deleted_at IS NULL AND a.veterinarian_id = $1';
-    
-    if (filter === 'today') {
-      countWhere += ` AND a.appointment_date = CURRENT_DATE`;
-    } else if (filter === 'past') {
-      countWhere += ` AND a.appointment_date < CURRENT_DATE`;
-    } else if (filter === 'upcoming') {
-      countWhere += ` AND a.appointment_date > CURRENT_DATE`;
-    }
-
-    if (status) {
-      countWhere += ` AND a.status = $2`;
-      countParams.push(status);
-    }
-
-    const countResult = await query(
-      `SELECT COUNT(*) as total FROM vet_appointments a WHERE ${countWhere}`,
-      countParams
-    );
-
-    res.json(successResponse({
-      data: result.rows,
-      filter,
-      status: status || 'all',
-      page: parseInt(page),
-      limit: parseInt(limit),
-      total: parseInt(countResult.rows[0].total)
-    }));
-  } catch (err) {
-    console.error('Get vet appointments by filter error:', err.message);
-    res.status(500).json({ status: 'error', message: 'Failed to fetch appointments' });
-  }
-};
-
-// Vet-specific: full detail but only if the veterinarian owns the appointment
-const getVetAppointmentById = async (req, res) => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) return res.status(401).json({ status: 'error', message: 'Unauthorized' });
-
-    const vetRes = await query('SELECT id FROM veterinarians WHERE user_id = $1 AND deleted_at IS NULL', [userId]);
-    if (vetRes.rows.length === 0) return res.status(403).json({ status: 'error', message: 'Not a veterinarian' });
-    const vetId = vetRes.rows[0].id;
-
-    const appointmentId = req.params.id;
-    const full = await query(
-      `SELECT a.veterinarian_id FROM vet_appointments a WHERE a.id = $1 AND a.deleted_at IS NULL`,
-      [appointmentId]
-    );
-    if (full.rows.length === 0) return res.status(404).json({ status: 'error', message: 'Appointment not found' });
-    if (full.rows[0].veterinarian_id !== vetId) return res.status(403).json({ status: 'error', message: 'Access denied' });
-
-    // Reuse getFullAppointment logic by calling the existing function via internal request
-    return getFullAppointment(req, res);
-  } catch (err) {
-    console.error('Get vet appointment failed:', err.message);
-    res.status(500).json({ status: 'error', message: 'Failed to fetch appointment' });
-  }
-};
-
-
-// ==================OWNER - APPOINTMENT LISTING & RETRIEVAL==========================
-// Owner-specific: list appointments for the authenticated owner with filter (today, past, upcoming, all)
-const getOwnerAppointmentsByFilter = async (req, res) => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ status: 'error', message: 'Unauthorized' });
-    }
-
-    const { filter = 'all', page = 1, limit = 20, status } = req.query;
-    const offset = (page - 1) * limit;
-
-    // Validate filter
-    if (!['today', 'past', 'upcoming', 'all'].includes(filter)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Invalid filter. Allowed values: today, past, upcoming, all'
-      });
-    }
-
-    let where = 'a.deleted_at IS NULL AND a.user_id = $1';
-    const params = [userId];
-    let paramIndex = 2;
-
-    // Apply date filters based on filter type
-    if (filter === 'today') {
-      where += ` AND a.appointment_date = CURRENT_DATE`;
-    } else if (filter === 'past') {
-      where += ` AND a.appointment_date < CURRENT_DATE`;
-    } else if (filter === 'upcoming') {
-      where += ` AND a.appointment_date > CURRENT_DATE`;
-    }
-    // 'all' has no additional date filter
-
-    // Apply status filter if provided
-    if (status) {
-      where += ` AND a.status = $${paramIndex}`;
-      params.push(status);
-      paramIndex++;
-    }
-
-    params.push(parseInt(limit));
-    params.push(parseInt(offset));
-    const limitIndex = paramIndex;
-    const offsetIndex = paramIndex + 1;
-
-    const result = await query(
-      `SELECT 
-        a.id, a.appointment_number, a.appointment_date, a.appointment_time, 
-        a.status, a.priority, a.appointment_type, a.chief_complaint, a.notes, a.symptoms,
-        a.consultation_fee, a.service_fee, a.total_amount, a.payment_status,
-        a.vet_service_ids,
-        vu.id as vet_id, vu.first_name as vet_first_name, vu.last_name as vet_last_name,
-        p.id as pet_id, p.name as pet_name,
-        pt.name as pet_type_name,
-        b.name as breed_name,
-        c.id as clinic_id, c.name as clinic_name, c.contact_number as clinic_phone,
-        jsonb_build_object(
-          'id', pay.id,
-          'payment_method', pay.payment_method,
-          'total_amount', pay.total_amount,
-          'paid_amount', pay.paid_amount,
-          'payment_status', pay.payment_status
-        ) as payment_info,
-        (
-          SELECT jsonb_agg(jsonb_build_object('id', vs.id, 'name', vs.name, 'code', vs.code, 'default_fee', vs.default_fee))
-          FROM vet_services vs
-          WHERE vs.deleted_at IS NULL AND vs.id = ANY(
-            SELECT (jsonb_array_elements(a.vet_service_ids)->>'service_id')::uuid
-          )
-        ) as services
-       FROM vet_appointments a
-       LEFT JOIN veterinarians v ON a.veterinarian_id = v.id
-       LEFT JOIN users vu ON v.user_id = vu.id
-       LEFT JOIN pets p ON a.pet_id = p.id
-       LEFT JOIN pet_types pt ON p.pet_type_id = pt.id
-       LEFT JOIN breeds b ON p.breed_id = b.id
-       LEFT JOIN vet_clinics c ON a.clinic_id = c.id
-       LEFT JOIN vet_appointment_payments pay ON a.id = pay.appointment_id
-       WHERE ${where}
-       ORDER BY a.appointment_date DESC, a.appointment_time DESC
-       LIMIT $${limitIndex} OFFSET $${offsetIndex}`,
-      params
-    );
-
-    // Count query
-    const countParams = [userId];
-    let countWhere = 'a.deleted_at IS NULL AND a.user_id = $1';
-    
-    if (filter === 'today') {
-      countWhere += ` AND a.appointment_date = CURRENT_DATE`;
-    } else if (filter === 'past') {
-      countWhere += ` AND a.appointment_date < CURRENT_DATE`;
-    } else if (filter === 'upcoming') {
-      countWhere += ` AND a.appointment_date > CURRENT_DATE`;
-    }
-
-    if (status) {
-      countWhere += ` AND a.status = $2`;
-      countParams.push(status);
-    }
-
-    const countResult = await query(
-      `SELECT COUNT(*) as total FROM vet_appointments a WHERE ${countWhere}`,
-      countParams
-    );
-
-    res.json(successResponse({
-      data: result.rows,
-      filter,
-      status: status || 'all',
-      page: parseInt(page),
-      limit: parseInt(limit),
-      total: parseInt(countResult.rows[0].total)
-    }));
-  } catch (err) {
-    console.error('Get owner appointments by filter error:', err.message);
-    res.status(500).json({ status: 'error', message: 'Failed to fetch appointments' });
-  }
-};
 
 // ======= APPOINTMENT CREATION & UPDATE========================================
 const createAppointment = async (req, res) => {
@@ -692,9 +684,10 @@ const createAppointment = async (req, res) => {
     }, 'Appointment created', 201));
 
   } catch (err) {
+    
     await client.query('ROLLBACK');
     //logger.error('Create appointment failed', { error: err.message, stack: err.stack });
-
+console.log(err.message);
     const isProd = process.env.NODE_ENV === 'production';
     res.status(500).json({
       status: 'error',
@@ -784,10 +777,89 @@ const updateAppointmentStatus = async (req, res) => {
   }
 };
 
-// ============================================================================
-// PAYMENT HANDLING
-// ============================================================================
+// ==== APPOINTMENT RESCHEDULING==========================================
+const rescheduleAppointment = async (req, res) => {
+  //const client = await query._pool.connect();
+  const client = await getConnection();
+  try {
+    await client.query('BEGIN');
 
+    const { id } = req.params;
+    const { new_date, new_time, reason } = req.body;
+
+    // Fetch current appointment
+    const appointmentResult = await client.query(
+      `SELECT appointment_date, appointment_time, veterinarian_id, clinic_id, status
+       FROM vet_appointments WHERE id = $1 AND deleted_at IS NULL`,
+      [id]
+    );
+
+    if (appointmentResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ status: 'error', message: 'Appointment not found' });
+    }
+
+    const current = appointmentResult.rows[0];
+
+    if (!['scheduled', 'confirmed'].includes(current.status)) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        status: 'error',
+        message: 'Can only reschedule scheduled or confirmed appointments'
+      });
+    }
+
+    // Verify new slot availability
+    const scheduleCheck = await client.query(
+      `SELECT id FROM vet_schedules 
+       WHERE veterinarian_id = $1 AND clinic_id = $2 
+       AND day_of_week = EXTRACT(DOW FROM $3::date)::smallint
+       AND is_available = true`,
+      [current.veterinarian_id, current.clinic_id, new_date]
+    );
+
+    if (scheduleCheck.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        status: 'error',
+        message: 'Veterinarian not available on new date'
+      });
+    }
+
+    // Record reschedule history
+    await client.query(
+      `INSERT INTO vet_appointment_reschedules (
+        appointment_id, old_date, old_time, new_date, new_time, reason, rescheduled_by, rescheduled_by_id
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [id, current.appointment_date, current.appointment_time, new_date, new_time, reason || null, 'user', req.user?.id || null]
+    );
+
+    // Update appointment
+    const updateResult = await client.query(
+      `UPDATE vet_appointments
+       SET appointment_date = $2, appointment_time = $3, status = 'scheduled'
+       WHERE id = $1
+       RETURNING id, appointment_number, appointment_date, appointment_time`,
+      [id, new_date, new_time]
+    );
+
+    await client.query('COMMIT');
+
+    //logger.info('Appointment rescheduled', { appointmentId: id, oldDate: current.appointment_date, newDate: new_date });
+
+    res.json(successResponse(updateResult.rows[0], 'Appointment rescheduled successfully'));
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    //logger.error('Reschedule appointment failed', { error: err.message });
+    res.status(500).json({ status: 'error', message: 'Failed to reschedule appointment' });
+  } finally {
+    client.release();
+  }
+};
+
+// ================PAYMENT HANDLING=========================================
 const processPayment = async (req, res) => {
   //const client = await query._pool.connect();
   const client = await getConnection();
@@ -916,91 +988,6 @@ const getPaymentInfo = async (req, res) => {
   } catch (err) {
     //logger.error('Get payment info failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to fetch payment info' });
-  }
-};
-
-// ============================================================================
-// APPOINTMENT RESCHEDULING
-// ============================================================================
-
-const rescheduleAppointment = async (req, res) => {
-  //const client = await query._pool.connect();
-  const client = await getConnection();
-  try {
-    await client.query('BEGIN');
-
-    const { id } = req.params;
-    const { new_date, new_time, reason } = req.body;
-
-    // Fetch current appointment
-    const appointmentResult = await client.query(
-      `SELECT appointment_date, appointment_time, veterinarian_id, clinic_id, status
-       FROM vet_appointments WHERE id = $1 AND deleted_at IS NULL`,
-      [id]
-    );
-
-    if (appointmentResult.rows.length === 0) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({ status: 'error', message: 'Appointment not found' });
-    }
-
-    const current = appointmentResult.rows[0];
-
-    if (!['scheduled', 'confirmed'].includes(current.status)) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({
-        status: 'error',
-        message: 'Can only reschedule scheduled or confirmed appointments'
-      });
-    }
-
-    // Verify new slot availability
-    const scheduleCheck = await client.query(
-      `SELECT id FROM vet_schedules 
-       WHERE veterinarian_id = $1 AND clinic_id = $2 
-       AND day_of_week = EXTRACT(DOW FROM $3::date)::smallint
-       AND is_available = true`,
-      [current.veterinarian_id, current.clinic_id, new_date]
-    );
-
-    if (scheduleCheck.rows.length === 0) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({
-        status: 'error',
-        message: 'Veterinarian not available on new date'
-      });
-    }
-
-    // Record reschedule history
-    await client.query(
-      `INSERT INTO vet_appointment_reschedules (
-        appointment_id, old_date, old_time, new_date, new_time, reason, rescheduled_by, rescheduled_by_id
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [id, current.appointment_date, current.appointment_time, new_date, new_time, reason || null, 'user', req.user?.id || null]
-    );
-
-    // Update appointment
-    const updateResult = await client.query(
-      `UPDATE vet_appointments
-       SET appointment_date = $2, appointment_time = $3, status = 'scheduled'
-       WHERE id = $1
-       RETURNING id, appointment_number, appointment_date, appointment_time`,
-      [id, new_date, new_time]
-    );
-
-    await client.query('COMMIT');
-
-    //logger.info('Appointment rescheduled', { appointmentId: id, oldDate: current.appointment_date, newDate: new_date });
-
-    res.json(successResponse(updateResult.rows[0], 'Appointment rescheduled successfully'));
-
-  } catch (err) {
-    await client.query('ROLLBACK');
-    //logger.error('Reschedule appointment failed', { error: err.message });
-    res.status(500).json({ status: 'error', message: 'Failed to reschedule appointment' });
-  } finally {
-    client.release();
   }
 };
 
@@ -1263,92 +1250,13 @@ const getAppointmentMedicalData = async (req, res) => {
 };
 
 
-// One-shot full appointment detail with related data (single DB query with JOINs & subqueries)
-const getFullAppointment = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await query(
-      `SELECT a.*, 
-              u.id as user_id, u.first_name as user_first_name, u.last_name as user_last_name, u.email as user_email, u.phone as user_phone,
-              p.id as pet_id, p.name as pet_name, p.age as pet_age, p.species as pet_species,
-              v.id as vet_id, vu.id as vet_user_id, vu.first_name as vet_first_name, vu.last_name as vet_last_name, v.specialization as vet_specialization,
-              c.id as clinic_id, c.name as clinic_name, c.contact_number as clinic_phone,
-              -- aggregate services for appointment
-              (
-                SELECT COALESCE(jsonb_agg(jsonb_build_object('id', vs.id, 'name', vs.name, 'code', vs.code, 'default_fee', vs.default_fee)), '[]'::jsonb)
-                FROM vet_services vs
-                WHERE vs.deleted_at IS NULL AND vs.id = ANY(
-                  SELECT (jsonb_array_elements(a.vet_service_ids)->>'service_id')::uuid
-                )
-              ) as services,
-              -- payments
-              (
-                SELECT COALESCE(jsonb_agg(jsonb_build_object('id', pay.id, 'payment_method', pay.payment_method, 'total_amount', pay.total_amount, 'paid_amount', pay.paid_amount, 'payment_status', pay.payment_status, 'transaction_id', pay.transaction_id)), '[]'::jsonb)
-                FROM vet_appointment_payments pay
-                WHERE pay.appointment_id = a.id
-              ) as payments,
-              -- medical records
-              (
-                SELECT COALESCE(jsonb_agg(row_to_json(m)), '[]'::jsonb)
-                FROM (
-                  SELECT id, record_date, record_type, diagnosis, symptoms, treatment_plan, followup_required, followup_date, notes
-                  FROM vet_medical_records WHERE appointment_id = a.id
-                ) m
-              ) as medical_records,
-              -- prescriptions
-              (
-                SELECT COALESCE(jsonb_agg(row_to_json(pr)), '[]'::jsonb)
-                FROM (
-                  SELECT id, prescription_number, prescription_date, valid_until, status, notes
-                  FROM vet_prescriptions WHERE appointment_id = a.id
-                ) pr
-              ) as prescriptions,
-              -- lab tests
-              (
-                SELECT COALESCE(jsonb_agg(row_to_json(lt)), '[]'::jsonb)
-                FROM (
-                  SELECT id, test_name, test_type, ordered_date, status, result_date, results
-                  FROM vet_lab_tests WHERE appointment_id = a.id
-                ) lt
-              ) as lab_tests,
-              -- vaccinations
-              (
-                SELECT COALESCE(jsonb_agg(row_to_json(vac)), '[]'::jsonb)
-                FROM (
-                  SELECT id, vaccine_name, vaccination_date, next_due_date, certificate_issued
-                  FROM vet_vaccinations WHERE appointment_id = a.id
-                ) vac
-              ) as vaccinations
-       FROM vet_appointments a
-       LEFT JOIN users u ON a.user_id = u.id
-       LEFT JOIN pets p ON a.pet_id = p.id
-       LEFT JOIN veterinarians v ON a.veterinarian_id = v.id
-       LEFT JOIN users vu ON v.user_id = vu.id
-       LEFT JOIN vet_clinics c ON a.clinic_id = c.id
-       WHERE a.id = $1 AND a.deleted_at IS NULL`,
-      [id]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ status: 'error', message: 'Appointment not found' });
-    }
-
-    res.json(successResponse(result.rows[0]));
-  } catch (err) {
-    console.error('Get full appointment failed:', err.message);
-    res.status(500).json({ status: 'error', message: 'Failed to fetch appointment' });
-  }
-};
-
 
 
 module.exports = {
   listAppointments,
-  getAppointmentById,
-  getFullAppointment,
-  getOwnerAppointmentsByFilter,
   getVetAppointmentsByFilter,
-  getVetAppointmentById,
+  getOwnerAppointmentsByFilter,
+  getAppointmentById,
   getPetWithAppointments,
   getPetAppointments,
   getAppointmentMedicalData,

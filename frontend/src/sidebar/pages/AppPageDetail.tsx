@@ -21,27 +21,28 @@ const AppPageDetail: React.FC = () => {
   const fetchPage = async (slug: string) => {
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       // Mock data - replace with your actual data source
       const mockPages: AppPage[] = [
         {
           id: 1,
           title: 'Privacy Policy',
           slug: 'privacy-policy',
-          content: '<h1>Privacy Policy</h1><p>This is our detailed privacy policy...</p>',
-          status: 'Active'
+          content:
+            '<h1>Privacy Policy</h1><p>This is our detailed privacy policy...</p>',
+          status: 'Active',
         },
         {
           id: 2,
           title: 'Terms and Conditions',
           slug: 'terms-conditions',
           content: '<h1>Terms</h1><p>These are our terms...</p>',
-          status: 'Active'
-        }
+          status: 'Active',
+        },
       ];
 
-      const foundPage = mockPages.find(p => p.slug === slug);
+      const foundPage = mockPages.find((p) => p.slug === slug);
       if (!foundPage) throw new Error('Page not found');
       return foundPage;
     } catch (err) {
@@ -67,21 +68,21 @@ const AppPageDetail: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className='flex justify-center items-center h-64'>
+        <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500'></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-4 max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
-          <p className="mb-4">{error}</p>
+      <div className='p-4 max-w-4xl mx-auto'>
+        <div className='bg-white rounded-lg shadow-md p-6 text-center'>
+          <h2 className='text-heading-lg text-red-600 mb-4'>Error</h2>
+          <p className='mb-4'>{error}</p>
           <button
             onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
+            className='px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300'
           >
             Go Back
           </button>
@@ -92,12 +93,12 @@ const AppPageDetail: React.FC = () => {
 
   if (!page) {
     return (
-      <div className="p-4 max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-          <h2 className="text-xl font-bold mb-4">Page Not Found</h2>
+      <div className='p-4 max-w-4xl mx-auto'>
+        <div className='bg-white rounded-lg shadow-md p-6 text-center'>
+          <h2 className='text-heading-lg mb-4'>Page Not Found</h2>
           <button
             onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
+            className='px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300'
           >
             Go Back
           </button>
@@ -107,18 +108,18 @@ const AppPageDetail: React.FC = () => {
   }
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
+    <div className='p-4 max-w-4xl mx-auto'>
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center mb-4 text-blue-600 hover:text-blue-800"
+        className='flex items-center mb-4 text-blue-600 hover:text-blue-800'
       >
-        <MdArrowBack className="mr-1" /> Back to Pages
+        <MdArrowBack className='mr-1' /> Back to Pages
       </button>
-      
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold mb-4">{page.title}</h1>
-        <div 
-          className="prose max-w-none"
+
+      <div className='bg-white rounded-lg shadow-md p-6'>
+        <h1 className='text-display-md mb-4'>{page.title}</h1>
+        <div
+          className='prose max-w-none'
           dangerouslySetInnerHTML={{ __html: page.content }}
         />
       </div>

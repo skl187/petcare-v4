@@ -17,25 +17,20 @@ const { createPrescription } = require('../medical-records/prescriptions.control
 // GET /api/appointments ADMINISTRATOR ONLY
 router.get('/', requireAuth, appointmentsController.listAppointments);
 
-// GET /api/appointments/full/:id ADMINISTRATOR ONLY
-router.get('/list/:id', requireAuth, appointmentsController.getFullAppointment);
-
 // GET /api/appointments/vet/list?filter=today | filter=upcoming | filter=past | filter=all OWNER ROUTE
 router.get('/vet/list', requireAuth, appointmentsController.getVetAppointmentsByFilter);
 
 // GET /api/appointments/owner/list?filter=today|upcoming|past|all&page=1&limit=20&status=* VET ROUTE
 router.get('/owner/list', requireAuth, appointmentsController.getOwnerAppointmentsByFilter);
 
-router.get('/vet/:id', requireAuth, appointmentsController.getVetAppointmentById);
+router.get('/:id', requireAuth, appointmentsController.getAppointmentById);
 
 // GET /api/appointments/pet/:pet_id/profile - Get complete pet profile with all appointments
 router.get('/pet/:pet_id/profile', requireAuth, appointmentsController.getPetWithAppointments);
 
 router.get('/pet/:pet_id', requireAuth, appointmentsController.getPetAppointments);
 
-router.get('/:appointmentId/medical-data', requireAuth, appointmentsController.getAppointmentMedicalData);
-
-router.get('/:id', requireAuth, appointmentsController.getAppointmentById);
+// router.get('/:appointmentId/medical-data', requireAuth, appointmentsController.getAppointmentMedicalData);
 
 router.post('/', requireAuth, appointmentsController.createAppointment);
 

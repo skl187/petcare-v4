@@ -461,9 +461,6 @@ export default function VeterinarianListTable() {
                   />
                 </TableCell>
                 <TableCell className='p-2 py-4 text-sm font-medium'>
-                  ID
-                </TableCell>
-                <TableCell className='p-2 py-4 text-sm font-medium'>
                   First Name
                 </TableCell>
                 <TableCell className='p-2 py-4 text-sm font-medium'>
@@ -498,9 +495,6 @@ export default function VeterinarianListTable() {
                       checked={selectedRows.includes(vet.id)}
                       onChange={() => toggleRowSelect(vet.id)}
                     />
-                  </TableCell>
-                  <TableCell className='p-2 py-4 text-sm text-gray-900 font-medium'>
-                    {vet.id}
                   </TableCell>
                   <TableCell className='p-2 py-4 text-sm text-gray-700'>
                     {vet.first_name}

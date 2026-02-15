@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import FormCard from '../../../components/form/FormCard';
+import DatePickerInput from '../../../components/form/DatePickerInput/DatePickerInput';
 import { API_ENDPOINTS } from '../../../constants/api';
 import {
   PetType,
@@ -472,23 +473,31 @@ export default function MyPetForm({
 
           {/* Date of Birth and Gender */}
           <div className='grid grid-cols-2 gap-4'>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Date of Birth <span className='text-red-500'>*</span>
-              </label>
-              <input
-                type='date'
-                {...register('dateOfBirth', {
-                  required: 'Date of birth is required',
-                })}
-                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-              />
-              {errors.dateOfBirth && (
-                <span className='text-red-500 text-sm'>
-                  {errors.dateOfBirth.message}
-                </span>
+            <Controller
+              name='dateOfBirth'
+              control={control}
+              rules={{ required: 'Date of birth is required' }}
+              render={({ field }) => (
+                <DatePickerInput
+                  label='Date of Birth'
+                  value={field.value ? new Date(field.value) : null}
+                  onChange={(date) => {
+                    if (date) {
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(
+                        2,
+                        '0',
+                      );
+                      const day = String(date.getDate()).padStart(2, '0');
+                      field.onChange(`${year}-${month}-${day}`);
+                    }
+                  }}
+                  onBlur={field.onBlur}
+                  required={true}
+                  error={errors.dateOfBirth?.message}
+                />
               )}
-            </div>
+            />
 
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-2'>

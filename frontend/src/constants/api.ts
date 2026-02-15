@@ -1,6 +1,6 @@
 // API Base URL from environment variables
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'https://api.bracepetcare.app';
+  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -19,6 +19,10 @@ export const API_ENDPOINTS = {
   PETS: {
     BASE: `${API_BASE_URL}/api/pets`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/pets/${id}`,
+  },
+
+  MY_PETS: {
+    BASE: `${API_BASE_URL}/api/pets/my-pets`,
   },
 
   // Pet Types
@@ -41,6 +45,13 @@ export const API_ENDPOINTS = {
   // Appointments
   APPOINTMENTS: {
     BASE: `${API_BASE_URL}/api/appointments`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/appointments/${id}`,
+  },
+
+  // Owner Bookings
+  OWNER_BOOKINGS: {
+    BASE: (filter: string = 'all') =>
+      `${API_BASE_URL}/api/appointments/owner/list?filter=${filter}`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/appointments/${id}`,
   },
 
@@ -85,6 +96,12 @@ export const API_ENDPOINTS = {
     ADDRESSES: (id: string) => `${API_BASE_URL}/api/users/${id}/addresses`,
     ADDRESS_DETAIL: (userId: string, addressId: string) =>
       `${API_BASE_URL}/api/users/${userId}/addresses/${addressId}`,
+  },
+
+  // Settings
+  SETTINGS: {
+    BASE: `${API_BASE_URL}/api/settings`,
+    DETAIL: (key: string) => `${API_BASE_URL}/api/settings?key=${key}`,
   },
 
   // Dashboard

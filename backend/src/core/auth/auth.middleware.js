@@ -1,5 +1,5 @@
 // src/core/auth/auth.middleware.js
-const { verifyToken, decodeToken } = require('./jwt.service');
+const { verifyToken } = require('./jwt.service');
 
 const authMiddleware = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -25,5 +25,4 @@ const requireAuth = (req, res, next) => {
   next();
 };
 
-module.exports = authMiddleware;
-module.exports.requireAuth = requireAuth;
+module.exports = { authMiddleware,requireAuth };

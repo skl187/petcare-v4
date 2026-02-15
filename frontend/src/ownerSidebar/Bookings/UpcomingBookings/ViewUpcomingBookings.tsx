@@ -3,14 +3,14 @@ import PageMeta from '../../../components/common/PageMeta';
 import ComponentCard from '../../../components/common/ComponentCard';
 import UpcomingBookingsTable from '../../../components/ownerTables/Bookings/UpcomingBookingsTable/UpcomingBookingsTable';
 import VeterinaryBookingsDetail from '../../../pages/VetPageForms/Veterinary/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
+import type { VetBooking } from '../../../components/vetTables/Veterinary/VeterninaryBookingsTable/VeterinaryBookingsTable';
 
 const ViewUpcomingBookings = () => {
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
-    string | null
-  >(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<VetBooking | null>(null);
 
   // If an appointment is selected, show the detail view
-  if (selectedAppointmentId) {
+  if (selectedAppointment) {
     return (
       <>
         <PageMeta
@@ -18,10 +18,10 @@ const ViewUpcomingBookings = () => {
           description='Appointment details and workflow'
         />
         <VeterinaryBookingsDetail
-          appointmentId={selectedAppointmentId}
+          appointmentData={selectedAppointment}
           readOnly={true}
           onBack={() => {
-            setSelectedAppointmentId(null);
+            setSelectedAppointment(null);
           }}
         />
       </>
@@ -38,7 +38,8 @@ const ViewUpcomingBookings = () => {
       <div className='space-y-6 p-4'>
         <ComponentCard title='ViewUpcomingBookings'>
           <UpcomingBookingsTable
-            onSelectAppointment={setSelectedAppointmentId}
+            filter='upcoming'
+            onSelectAppointment={setSelectedAppointment}
           />
         </ComponentCard>
       </div>

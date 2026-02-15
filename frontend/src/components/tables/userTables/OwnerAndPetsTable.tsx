@@ -102,11 +102,6 @@ export default function OwnerAndPetsTable() {
 
   const columns = [
     {
-      key: 'id' as keyof OwnerAndPet,
-      label: 'ID',
-      className: 'min-w-[80px] text-gray-700 font-semibold max-w-[105px]',
-    },
-    {
       key: 'first_name' as keyof OwnerAndPet,
       label: 'Name',
       className: 'min-w-[200px] text-gray-700 font-semibold max-w-[250px]',
@@ -345,9 +340,6 @@ export default function OwnerAndPetsTable() {
                       checked={selectedRows.includes(owner.id)}
                       onChange={() => toggleSelectRow(owner.id)}
                     />
-                  </TableCell>
-                  <TableCell className='p-2 py-4 text-sm text-gray-900 font-medium'>
-                    #{owner.id}
                   </TableCell>
                   <TableCell className='p-2 py-4'>
                     <div className='flex items-center gap-3'>

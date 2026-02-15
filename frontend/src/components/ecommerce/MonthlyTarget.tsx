@@ -20,11 +20,13 @@ const formatCurrency = (value: number): string => {
 export default function MonthlyTarget({ data }: Props) {
   const monthlyRevenue = parseFloat(data?.revenue?.revenue_last_30_days || '0');
   const todayRevenue = parseFloat(data?.revenue?.revenue_today || '0');
-  const _totalRevenue = parseFloat(data?.revenue?.total_revenue || '0');
 
   // Calculate progress (assuming a monthly target of 50K or use actual data)
   const monthlyTarget = 50000;
-  const progressPercentage = Math.min(Math.round((monthlyRevenue / monthlyTarget) * 100), 100);
+  const progressPercentage = Math.min(
+    Math.round((monthlyRevenue / monthlyTarget) * 100),
+    100,
+  );
 
   const series = [progressPercentage];
   const options: ApexOptions = {
@@ -124,7 +126,8 @@ export default function MonthlyTarget({ data }: Props) {
           </div>
 
           <span className='absolute left-1/2 top-full -translate-x-1/2 -translate-y-[95%] rounded-full bg-success-50 px-3 py-1 text-xs font-medium text-success-600 dark:bg-success-500/15 dark:text-success-500'>
-            {progressPercentage >= 50 ? '+' : ''}{progressPercentage}% of target
+            {progressPercentage >= 50 ? '+' : ''}
+            {progressPercentage}% of target
           </span>
         </div>
         <p className='mx-auto mt-10 w-full max-w-[380px] text-center text-sm text-gray-500 sm:text-base'>

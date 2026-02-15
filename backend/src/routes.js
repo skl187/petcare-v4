@@ -15,6 +15,9 @@ const permissionsRoutes = require('./modules/permissions/permissions.routes');
 const medicalRecordsRoutes = require("./modules/medical-records/medical-records.routes");
 const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
 const reviewsRoutes = require("./modules/reviews/reviews.routes");
+const settingsRoutes = require("./modules/settings/settings.routes");
+const notificationChannelsRoutes = require("./modules/notification-channels/notification-channels.routes");
+const notificationsRoutes = require("./modules/notifications/notifications.routes");
 
 const router = express.Router();
 
@@ -32,5 +35,9 @@ router.use('/permissions', permissionsRoutes);
 router.use('/medical-records', medicalRecordsRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/reviews', reviewsRoutes);
+router.use('/settings', settingsRoutes);
+router.use('/setting', settingsRoutes);
+router.use('/notification-channels', notificationChannelsRoutes);
+router.use('/notifications', notificationsRoutes);
 
 module.exports = router;

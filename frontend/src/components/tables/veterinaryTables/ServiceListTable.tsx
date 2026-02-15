@@ -388,9 +388,6 @@ const ServiceListTable = () => {
                     onChange={toggleSelectAll}
                   />
                 </TableCell>
-                <TableCell className='p-2 py-3 text-left text-sm text-gray-700 font-medium min-w-[80px]'>
-                  ID
-                </TableCell>
                 <TableCell className='p-2 py-3 text-left text-sm text-gray-700 font-medium min-w-[100px]'>
                   Code
                 </TableCell>
@@ -433,9 +430,6 @@ const ServiceListTable = () => {
                         checked={selectedRows.includes(service.id)}
                         onChange={() => toggleRowSelect(service.id)}
                       />
-                    </TableCell>
-                    <TableCell className='p-2 py-4 text-sm text-gray-900 font-medium'>
-                      #{service.id}
                     </TableCell>
                     <TableCell className='p-2 py-4 text-sm text-gray-900 font-medium'>
                       {service.code}

@@ -127,11 +127,6 @@ export default function VetBookingsTable() {
 
   const columns = [
     {
-      key: 'id',
-      label: 'ID',
-      className: 'min-w-[80px] text-gray-700 font-semibold max-w-[105px]',
-    },
-    {
       key: 'appointment_number',
       label: 'Appointment #',
       className: 'min-w-[150px] text-gray-700 font-semibold max-w-[200px]',

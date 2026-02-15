@@ -1,21 +1,21 @@
-import { MdEdit, MdDelete } from "react-icons/md";
-import { useState, useEffect } from "react";
+import { MdEdit, MdDelete } from 'react-icons/md';
+import { useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../../ui/table";
-import Badge from "../../ui/badge/Badge";
-import Checkbox from "../../form/input/Checkbox";
-import PermissionForm from "../../../pages/Forms/PermissionForms/PermissionForm";
-import Pagination from "../tableComponents/Pagination";
-import useSort from "../../../hooks/useSort";
-import SortableTableHeader from "../tableComponents/SortableTableHeader";
-import { TableToolbar } from "../tableComponents/TableToolbar";
-import DeleteDialog from "../tableComponents/DeleteDailog";
-import { API_ENDPOINTS } from "../../../constants/api";
+} from '../../ui/table';
+import Badge from '../../ui/badge/Badge';
+import Checkbox from '../../form/input/Checkbox';
+import PermissionForm from '../../../pages/Forms/PermissionForms/PermissionForm';
+import Pagination from '../tableComponents/Pagination';
+import useSort from '../../../hooks/useSort';
+import SortableTableHeader from '../tableComponents/SortableTableHeader';
+import { TableToolbar } from '../tableComponents/TableToolbar';
+import DeleteDialog from '../tableComponents/DeleteDailog';
+import { API_ENDPOINTS } from '../../../constants/api';
 
 export interface Permission {
   id: string;
@@ -29,59 +29,61 @@ export interface Permission {
 
 export default function PermissionsTable() {
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editPermission, setEditPermission] = useState<Permission | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [permissions, setPermissions] = useState<Permission[]>([]);
-  const [permissionToDelete, setPermissionToDelete] = useState<string | null>(null);
+  const [permissionToDelete, setPermissionToDelete] = useState<string | null>(
+    null,
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [resourceFilter, setResourceFilter] = useState("");
+  const [resourceFilter, setResourceFilter] = useState('');
   const [resources, setResources] = useState<string[]>([]);
 
   const columns = [
     {
-      key: "name",
-      label: "Name",
-      className: "min-w-[200px] text-gray-700 font-semibold max-w-[300px]",
+      key: 'name',
+      label: 'Name',
+      className: 'min-w-[200px] text-gray-700 font-semibold max-w-[300px]',
     },
     {
-      key: "action",
-      label: "Action",
-      className: "min-w-[100px] text-gray-700 max-w-[150px]",
+      key: 'action',
+      label: 'Action',
+      className: 'min-w-[100px] text-gray-700 max-w-[150px]',
     },
     {
-      key: "resource",
-      label: "Resource",
-      className: "min-w-[120px] text-gray-700 max-w-[150px]",
+      key: 'resource',
+      label: 'Resource',
+      className: 'min-w-[120px] text-gray-700 max-w-[150px]',
     },
     {
-      key: "description",
-      label: "Description",
-      className: "min-w-[200px] text-gray-700 max-w-[400px]",
+      key: 'description',
+      label: 'Description',
+      className: 'min-w-[200px] text-gray-700 max-w-[400px]',
     },
   ] as const;
 
   // Fetch resources for filter dropdown
   const fetchResources = async () => {
     try {
-      const token = sessionStorage.getItem("token");
+      const token = sessionStorage.getItem('token');
       const response = await fetch(API_ENDPOINTS.PERMISSIONS.RESOURCES, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       });
       const data = await response.json();
-      if (data.status === "success") {
+      if (data.status === 'success') {
         setResources(data.data.resources);
       }
     } catch (err) {
-      console.error("Error fetching resources:", err);
+      console.error('Error fetching resources:', err);
     }
   };
 
@@ -90,7 +92,7 @@ export default function PermissionsTable() {
     setLoading(true);
     setError(null);
     try {
-      const token = sessionStorage.getItem("token");
+      const token = sessionStorage.getItem('token');
       let url = `${API_ENDPOINTS.PERMISSIONS.BASE}?page=${currentPage}&limit=${itemsPerPage}`;
       if (searchQuery) url += `&search=${searchQuery}`;
       if (resourceFilter) url += `&resource=${resourceFilter}`;
@@ -98,19 +100,19 @@ export default function PermissionsTable() {
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       });
       const data = await response.json();
-      if (data.status === "success") {
+      if (data.status === 'success') {
         setPermissions(data.data.permissions);
         setTotalItems(data.data.meta.total);
       } else {
-        setError(data.message || "Failed to fetch permissions");
+        setError(data.message || 'Failed to fetch permissions');
       }
     } catch (err) {
-      console.error("Error fetching permissions:", err);
-      setError("Failed to fetch permissions");
+      console.error('Error fetching permissions:', err);
+      setError('Failed to fetch permissions');
     } finally {
       setLoading(false);
     }
@@ -127,8 +129,8 @@ export default function PermissionsTable() {
   const filteredData = permissions;
 
   const { sortedData, requestSort, sortConfig } = useSort(filteredData, {
-    key: "name",
-    direction: "asc",
+    key: 'name',
+    direction: 'asc',
   });
 
   const handlePageChange = (page: number) => {
@@ -142,7 +144,7 @@ export default function PermissionsTable() {
 
   const toggleSelectRow = (id: string) => {
     setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id],
     );
   };
 
@@ -150,7 +152,7 @@ export default function PermissionsTable() {
     setSelectedRows(
       selectedRows.length === permissions.length
         ? []
-        : permissions.map((row) => row.id)
+        : permissions.map((row) => row.id),
     );
   };
 
@@ -158,16 +160,16 @@ export default function PermissionsTable() {
     if (!permissionToDelete) return;
 
     try {
-      const token = sessionStorage.getItem("token");
+      const token = sessionStorage.getItem('token');
       const response = await fetch(
         API_ENDPOINTS.PERMISSIONS.DETAIL(permissionToDelete),
         {
-          method: "DELETE",
+          method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -177,19 +179,19 @@ export default function PermissionsTable() {
         setPermissionToDelete(null);
       }
     } catch (err) {
-      console.error("Error deleting permission:", err);
+      console.error('Error deleting permission:', err);
     }
   };
 
   const handleBulkDelete = async () => {
     try {
-      const token = sessionStorage.getItem("token");
+      const token = sessionStorage.getItem('token');
       for (const id of selectedRows) {
         await fetch(API_ENDPOINTS.PERMISSIONS.DETAIL(id), {
-          method: "DELETE",
+          method: 'DELETE',
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
         });
       }
@@ -198,7 +200,7 @@ export default function PermissionsTable() {
       setSelectedRows([]);
       setIsDeleteDialogOpen(false);
     } catch (err) {
-      console.error("Error deleting permissions:", err);
+      console.error('Error deleting permissions:', err);
     }
   };
 
@@ -210,15 +212,16 @@ export default function PermissionsTable() {
   };
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+    <div className='overflow-hidden rounded-xl border border-gray-200 bg-white'>
       <TableToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search permissions..."
+        searchPlaceholder='Search permissions...'
         onAddNew={() => setIsAddDialogOpen(true)}
-        addButtonLabel="Add Permission"
+        addButtonLabel='Add Permission'
         selectedRowsCount={selectedRows.length}
         onBulkActionChange={() => {}}
+        onFilterChange={setResourceFilter}
         onApplyAction={() => {
           setPermissionToDelete(null);
           setIsDeleteDialogOpen(true);
@@ -231,9 +234,9 @@ export default function PermissionsTable() {
             setResourceFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white"
+          className='px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white'
         >
-          <option value="">All Resources</option>
+          <option value=''>All Resources</option>
           {resources.map((resource) => (
             <option key={resource} value={resource}>
               {resource}
@@ -242,13 +245,13 @@ export default function PermissionsTable() {
         </select>
       </TableToolbar>
 
-      <div className="max-w-full overflow-x-auto">
+      <div className='max-w-full overflow-x-auto'>
         <Table>
-          <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
+          <TableHeader className='border-b border-gray-100 dark:border-white/[0.05]'>
             <TableRow>
               <TableCell
                 isHeader
-                className="py-3 font-semibold text-start text-theme-xs text-gray-500"
+                className='py-3 font-semibold text-start text-theme-xs text-gray-500'
               >
                 <Checkbox
                   checked={
@@ -270,18 +273,18 @@ export default function PermissionsTable() {
               ))}
               <TableCell
                 isHeader
-                className="py-3 font-semibold text-start text-theme-xs text-gray-500 min-w-[100px]"
+                className='py-3 font-semibold text-start text-theme-xs text-gray-500 min-w-[100px]'
               >
                 Actions
               </TableCell>
             </TableRow>
           </TableHeader>
 
-          <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+          <TableBody className='divide-y divide-gray-100 dark:divide-white/[0.05]'>
             {loading ? (
               <TableRow>
                 <TableCell
-                  className="py-8 text-center text-gray-500"
+                  className='py-8 text-center text-gray-500'
                   colSpan={6}
                 >
                   Loading...
@@ -290,7 +293,7 @@ export default function PermissionsTable() {
             ) : error ? (
               <TableRow>
                 <TableCell
-                  className="py-8 text-center text-red-500"
+                  className='py-8 text-center text-red-500'
                   colSpan={6}
                 >
                   {error}
@@ -299,7 +302,7 @@ export default function PermissionsTable() {
             ) : sortedData.length === 0 ? (
               <TableRow>
                 <TableCell
-                  className="py-8 text-center text-gray-500"
+                  className='py-8 text-center text-gray-500'
                   colSpan={6}
                 >
                   No permissions found
@@ -308,44 +311,44 @@ export default function PermissionsTable() {
             ) : (
               sortedData.map((permission) => (
                 <TableRow key={permission.id}>
-                  <TableCell className="py-3 text-gray-500 text-theme-sm">
+                  <TableCell className='py-3 text-gray-500 text-theme-sm'>
                     <Checkbox
                       checked={selectedRows.includes(permission.id)}
                       onChange={() => toggleSelectRow(permission.id)}
                     />
                   </TableCell>
-                  <TableCell className="py-3 text-gray-800 text-theme-sm font-medium">
+                  <TableCell className='py-3 text-gray-800 text-theme-sm font-medium'>
                     {permission.name}
                   </TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className='py-3'>
                     {permission.action ? (
-                      <Badge variant="light" color="info" size="sm">
+                      <Badge variant='light' color='info' size='sm'>
                         {permission.action}
                       </Badge>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className='text-gray-400'>—</span>
                     )}
                   </TableCell>
-                  <TableCell className="py-3">
+                  <TableCell className='py-3'>
                     {permission.resource ? (
-                      <Badge variant="light" color="primary" size="sm">
+                      <Badge variant='light' color='primary' size='sm'>
                         {permission.resource}
                       </Badge>
                     ) : (
-                      <span className="text-gray-400">General</span>
+                      <span className='text-gray-400'>General</span>
                     )}
                   </TableCell>
-                  <TableCell className="py-3 text-gray-600 text-theme-sm">
+                  <TableCell className='py-3 text-gray-600 text-theme-sm'>
                     {permission.description || (
-                      <span className="text-gray-400">—</span>
+                      <span className='text-gray-400'>—</span>
                     )}
                   </TableCell>
-                  <TableCell className="py-3">
-                    <div className="flex items-center gap-2">
+                  <TableCell className='py-3'>
+                    <div className='flex items-center gap-2'>
                       <button
                         onClick={() => setEditPermission(permission)}
-                        className="p-1.5 text-gray-500 hover:text-brand-500 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Edit"
+                        className='p-1.5 text-gray-500 hover:text-brand-500 hover:bg-gray-100 rounded-lg transition-colors'
+                        title='Edit'
                       >
                         <MdEdit size={18} />
                       </button>
@@ -354,8 +357,8 @@ export default function PermissionsTable() {
                           setPermissionToDelete(permission.id);
                           setIsDeleteDialogOpen(true);
                         }}
-                        className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-gray-100 rounded-lg transition-colors"
-                        title="Delete"
+                        className='p-1.5 text-gray-500 hover:text-red-500 hover:bg-gray-100 rounded-lg transition-colors'
+                        title='Delete'
                       >
                         <MdDelete size={18} />
                       </button>
@@ -397,7 +400,7 @@ export default function PermissionsTable() {
         }}
         onConfirm={permissionToDelete ? handleDelete : handleBulkDelete}
         multipleCount={permissionToDelete ? 1 : selectedRows.length}
-        itemLabel="permission"
+        itemLabel='permission'
       />
     </div>
   );

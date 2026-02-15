@@ -101,6 +101,27 @@
   "message": "Reviews retrieved successfully"
 }
 ```
+
+```json
+curl -X POST http://localhost:3000/api/settings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "namespace": "tenant_acme",
+    "key": "smtp_config",
+    "value": {
+      "host": "smtp.office365.com",
+      "port": 587,
+      "secure": false,
+      "username": "notifications@acme.com",
+      "password": "acme-smtp-password-123",
+      "from_name": "Acme Corp",
+      "from_email": "notifications@acme.com"
+    },
+    "description": "SMTP configuration for Acme Corp tenant",
+    "is_secret": true,
+    "is_active": true
+  }'
+  ```
 </pre>
             </div>
         </div>

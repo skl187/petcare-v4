@@ -1,31 +1,31 @@
-import { MdEdit, MdDelete, MdAdd } from "react-icons/md";
-import { useState } from "react";
+import { MdEdit, MdDelete, MdAdd } from 'react-icons/md';
+import { useState } from 'react';
 import {
   Table,
   TableBody,
   TableCell,
   TableHeader,
   TableRow,
-} from "../../ui/table";
-import Badge from "../../ui/badge/Badge";
-import Checkbox from "../../form/input/Checkbox";
-import SystemServiceForm from "../../../pages/Forms/SystemServiceForm/SystemServicesForm";
-import { SystemServiceFormData } from "../../../pages/Forms/SystemServiceForm/SystemServicesForm";
-import Pagination from "../tableComponents/Pagination";
-import useSort from "../../../hooks/useSort";
-import SortableTableHeader from "../tableComponents/SortableTableHeader";
-import { TableToolbar } from "../tableComponents/TableToolbar";
-import Switch from "../../form/switch/Switch";
-import { IoIosCloseCircle, IoIosCheckmarkCircle } from "react-icons/io";
-import ImageHoverPreview from "../tableComponents/ImageHoverPreview";
-import DeleteDialog from "../tableComponents/DeleteDailog";
+} from '../../ui/table';
+import Badge from '../../ui/badge/Badge';
+import Checkbox from '../../form/input/Checkbox';
+import SystemServiceForm from '../../../pages/Forms/SystemServiceForm/SystemServicesForm';
+import { SystemServiceFormData } from '../../../pages/Forms/SystemServiceForm/SystemServicesForm';
+import Pagination from '../tableComponents/Pagination';
+import useSort from '../../../hooks/useSort';
+import SortableTableHeader from '../tableComponents/SortableTableHeader';
+import { TableToolbar } from '../tableComponents/TableToolbar';
+import Switch from '../../form/switch/Switch';
+import { IoIosCloseCircle, IoIosCheckmarkCircle } from 'react-icons/io';
+import ImageHoverPreview from '../tableComponents/ImageHoverPreview';
+import DeleteDialog from '../tableComponents/DeleteDailog';
 
 export interface SystemService {
   id: number;
   name: string;
   image: string;
   description: string;
-  status: "Active" | "Inactive";
+  status: 'Active' | 'Inactive';
 }
 
 // Mock data for system services
@@ -34,15 +34,15 @@ const mockServices: SystemService[] = Array.from({ length: 10 }, (_, i) => ({
   name: `Service ${i + 1}`,
   image: `/images/services/service-${(i % 5) + 1}.jpg`,
   description: `Description for service ${i + 1} providing important functionality`,
-  status: i % 3 !== 0 ? "Active" : "Inactive",
+  status: i % 3 !== 0 ? 'Active' : 'Inactive',
 }));
 
 export default function SystemServicesTable() {
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [actionDropdown, setActionDropdown] = useState<string>("No actions");
-  const [statusUpdate, setStatusUpdate] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [actionDropdown, setActionDropdown] = useState<string>('No actions');
+  const [statusUpdate, setStatusUpdate] = useState<string>('');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editService, setEditService] = useState<SystemService | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -53,40 +53,36 @@ export default function SystemServicesTable() {
 
   const columns = [
     {
-      key: "id",
-      label: "ID",
-      className: "min-w-[80px] text-gray-700 font-semibold max-w-[105px]",
+      key: 'name',
+      label: 'Name',
+      className: 'min-w-[200px] text-gray-700 font-semibold max-w-[300px]',
     },
     {
-      key: "name",
-      label: "Name",
-      className: "min-w-[200px] text-gray-700 font-semibold max-w-[300px]",
+      key: 'description',
+      label: 'Description',
+      className: 'min-w-[250px] text-gray-700 max-w-[400px]',
     },
     {
-      key: "description",
-      label: "Description",
-      className: "min-w-[250px] text-gray-700 max-w-[400px]",
-    },
-    {
-      key: "status",
-      label: "Status",
-      className: "min-w-[100px] max-w-[200px] text-gray-700 font-semibold",
+      key: 'status',
+      label: 'Status',
+      className: 'min-w-[100px] max-w-[200px] text-gray-700 font-semibold',
     },
   ] as const;
 
   // Filtered data based on search and status
   const filteredData = services
-    .filter((service) =>
-      service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter(
+      (service) =>
+        service.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        service.description.toLowerCase().includes(searchQuery.toLowerCase()),
     )
     .filter((service) =>
-      statusFilter ? service.status === statusFilter : true
+      statusFilter ? service.status === statusFilter : true,
     );
 
   const { sortedData, requestSort, sortConfig } = useSort(filteredData, {
-    key: "id",
-    direction: "asc",
+    key: 'id',
+    direction: 'asc',
   });
 
   // Pagination logic
@@ -105,7 +101,7 @@ export default function SystemServicesTable() {
 
   const toggleSelectRow = (id: number) => {
     setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id],
     );
   };
 
@@ -113,18 +109,18 @@ export default function SystemServicesTable() {
     setSelectedRows(
       selectedRows.length === services.length
         ? []
-        : services.map((row) => row.id)
+        : services.map((row) => row.id),
     );
   };
 
   const handleApplyAction = () => {
-    if (actionDropdown === "Delete") {
+    if (actionDropdown === 'Delete') {
       handleDelete();
-    } else if (actionDropdown === "Status" && statusUpdate) {
+    } else if (actionDropdown === 'Status' && statusUpdate) {
       const updatedServices = services.map((service) =>
         selectedRows.includes(service.id)
-          ? { ...service, status: statusUpdate as "Active" | "Inactive" }
-          : service
+          ? { ...service, status: statusUpdate as 'Active' | 'Inactive' }
+          : service,
       );
       setServices(updatedServices);
       setSelectedRows([]);
@@ -145,11 +141,11 @@ export default function SystemServicesTable() {
 
     if (serviceToDelete) {
       updatedServices = services.filter(
-        (service) => service.id !== serviceToDelete
+        (service) => service.id !== serviceToDelete,
       );
     } else {
       updatedServices = services.filter(
-        (service) => !selectedRows.includes(service.id)
+        (service) => !selectedRows.includes(service.id),
       );
     }
 
@@ -173,10 +169,10 @@ export default function SystemServicesTable() {
         service.id === id
           ? {
               ...service,
-              status: service.status === "Active" ? "Inactive" : "Active",
+              status: service.status === 'Active' ? 'Inactive' : 'Active',
             }
-          : service
-      )
+          : service,
+      ),
     );
   };
 
@@ -184,9 +180,10 @@ export default function SystemServicesTable() {
     const newService: SystemService = {
       id: services.length + 1,
       name: data.name,
-      image: data.image instanceof File 
-        ? URL.createObjectURL(data.image) 
-        : `/images/services/service-${(services.length % 5) + 1}.jpg`,
+      image:
+        data.image instanceof File
+          ? URL.createObjectURL(data.image)
+          : `/images/services/service-${(services.length % 5) + 1}.jpg`,
       description: data.description,
       status: data.status,
     };
@@ -200,41 +197,42 @@ export default function SystemServicesTable() {
         ? {
             ...service,
             name: data.name,
-            image: data.image instanceof File
-              ? URL.createObjectURL(data.image)
-              : service.image,
+            image:
+              data.image instanceof File
+                ? URL.createObjectURL(data.image)
+                : service.image,
             description: data.description,
             status: data.status,
           }
-        : service
+        : service,
     );
     setServices(updatedServices);
     setEditService(null);
   };
 
   return (
-    <div className="p-4 bg-white rounded-xl shadow-md">
+    <div className='p-4 bg-white rounded-xl shadow-md'>
       {/* Header Section */}
       <TableToolbar
         onAddNew={handleAddNew}
-        addButtonLabel="Add Service"
-        addButtonIcon={<MdAdd className="w-5 h-5" />}
+        addButtonLabel='Add Service'
+        addButtonIcon={<MdAdd className='w-5 h-5' />}
         selectedRowsCount={selectedRows.length}
         bulkActionsOptions={
           <>
-            <option value="No actions">No actions</option>
-            <option value="Delete">Delete</option>
-            <option value="Status">Status</option>
+            <option value='No actions'>No actions</option>
+            <option value='Delete'>Delete</option>
+            <option value='Status'>Status</option>
           </>
         }
         statusUpdateOptions={
           <>
-            <option value="">Select Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+            <option value=''>Select Status</option>
+            <option value='Active'>Active</option>
+            <option value='Inactive'>Inactive</option>
           </>
         }
-        showStatusDropdown={actionDropdown === "Status"}
+        showStatusDropdown={actionDropdown === 'Status'}
         onBulkActionChange={setActionDropdown}
         onStatusUpdateChange={setStatusUpdate}
         onApplyAction={handleApplyAction}
@@ -242,12 +240,12 @@ export default function SystemServicesTable() {
         statusUpdateValue={statusUpdate}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        searchPlaceholder="Search services..."
+        searchPlaceholder='Search services...'
         filterOptions={
           <>
-            <option value="">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+            <option value=''>All Status</option>
+            <option value='Active'>Active</option>
+            <option value='Inactive'>Inactive</option>
           </>
         }
         onFilterChange={setStatusFilter}
@@ -255,12 +253,12 @@ export default function SystemServicesTable() {
       />
 
       {/* Table */}
-      <div className="w-full overflow-x-auto rounded-lg border border-gray-200">
-        <div className="min-w-[800px]">
-          <Table className="w-full">
-            <TableHeader className="bg-gray-50">
+      <div className='w-full overflow-x-auto rounded-lg border border-gray-200'>
+        <div className='min-w-[800px]'>
+          <Table className='w-full'>
+            <TableHeader className='bg-gray-50'>
               <TableRow>
-                <TableCell className="w-10 p-2 py-3">
+                <TableCell className='w-10 p-2 py-3'>
                   <Checkbox
                     checked={selectedRows.length === services.length}
                     onChange={toggleSelectAll}
@@ -276,7 +274,7 @@ export default function SystemServicesTable() {
                     className={`p-2 py-4 text-left text-sm text-gray-100 font-medium ${column.className}`}
                   />
                 ))}
-                <TableCell className="w-24 p-2 py-4 text-sm font-medium">
+                <TableCell className='w-24 p-2 py-4 text-sm font-medium'>
                   Actions
                 </TableCell>
               </TableRow>
@@ -284,59 +282,65 @@ export default function SystemServicesTable() {
 
             <TableBody>
               {currentItems.map((service) => (
-                <TableRow key={service.id} className="hover:bg-gray-50">
-                  <TableCell className="p-2 py-4">
+                <TableRow key={service.id} className='hover:bg-gray-50'>
+                  <TableCell className='p-2 py-4'>
                     <Checkbox
                       checked={selectedRows.includes(service.id)}
                       onChange={() => toggleSelectRow(service.id)}
                     />
                   </TableCell>
-                  <TableCell className="p-2 py-4 text-sm text-gray-900 font-medium">
-                    #{service.id}
-                  </TableCell>
-                  <TableCell className="p-2 py-4">
-                    <div className="flex items-center gap-3">
+
+                  <TableCell className='p-2 py-4'>
+                    <div className='flex items-center gap-3'>
                       <ImageHoverPreview
                         src={service.image}
                         alt={service.name}
-                        className="w-10 h-10 rounded-full object-cover"
+                        className='w-10 h-10 rounded-full object-cover'
                       />
                       <div>
-                        <div className="font-medium text-gray-900">{service.name}</div>
+                        <div className='font-medium text-gray-900'>
+                          {service.name}
+                        </div>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="p-2 py-4 text-sm text-gray-500">
+                  <TableCell className='p-2 py-4 text-sm text-gray-500'>
                     {service.description}
                   </TableCell>
-                  <TableCell className="p-2 py-4">
-                    <div className="flex items-center gap-3">
+                  <TableCell className='p-2 py-4'>
+                    <div className='flex items-center gap-3'>
                       <Badge
-                        size="sm"
-                        color={service.status === "Active" ? "success" : "error"}
+                        size='sm'
+                        color={
+                          service.status === 'Active' ? 'success' : 'error'
+                        }
                       >
-                        {service.status === "Active" ? <IoIosCheckmarkCircle/> : <IoIosCloseCircle/> }
+                        {service.status === 'Active' ? (
+                          <IoIosCheckmarkCircle />
+                        ) : (
+                          <IoIosCloseCircle />
+                        )}
                       </Badge>
                       <Switch
-                        label=""
-                        checked={service.status === "Active"}
+                        label=''
+                        checked={service.status === 'Active'}
                         onChange={() => toggleStatus(service.id)}
                       />
                     </div>
                   </TableCell>
-                  <TableCell className="p-2 py-4">
-                    <div className="flex gap-2">
+                  <TableCell className='p-2 py-4'>
+                    <div className='flex gap-2'>
                       <button
                         onClick={() => handleEdit(service)}
-                        className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                        className='text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50'
                       >
-                        <MdEdit className="w-5 h-5" />
+                        <MdEdit className='w-5 h-5' />
                       </button>
                       <button
                         onClick={() => handleDelete(service.id)}
-                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                        className='text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50'
                       >
-                        <MdDelete className="w-5 h-5" />
+                        <MdDelete className='w-5 h-5' />
                       </button>
                     </div>
                   </TableCell>
@@ -368,17 +372,17 @@ export default function SystemServicesTable() {
       ) : null}
 
       {/* Delete Dialog */}
-       <DeleteDialog
-  isOpen={isDeleteDialogOpen}
-  onClose={() => setIsDeleteDialogOpen(false)}
-  onConfirm={confirmDelete}
-  itemLabel="Vet Booking"
-  description={
-    selectedRows.length > 1
-      ? `Are you sure you want to delete ${selectedRows.length} selected services?`
-      : "Are you sure you want to delete this service?"
-  }
-/>
+      <DeleteDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={confirmDelete}
+        itemLabel='Vet Booking'
+        description={
+          selectedRows.length > 1
+            ? `Are you sure you want to delete ${selectedRows.length} selected services?`
+            : 'Are you sure you want to delete this service?'
+        }
+      />
     </div>
   );
 }
