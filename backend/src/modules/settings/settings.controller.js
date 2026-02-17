@@ -1,5 +1,6 @@
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const { loadSettings } = require('../../core/settings/settings.service');
 
 const list = async (req, res) => {
   try {
@@ -47,6 +48,8 @@ const create = async (req, res) => {
       [namespace, key, value || null, description || null, is_secret === true, is_active === undefined ? true : is_active, (req.user && req.user.id) || null]
     );
 
+    // refresh in-memory settings cache
+    await loadSettings();
     res.status(201).json(successResponse(result.rows[0], 'Created', 201));
   } catch (err) {
     res.status(500).json({ status: 'error', message: `Failed to create: ${err.message}` });
@@ -102,6 +105,8 @@ const update = async (req, res) => {
     }
 
     if (result.rows.length === 0) return res.status(404).json({ status: 'error', message: 'Not found' });
+    // refresh cache after change
+    await loadSettings();
     res.json(successResponse(result.rows[0], 'Updated'));
   } catch (err) {
     res.status(500).json({ status: 'error', message: `Failed to update: ${err.message}` });
@@ -117,6 +122,8 @@ const remove = async (req, res) => {
     );
 
     if (result.rows.length === 0) return res.status(404).json({ status: 'error', message: 'Not found' });
+    // refresh cache after delete
+    await loadSettings();
     res.json(successResponse(null, 'Deleted'));
   } catch (err) {
     res.status(500).json({ status: 'error', message: 'Failed to delete' });

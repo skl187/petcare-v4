@@ -1,25 +1,37 @@
 // src/core/email/email.service.js
 const nodemailer = require('nodemailer');
 const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, CLIENT_URL, NODE_ENV } = require('../../config/env');
+const { getSetting } = require('../settings/settings.service');
 
 let transporter = null;
 
+const resolveSmtpConfig = () => {
+  const smtpCfg = getSetting('smtp_config') || {};
+  return {
+    host: smtpCfg.host || SMTP_HOST,
+    port: smtpCfg.port ? parseInt(smtpCfg.port) : SMTP_PORT,
+    user: smtpCfg.username || smtpCfg.user || SMTP_USER,
+    pass: smtpCfg.password || SMTP_PASS,
+    secure: typeof smtpCfg.secure === 'boolean' ? smtpCfg.secure : (smtpCfg.port ? parseInt(smtpCfg.port) === 465 : SMTP_PORT === 465),
+    from: smtpCfg.from_email || smtpCfg.from || SMTP_FROM
+  };
+};
+
 const getTransporter = () => {
   if (!transporter) {
+    const cfg = resolveSmtpConfig();
+
     // In development without SMTP config, skip transporter
-    if (NODE_ENV !== 'production' && !SMTP_HOST) {
-      console.log('[email] No SMTP configured, emails will be logged to console');
+    if (NODE_ENV !== 'production' && !cfg.host) {
+      console.log('[email] No SMTP configured (env or DB), emails will be logged to console');
       return null;
     }
 
     transporter = nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: SMTP_PORT,
-      secure: SMTP_PORT === 465,
-      auth: {
-        user: SMTP_USER,
-        pass: SMTP_PASS
-      }
+      host: cfg.host,
+      port: cfg.port,
+      secure: cfg.secure,
+      auth: cfg.user || cfg.pass ? { user: cfg.user, pass: cfg.pass } : undefined
     });
   }
   return transporter;
@@ -27,6 +39,7 @@ const getTransporter = () => {
 
 const sendEmail = async ({ to, subject, html, text }) => {
   const transport = getTransporter();
+  const cfg = resolveSmtpConfig();
 
   if (!transport) {
     // Log email for development
@@ -35,7 +48,7 @@ const sendEmail = async ({ to, subject, html, text }) => {
   }
 
   return transport.sendMail({
-    from: SMTP_FROM,
+    from: cfg.from,
     to,
     subject,
     html,

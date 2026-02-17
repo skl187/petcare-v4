@@ -21,7 +21,9 @@ async function initApp() {
     await initializeDatabase();
     await loadSettings();
     dbReady = true;
-    console.log('✓ Database & settings initialized');
+    // console.log(`✓ Database & Settings loaded (${Object.keys(getAllSettings()).length})`);
+    console.log(`✓ Database & Settings loaded`);
+  
   } catch (err) {
     dbReady = false;
     console.warn('⚠️ Initialization warning:', err.message);

@@ -1,10 +1,11 @@
-# version: "3.8"
+version: "3.9"
 
 services:
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: v3-backend-1
     env_file:
       - ./backend/.env
     ports:
@@ -13,46 +14,27 @@ services:
       - ./backend:/app
       - /app/node_modules
     command: npm run dev
-    depends_on:
-      - db
+    restart: unless-stopped
+    networks:
+      - db_default
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: v3-frontend-1
     env_file:
       - ./frontend/.env
     ports:
-      - "${FRONTEND_PORT:-3001}:5173"  # Map 3001 (host) to 5173 (container)
+      - "${FRONTEND_PORT:-3001}:5173"
     volumes:
       - ./frontend:/app
       - /app/node_modules
     command: npm run dev
-    depends_on:
-      - backend
+    restart: unless-stopped
+    networks:
+      - db_default
 
-  db:
-    image: postgres:15
-    restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-petcare}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@petcare.com
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
-    ports:
-      - "${PGADMIN_PORT:-8080}:80"
-    depends_on:
-      - db
-
-volumes:
-  db_data:
+networks:
+  db_default:
+    external: true

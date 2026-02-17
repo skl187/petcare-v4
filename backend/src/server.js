@@ -3,5 +3,11 @@ const app = require('./app');
 const { PORT } = require('./config/env');
 
 app.listen(PORT, () => {
-  console.log(`✓ Server running on port ${PORT}`);
+  console.log(`
+╔════════════════════════════════════════╗
+║   PetCare API Server Running           ║
+║   Port: ${PORT}                           ║
+║   Environment: ${process.env.NODE_ENV || 'development'}             ║
+╚════════════════════════════════════════╝
+    `);
 });
