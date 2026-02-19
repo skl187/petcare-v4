@@ -8,32 +8,28 @@ import { AuthProvider } from './components/auth/AuthContext';
 import ProtectedRoute from './ProtectedRoute';
 import RoleProtectedRoute from './RoleProtectedRoute';
 import VetLayout from './layout/VetLayout/VetLayout';
-import SignIn from './pages/AuthPages/SignIn';
-import SignUp from './pages/AuthPages/SignUp';
-import NotFound from './pages/OtherPage/NotFound';
-import Videos from './pages/UiElements/Videos';
-import Images from './pages/UiElements/Images';
-import Badges from './pages/UiElements/Badges';
-import Avatars from './pages/UiElements/Avatars';
-import Buttons from './pages/UiElements/Buttons';
-import LineChart from './pages/Charts/LineChart';
-import BarChart from './pages/Charts/BarChart';
-import Calendar from './pages/Calendar';
-import FormElements from './pages/Forms/FormElements';
-import Blank from './pages/Blank';
+import SignIn from './authPages/SignIn';
+import SignUp from './authPages/SignUp';
+import NotFound from './adminPages/OtherPage/NotFound';
+import Videos from './adminPages/UiElements/Videos';
+import Images from './adminPages/UiElements/Images';
+import Badges from './adminPages/UiElements/Badges';
+import Avatars from './adminPages/UiElements/Avatars';
+import Buttons from './adminPages/UiElements/Buttons';
+import LineChart from './adminPages/Charts/LineChart';
+import BarChart from './adminPages/Charts/BarChart';
+import Calendar from './adminPages/Calendar';
+import FormElements from './adminPages/Forms/FormElements';
+import Blank from './adminPages/Blank';
 import AppLayout from './layout/AppLayout';
 import { ScrollToTop } from './components/common/ScrollToTop';
-import Home from './pages/Dashboard/Home';
-import Bookings from './sidebar/bookings/Bookings';
+import Home from './adminPages/Dashboard/Home';
+import TodayAppointments from './adminPages/appointments/today_appointments';
 import Reports from './sidebar/reports/Reports';
-import VetBookings from './sidebar/veterinary/VetBookings';
-import VetList from './sidebar/veterinary/VetList';
 import CategoryList from './sidebar/veterinary/CategoryList';
-import ServiceList from './sidebar/veterinary/ServiceList';
-import Employees from './sidebar/users/Employees';
-import EmpRequestList from './sidebar/users/EmpRequestList';
-import OwnerAndPets from './sidebar/users/OwnerAndPets';
-import BookingReviews from './sidebar/users/BookingReviews';
+import Employees from './adminPages/users/Employees';
+import EmpRequestList from './adminPages/users/EmpRequestList';
+import BookingReviews from './adminPages/users/BookingReviews';
 import Tax from './sidebar/finance/Tax';
 import EmployeeEarnings from './sidebar/finance/EmployeeEarnings';
 import DailyBookings from './sidebar/overallReports/DailyBookings';
@@ -44,22 +40,35 @@ import InvoicePage from './sidebar/veterinary/InvoicePage';
 import City from './sidebar/Location/City';
 import State from './sidebar/Location/State';
 import Country from './sidebar/Location/Country';
-import PetType from './sidebar/pet/PetType';
-import PetBreed from './sidebar/pet/PetBreed';
 import AppPage from './sidebar/pages/AppPage';
-import ListNotification from './sidebar/notifications/ListNotification';
-import TemplateNotification from './sidebar/notifications/TemplateNotification';
 import AppBanner from './sidebar/appBanner/AppBanner';
 import AccessControl from './sidebar/accessControl/AccessControl';
 import SystemServices from './sidebar/systemServices/SystemServices';
 import AppPageDetail from './sidebar/pages/AppPageDetail';
 import OwnerLayout from './layout/OwnerLayout/OwnerLayout';
-import PetCenterList from './sidebar/veterinary/PetCenterList';
-import ManageRoles from './sidebar/roles/ManageRoles';
-import ManagePermissions from './sidebar/permissions/ManagePermissions';
-import AdminSettings from './pages/AdminSettings';
 
-// vetImports
+// Admin Imports
+// Todays Appointments
+//veterinary
+import VetBookings from './adminPages/veterinary/VetBookings';
+import VetList from './adminPages/veterinary/VetList';
+import ServiceList from './adminPages/veterinary/ServiceList';
+import PetCenterList from './adminPages/veterinary/petCentersList';
+// users
+import OwnerAndPets from './adminPages/users/OwnerAndPets';
+// notifications
+import ListNotification from './adminPages/notifications/ListNotification';
+import TemplateNotification from './adminPages/notifications/TemplateNotification';
+// pets
+import PetType from './adminPages/pets/PetType';
+import PetBreed from './adminPages/pets/PetBreed';
+// roles
+import ManageRoles from './adminPages/roles/manageRoles';
+import ManagePermissions from './adminPages/roles/managePermissions';
+// settings
+import AdminSettings from './adminPages/settings';
+
+// Veterinary Imports
 import VetDahboard from './vetPages/VetDashboard/VetDahboard';
 import VetServiceList from './vetPages/VetServices/VetServiceList';
 import VeterinaryBookings from './vetPages/VetServices/VeterinaryBookingsWrapper';
@@ -74,13 +83,13 @@ import ViewUpcomingBookings from './userPages/Bookings/UpcomingBookings/ViewUpco
 import Payments from './userPages/Payments/Payments';
 import MessageInbox from './userPages/Messages/Inbox/MessageInbox';
 import SendNewMessage from './userPages/Messages/SendMessage/SendNewMessage';
-import ResetPasswordForm from './components/auth/ResetPassword';
-import ForgotPassword from './components/auth/ForgotPassword';
-import VerifyEmail from './components/auth/VerifyEmail';
-import RegistrationSuccess from './components/auth/RegistrationSuccess';
+import ResetPasswordForm from './authPages/ResetPassword';
+import ForgotPassword from './authPages/ForgotPassword';
+import VerifyEmail from './authPages/VerifyEmail';
+import RegistrationSuccess from './authPages/RegistrationSuccess';
 import ToastContainer from './components/ui/toast/ToastContainer';
-import { VeterinaryBookingsDetail } from './pages/VetPageForms/Veterinary/VeterinaryBookingsDetail';
-import ProfileWithLayout from './pages/ProfileWithLayout';
+import { VeterinaryBookingsDetail } from './adminPages/VetPageForms/Veterinary/VeterinaryBookingsDetail';
+import ProfileWithLayout from './adminPages/ProfileWithLayout';
 
 export default function App() {
   return (
@@ -113,7 +122,7 @@ export default function App() {
             >
               <Route element={<AppLayout />}>
                 <Route path='/home' element={<Home />} />
-                <Route path='/bookings' element={<Bookings />} />
+                <Route path='/today-appointments' element={<TodayAppointments />} />
                 <Route path='/reports' element={<Reports />} />
                 {/* veterinary */}
                 <Route path='/vetBookings' element={<VetBookings />} />
@@ -193,7 +202,7 @@ export default function App() {
               </Route>
             </Route>
 
-            {/* Vet Routes */}
+            {/* Veterinary Dashboard Routes */}
             <Route
               element={
                 <RoleProtectedRoute
@@ -214,7 +223,7 @@ export default function App() {
               </Route>
             </Route>
 
-            {/* Owner Routes */}
+            {/* Pet Owner Dashboard Routes */}
             <Route element={<RoleProtectedRoute allowedRoles={['owner']} />}>
               <Route element={<OwnerLayout />}>
                 <Route path='/owner/home' element={<OwnerDashboard />} />
@@ -236,6 +245,7 @@ export default function App() {
                 <Route path='/owner/new-message' element={<SendNewMessage />} />
               </Route>
             </Route>
+            
           </Route>
 
           {/* Fallback Route for 404 */}

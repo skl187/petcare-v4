@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import PageMeta from '../common/PageMeta';
-import AuthLayout from '../../pages/AuthPages/AuthPageLayout';
-import { API_ENDPOINTS } from '../../constants/api';
+import PageMeta from '../components/common/PageMeta';
+import AuthLayout from './AuthPageLayout';
+import { API_ENDPOINTS } from '../constants/api';
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();

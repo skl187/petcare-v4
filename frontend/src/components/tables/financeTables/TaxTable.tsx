@@ -9,8 +9,8 @@ import {
 } from '../../ui/table';
 import Badge from '../../ui/badge/Badge';
 import Checkbox from '../../form/input/Checkbox';
-import TaxForm from '../../../pages/Forms/FinanceForms/TaxForm';
-import { TaxFormData } from '../../../pages/Forms/FinanceForms/TaxForm';
+import TaxForm from '../../../adminPages/Forms/FinanceForms/TaxForm';
+import { TaxFormData } from '../../../adminPages/Forms/FinanceForms/TaxForm';
 import Pagination from '../tableComponents/Pagination';
 import useSort from '../../../hooks/useSort';
 import SortableTableHeader from '../tableComponents/SortableTableHeader';

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import PageMeta from '../../components/common/PageMeta';
 import ComponentCard from '../../components/common/ComponentCard';
 import VeterinaryBookingsTable from '../../components/vetTables/Veterinary/VeterninaryBookingsTable/VeterinaryBookingsTable';
-import VeterinaryBookingsDetail from '../../pages/VetPageForms/Veterinary/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
+import VeterinaryBookingsDetail from '../../adminPages/VetPageForms/Veterinary/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
 import type { VetBooking } from '../../components/vetTables/Veterinary/VeterninaryBookingsTable/VeterinaryBookingsTable';
 
 type TabFilter = 'today' | 'upcoming' | 'all';

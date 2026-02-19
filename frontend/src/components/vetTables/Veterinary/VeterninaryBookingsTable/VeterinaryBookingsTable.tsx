@@ -15,7 +15,7 @@ import { TableToolbar } from '../../../tables/tableComponents/TableToolbar';
 import ImageHoverPreview from '../../../tables/tableComponents/ImageHoverPreview';
 import VeterinaryBookingsForm, {
   VetBookingFormData,
-} from '../../../../pages/VetPageForms/Veterinary/VeterinaryBookingsForm/VeterinaryBookingsForm';
+} from '../../../../adminPages/VetPageForms/Veterinary/VeterinaryBookingsForm/VeterinaryBookingsForm';
 import { API_ENDPOINTS } from '../../../../constants/api';
 import { useAuth } from '../../../../components/auth/AuthContext';
 

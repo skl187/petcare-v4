@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
-import PageMeta from '../common/PageMeta';
-import AuthLayout from '../../pages/AuthPages/AuthPageLayout';
-import { API_ENDPOINTS } from '../../constants/api';
+import PageMeta from '../components/common/PageMeta';
+import AuthLayout from './AuthPageLayout';
+import { API_ENDPOINTS } from '../constants/api';
 
 export default function RegistrationSuccess() {
   const location = useLocation();

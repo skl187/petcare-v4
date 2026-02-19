@@ -10,8 +10,8 @@ import {
 } from '../../ui/table';
 import Badge from '../../ui/badge/Badge';
 import Checkbox from '../../form/input/Checkbox';
-import AppPageForm from '../../../pages/Forms/PageForm/AppPageForm';
-import { AppPageFormData } from '../../../pages/Forms/PageForm/AppPageForm';
+import AppPageForm from '../../../adminPages/Forms/PageForm/AppPageForm';
+import { AppPageFormData } from '../../../adminPages/Forms/PageForm/AppPageForm';
 import Pagination from '../tableComponents/Pagination';
 import useSort from '../../../hooks/useSort';
 import SortableTableHeader from '../tableComponents/SortableTableHeader';

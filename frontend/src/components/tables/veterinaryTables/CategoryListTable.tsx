@@ -9,8 +9,8 @@ import {
 } from '../../ui/table';
 import Badge from '../../ui/badge/Badge';
 import Checkbox from '../../form/input/Checkbox';
-import CategoryListForm from '../../../pages/Forms/VetForms/CategoryListForm';
-import { CategoryFormData } from '../../../pages/Forms/VetForms/CategoryListForm';
+import CategoryListForm from '../../../adminPages/Forms/VetForms/CategoryListForm';
+import { CategoryFormData } from '../../../adminPages/Forms/VetForms/CategoryListForm';
 import Pagination from '../tableComponents/Pagination';
 import useSort from '../../../hooks/useSort';
 import SortableTableHeader from '../tableComponents/SortableTableHeader';

@@ -9,8 +9,8 @@ import {
 } from '../../ui/table';
 import Badge from '../../ui/badge/Badge';
 import Checkbox from '../../form/input/Checkbox';
-import OwnerAndPetsForm from '../../../pages/Forms/UserForms/OwnerAndPetsForm';
-import { OwnerAndPetsFormData } from '../../../pages/Forms/UserForms/OwnerAndPetsForm';
+import OwnerAndPetsForm from '../../../adminPages/Forms/UserForms/OwnerAndPetsForm';
+import { OwnerAndPetsFormData } from '../../../adminPages/Forms/UserForms/OwnerAndPetsForm';
 import Pagination from '../tableComponents/Pagination';
 import useSort from '../../../hooks/useSort';
 import SortableTableHeader from '../tableComponents/SortableTableHeader';

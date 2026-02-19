@@ -9,8 +9,8 @@ import {
 } from '../../ui/table';
 import Badge from '../../ui/badge/Badge';
 import Checkbox from '../../form/input/Checkbox';
-import StateLocationForm from '../../../pages/Forms/LocationForms/StateLocationForm';
-import { StateLocationFormData } from '../../../pages/Forms/LocationForms/StateLocationForm';
+import StateLocationForm from '../../../adminPages/Forms/LocationForms/StateLocationForm';
+import { StateLocationFormData } from '../../../adminPages/Forms/LocationForms/StateLocationForm';
 import Pagination from '../tableComponents/Pagination';
 import useSort from '../../../hooks/useSort';
 import SortableTableHeader from '../tableComponents/SortableTableHeader';

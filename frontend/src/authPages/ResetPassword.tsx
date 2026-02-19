@@ -1,11 +1,11 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { EyeCloseIcon, EyeIcon } from '../../icons';
-import Label from '../form/Label';
-import Input from '../form/input/InputField';
-import PageMeta from '../common/PageMeta';
-import AuthLayout from '../../pages/AuthPages/AuthPageLayout';
-import { API_ENDPOINTS } from '../../constants/api';
+import { EyeCloseIcon, EyeIcon } from '../icons';
+import Label from '../components/form/Label';
+import Input from '../components/form/input/InputField';
+import PageMeta from '../components/common/PageMeta';
+import AuthLayout from './AuthPageLayout';
+import { API_ENDPOINTS } from '../constants/api';
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();

@@ -9,7 +9,7 @@ import {
 } from '../../ui/table';
 import Badge from '../../ui/badge/Badge';
 import Checkbox from '../../form/input/Checkbox';
-import VetListForm from '../../../pages/Forms/VetForms/VetListForm';
+import VetListForm from '../../../adminPages/Forms/VetForms/VetListForm';
 import Pagination from '../tableComponents/Pagination';
 import Switch from '../../form/switch/Switch';
 import { IoIosCloseCircle, IoIosCheckmarkCircle } from 'react-icons/io';

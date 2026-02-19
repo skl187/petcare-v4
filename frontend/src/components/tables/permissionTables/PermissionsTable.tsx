@@ -9,7 +9,7 @@ import {
 } from '../../ui/table';
 import Badge from '../../ui/badge/Badge';
 import Checkbox from '../../form/input/Checkbox';
-import PermissionForm from '../../../pages/Forms/PermissionForms/PermissionForm';
+import PermissionForm from '../../../adminPages/Forms/PermissionForms/PermissionForm';
 import Pagination from '../tableComponents/Pagination';
 import useSort from '../../../hooks/useSort';
 import SortableTableHeader from '../tableComponents/SortableTableHeader';

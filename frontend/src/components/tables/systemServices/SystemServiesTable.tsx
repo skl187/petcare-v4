@@ -9,8 +9,8 @@ import {
 } from '../../ui/table';
 import Badge from '../../ui/badge/Badge';
 import Checkbox from '../../form/input/Checkbox';
-import SystemServiceForm from '../../../pages/Forms/SystemServiceForm/SystemServicesForm';
-import { SystemServiceFormData } from '../../../pages/Forms/SystemServiceForm/SystemServicesForm';
+import SystemServiceForm from '../../../adminPages/Forms/SystemServiceForm/SystemServicesForm';
+import { SystemServiceFormData } from '../../../adminPages/Forms/SystemServiceForm/SystemServicesForm';
 import Pagination from '../tableComponents/Pagination';
 import useSort from '../../../hooks/useSort';
 import SortableTableHeader from '../tableComponents/SortableTableHeader';

@@ -12,7 +12,7 @@ import Checkbox from '../../../../components/form/input/Checkbox';
 import Pagination from '../../../tables/tableComponents/Pagination';
 import useSort from '../../../../hooks/useSort';
 import DeleteDialog from '../../../tables/tableComponents/DeleteDailog';
-import UpcomingBookingsForm from '../../../../pages/OwnerPageForms/BookingsForms/UpcomingBookingsForm/UpcomingBookingsForm';
+import UpcomingBookingsForm from '../../../../adminPages/OwnerPageForms/BookingsForms/UpcomingBookingsForm/UpcomingBookingsForm';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
 import { API_ENDPOINTS } from '../../../../constants/api';
 import type { VetBooking } from '../../../vetTables/Veterinary/VeterninaryBookingsTable/VeterinaryBookingsTable';

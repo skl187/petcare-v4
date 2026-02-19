@@ -1,6 +1,6 @@
 import VetBookings from "../veterinary/VetBookings"
 
-const Bookings = () => {
+const TodayAppointments = () => {
   return (
     <div>
       <VetBookings />
@@ -8,4 +8,4 @@ const Bookings = () => {
   )
 }
 
-export default Bookings
+export default TodayAppointments

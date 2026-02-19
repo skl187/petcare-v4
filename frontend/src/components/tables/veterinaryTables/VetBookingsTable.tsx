@@ -9,15 +9,15 @@ import {
 } from '../../ui/table';
 import Badge from '../../ui/badge/Badge';
 import Checkbox from '../../form/input/Checkbox';
-import VetBookingForm from '../../../pages/Forms/VetForms/VetBookingForm';
+import VetBookingForm from '../../../adminPages/Forms/VetForms/VetBookingForm';
 import Pagination from '../tableComponents/Pagination';
 import useSort from '../../../hooks/useSort';
 import SortableTableHeader from '../tableComponents/SortableTableHeader';
 import { TableToolbar } from '../tableComponents/TableToolbar';
 import DeleteDialog from '../tableComponents/DeleteDailog';
 import { API_ENDPOINTS } from '../../../constants/api';
-import VeterinaryBookingsDetail from '../../../pages/VetPageForms/Veterinary/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
-import AdminAppointmentDetail from '../../../pages/VetPageForms/Veterinary/AdminAppointmentDetail/AdminAppointmentDetail';
+import VeterinaryBookingsDetail from '../../../adminPages/VetPageForms/Veterinary/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
+import AdminAppointmentDetail from '../../../adminPages/VetPageForms/Veterinary/AdminAppointmentDetail/AdminAppointmentDetail';
 import { useAuth } from '../../auth/AuthContext';
 
 export interface Booking {

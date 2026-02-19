@@ -34,8 +34,8 @@ const navItems: NavItem[] = [
   },
   {
     icon: <CiCalendarDate />,
-    name: 'Appointments',
-    path: '/bookings',
+    name: 'Today Appointments',
+    path: '/today-appointments',
   },
   // {
   //   icon: <TbReportAnalytics />,

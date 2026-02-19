@@ -7,7 +7,7 @@ const VetDashOwenerAndPets = () => {
     <PageMeta title="BracePet VetDashOwenerAndPets" description="This is BracePet VetDashOwenerAndPets" />
     <div className="space-y-6 p-4">
       <ComponentCard title="VetDashOwenerAndPets">
-      <VetOwnerAndPetsTable />
+        <VetOwnerAndPetsTable />
       </ComponentCard>
     </div>
   </>

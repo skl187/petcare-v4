@@ -1,11 +1,11 @@
 import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Label from '../form/Label';
-import Input from '../form/input/InputField';
-import Button from '../ui/button/Button';
-import PageMeta from '../common/PageMeta';
-import AuthLayout from '../../pages/AuthPages/AuthPageLayout';
-import { API_ENDPOINTS } from '../../constants/api';
+import Label from '../components/form/Label';
+import Input from '../components/form/input/InputField';
+import Button from '../components/ui/button/Button';
+import PageMeta from '../components/common/PageMeta';
+import AuthLayout from './AuthPageLayout';
+import { API_ENDPOINTS } from '../constants/api';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState<string>('');
