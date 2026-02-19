@@ -1,16 +1,17 @@
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
+import NotificationListTable from "../../components/tables/notifications/NotificationListTable";
 
 const ListNotification = () => {
   return (
     <>
-    <PageMeta title="BracePet  ListNotification" description="This is BracePet  ListNotification" />
-    <div className="space-y-6 p-4">
-      <ComponentCard title=" ListNotification">
-        systemservices
-      </ComponentCard>
-    </div>
-  </>
+      <PageMeta title="Notifications List | Dashboard" description="View and manage pending notifications" />
+      <div className="space-y-6 p-4">
+        <ComponentCard title="Notifications">
+          <NotificationListTable />
+        </ComponentCard>
+      </div>
+    </>
   )
 }
 

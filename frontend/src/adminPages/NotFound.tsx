@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import GridShape from "../../components/common/GridShape";
-import PageMeta from "../../components/common/PageMeta";
+import GridShape from "../components/common/GridShape";
+import PageMeta from "../components/common/PageMeta";
 import { Link } from "react-router-dom";
 
 export default function NotFound() {
   const navigate = useNavigate();
 
   // Retrieve last valid route or default to home
-  const [_lastValidRoute] = useState(
+  const [lastValidRoute] = useState(
     sessionStorage.getItem("lastValidRoute") || "/home"
   );
 

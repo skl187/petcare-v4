@@ -10,6 +10,7 @@ import {
   AppointmentWorkflowSection,
   AppointmentActionsSection,
 } from './sections';
+import { formatDateWithTime } from '../../../../utils/formatDate';
 
 const APPOINTMENTS_BASE = API_ENDPOINTS.APPOINTMENTS.BASE;
 const API_ORIGIN = new URL(APPOINTMENTS_BASE, window.location.origin).origin;
@@ -468,11 +469,11 @@ export default function VeterinaryBookingsDetail({
           <>
             <div className='flex items-center justify-between'>
               <div>
-                <h1 className='text-3xl font-bold text-gray-900'>
+                <h1 className='text-2xl font-bold text-gray-900'>
                   {appointment.petName}'s Appointment
                 </h1>
                 <p className='text-gray-600 mt-1'>
-                  {appointment.date} {appointment.time} • {appointment.reason}
+                  {formatDateWithTime(appointment.date, appointment.time)} • {appointment.reason}
                 </p>
               </div>
               <div className='text-right'>
@@ -510,6 +511,96 @@ export default function VeterinaryBookingsDetail({
                     onStatusUpdate={refreshAppointmentDetails}
                   />
                 )}
+
+                {/* Summary cards (Pet | Veterinarian | Payment) - compact, multi-column /}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  {/* Pet Card /}
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-4">
+                      PET
+                    </h3>
+                    <div className="flex items-center gap-4">
+                      <img
+                        src={appointment.petPhoto || '/images/pets/placeholder.jpg'}
+                        alt={appointment.petName}
+                        className="w-16 h-16 rounded-full object-cover border"
+                      />
+                      <div>
+                        <div className="text-lg font-semibold text-gray-900">
+                          {appointment.petName}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {appointment.petBreed || '—'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-700">
+                      <div>
+                        <div className="text-xs text-gray-500">Age</div>
+                        <div className="font-medium">{appointment.petAge ?? '—'}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Weight</div>
+                        <div className="font-medium">{appointment.petWeight || '—'}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Veterinarian Card /}
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-4">
+                      VETERINARIAN
+                    </h3>
+                    <div className="text-gray-900 font-semibold">
+                      {(appointment as any)?.vet_first_name
+                        ? `${(appointment as any).vet_first_name} ${(appointment as any).vet_last_name}`
+                        : (appointment as any).veterinarian || (appointment as any).vetName || 'Not assigned'}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      {(appointment as any).clinic_name || (appointment as any).clinicName || '—'}
+                    </div>
+                  </div>
+
+                  {/* Payment Card /}
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-4">
+                      PAYMENT
+                    </h3>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-xs text-gray-500">Status</div>
+                        <div className="mt-2">
+                          <span
+                            className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
+                              (appointment as any).payment_status === 'paid' ||
+                              (appointment as any).paymentStatus === 'paid'
+                                ? 'bg-green-100 text-green-800'
+                                : (appointment as any).payment_status === 'pending' ||
+                                  (appointment as any).paymentStatus === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
+                            {(appointment as any).payment_status || (appointment as any).paymentStatus || 'Pending'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs text-gray-500">Total</div>
+                        <div className="text-2xl font-bold text-blue-900 mt-2">
+                          ${(
+                            Number((appointment as any).total_amount) ||
+                            Number((appointment as any).totalAmount) ||
+                            0
+                          ).toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* EOF - Summary cards (Pet | Veterinarian | Payment) - compact, multi-column */}
+
                 <AppointmentDetailsSection appointment={appointment} />
                 <AppointmentWorkflowSection
                   appointment={appointment}

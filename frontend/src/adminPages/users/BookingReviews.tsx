@@ -1,17 +1,23 @@
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
-import BookingReviewsTable from "../../components/tables/userTables/BookingReviewsTable";
+import AdminReviewsTable from "../../components/tables/reviews/AdminReviewsTable";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb";
+
 const BookingReviews = () => {
   return (
     <>
-    <PageMeta title="BracePet Booking Reviews Table" description="This is BracePet Booking Reviews Table" />
-    <div className="space-y-6 p-4">
-      <ComponentCard title="Booking Reviews Table">
-        <BookingReviewsTable />
-      </ComponentCard>
-    </div>
-  </>
-  )
-}
+      <PageMeta 
+        title="Booking Reviews - BracePet Admin" 
+        description="View and manage all appointment-related reviews" 
+      />
+      <PageBreadcrumb pageTitle="Booking Reviews" />
+      <div className="space-y-6 p-4">
+        <ComponentCard title="All Appointment Reviews">
+          <AdminReviewsTable />
+        </ComponentCard>
+      </div>
+    </>
+  );
+};
 
-export default BookingReviews
+export default BookingReviews;

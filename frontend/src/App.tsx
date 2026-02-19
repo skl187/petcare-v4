@@ -7,10 +7,7 @@ import {
 import { AuthProvider } from './components/auth/AuthContext';
 import ProtectedRoute from './ProtectedRoute';
 import RoleProtectedRoute from './RoleProtectedRoute';
-import VetLayout from './layout/VetLayout/VetLayout';
-import SignIn from './authPages/SignIn';
-import SignUp from './authPages/SignUp';
-import NotFound from './adminPages/OtherPage/NotFound';
+import NotFound from './adminPages/NotFound';
 import Videos from './adminPages/UiElements/Videos';
 import Images from './adminPages/UiElements/Images';
 import Badges from './adminPages/UiElements/Badges';
@@ -24,7 +21,7 @@ import Blank from './adminPages/Blank';
 import AppLayout from './layout/AppLayout';
 import { ScrollToTop } from './components/common/ScrollToTop';
 import Home from './adminPages/Dashboard/Home';
-import TodayAppointments from './adminPages/appointments/today_appointments';
+import TodayAppointments from './adminPages/today_appointments/today_appointments';
 import Reports from './sidebar/reports/Reports';
 import CategoryList from './sidebar/veterinary/CategoryList';
 import Employees from './adminPages/users/Employees';
@@ -45,6 +42,16 @@ import AppBanner from './sidebar/appBanner/AppBanner';
 import AccessControl from './sidebar/accessControl/AccessControl';
 import SystemServices from './sidebar/systemServices/SystemServices';
 import AppPageDetail from './sidebar/pages/AppPageDetail';
+
+
+import SignIn from './authPages/SignIn';
+import SignUp from './authPages/SignUp';
+import ResetPasswordForm from './authPages/ResetPassword';
+import ForgotPassword from './authPages/ForgotPassword';
+import VerifyEmail from './authPages/VerifyEmail';
+import RegistrationSuccess from './authPages/RegistrationSuccess';
+
+import VetLayout from './layout/VetLayout/VetLayout';
 import OwnerLayout from './layout/OwnerLayout/OwnerLayout';
 
 // Admin Imports
@@ -83,10 +90,6 @@ import ViewUpcomingBookings from './userPages/Bookings/UpcomingBookings/ViewUpco
 import Payments from './userPages/Payments/Payments';
 import MessageInbox from './userPages/Messages/Inbox/MessageInbox';
 import SendNewMessage from './userPages/Messages/SendMessage/SendNewMessage';
-import ResetPasswordForm from './authPages/ResetPassword';
-import ForgotPassword from './authPages/ForgotPassword';
-import VerifyEmail from './authPages/VerifyEmail';
-import RegistrationSuccess from './authPages/RegistrationSuccess';
 import ToastContainer from './components/ui/toast/ToastContainer';
 import { VeterinaryBookingsDetail } from './adminPages/VetPageForms/Veterinary/VeterinaryBookingsDetail';
 import ProfileWithLayout from './adminPages/ProfileWithLayout';

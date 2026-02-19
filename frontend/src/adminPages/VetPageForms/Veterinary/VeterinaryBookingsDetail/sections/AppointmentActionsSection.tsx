@@ -230,8 +230,8 @@ export default function AppointmentActionsSection({
 
   return (
     <>
-      <div className='bg-white rounded-lg shadow-md p-6'>
-        <h2 className='text-lg font-bold text-gray-900 mb-6'>
+      <div className='bg-white rounded-lg shadow-md p-4'>
+        <h2 className='text-base font-semibold text-gray-900 mb-4'>
           APPOINTMENT ACTIONS
         </h2>
 
@@ -253,7 +253,7 @@ export default function AppointmentActionsSection({
             <button
               onClick={() => setShowConfirmScheduled(true)}
               disabled={loading}
-              className='px-6 py-3 rounded-lg font-semibold text-white bg-blue-500 hover:bg-blue-600 active:scale-95 disabled:bg-gray-400'
+              className='px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 active:scale-95 disabled:bg-gray-400'
             >
               Confirm Appointment
             </button>
@@ -263,13 +263,13 @@ export default function AppointmentActionsSection({
         {/* Status: confirmed - show edit hint and start button */}
         {appointmentStatus === 'confirmed' && (
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <div className='px-6 py-3 rounded-lg bg-gray-100 border-2 border-gray-300 text-gray-700 font-semibold flex items-center justify-center cursor-default'>
+            <div className='px-4 py-2 rounded-md bg-gray-100 border border-gray-200 text-gray-700 text-sm font-medium flex items-center justify-center'>
               Edit Mode (Appointment Confirmed)
             </div>
             <button
               onClick={() => setShowStartConfirm(true)}
               disabled={loading}
-              className='px-6 py-3 rounded-lg font-semibold text-white bg-amber-500 hover:bg-amber-600 active:scale-95 disabled:bg-gray-400'
+              className='px-4 py-2 rounded-md text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 active:scale-95 disabled:bg-gray-400'
             >
               Start Appointment
             </button>
@@ -289,7 +289,7 @@ export default function AppointmentActionsSection({
                     appointmentStatus === 'Completed' ||
                     appointmentStatus === 'Cancelled'
                   }
-                  className={`px-6 py-3 rounded-lg font-semibold text-white transition ${
+                  className={`px-4 py-2 rounded-md text-sm font-medium text-white transition ${
                     appointmentStatus === 'Completed' ||
                     appointmentStatus === 'Cancelled'
                       ? 'bg-gray-400 cursor-not-allowed'
@@ -308,7 +308,7 @@ export default function AppointmentActionsSection({
                   appointmentStatus === 'Completed' ||
                   appointmentStatus === 'Cancelled'
                 }
-                className={`px-6 py-3 rounded-lg font-semibold text-white transition ${
+                className={`px-4 py-2 rounded-md text-sm font-medium text-white transition ${
                   appointmentStatus === 'Completed' ||
                   appointmentStatus === 'Cancelled'
                     ? 'bg-gray-400 cursor-not-allowed'
@@ -326,7 +326,7 @@ export default function AppointmentActionsSection({
                   appointmentStatus === 'Completed' ||
                   appointmentStatus === 'Cancelled'
                 }
-                className={`px-6 py-3 rounded-lg font-semibold transition ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition ${
                   appointmentStatus === 'Completed' ||
                   appointmentStatus === 'Cancelled'
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
@@ -344,7 +344,7 @@ export default function AppointmentActionsSection({
                   appointmentStatus === 'Completed' ||
                   appointmentStatus === 'Cancelled'
                 }
-                className={`px-6 py-3 rounded-lg font-semibold transition ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition ${
                   appointmentStatus === 'Completed' ||
                   appointmentStatus === 'Cancelled'
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'

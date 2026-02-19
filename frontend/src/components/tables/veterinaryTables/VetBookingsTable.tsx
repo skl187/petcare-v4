@@ -296,7 +296,7 @@ export default function VetBookingsTable() {
   };
 
   return (
-    <div className='p-4 bg-white rounded-xl shadow-md'>
+    <div className='bg-white rounded-xl shadow-md'>
       {/* Loading State */}
       {loading && (
         <div className='flex items-center justify-center py-12'>

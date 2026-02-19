@@ -54,32 +54,101 @@ export default function AdminAppointmentDetail({
   }
 
   return (
-    <div className='space-y-4 text-sm'>
-      {/* Pet Information */}
-      <div>
-        <h4 className='text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
-          Pet
-        </h4>
-        <p className='text-gray-900 font-medium text-sm'>
-          {appointment.pet_name || 'N/A'}
-        </p>
-      </div>
+    <div className='space-y-4 text-md'>
+      {/* Pet / Veterinarian / Payment cards */}
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+        {/* Pet card */}
+        <div className='bg-white border border-gray-200 rounded-lg shadow-sm p-4'>
+          <div className='flex justify-between items-start'>
+            <div>
+              <h4 className='text-sm font-semibold text-gray-500 uppercase tracking-wide'>
+                Pet
+              </h4>
+              <p className='mt-2 text-sm font-medium text-gray-900'>
+                {appointment.pet_name || 'N/A'}
+              </p>
+              <p className='text-sm text-gray-600 mt-1'>
+                {appointment.first_name} {appointment.last_name}
+              </p>
+              <p className='text-sm text-gray-500 mt-1 break-words'>
+                {appointment.email}
+              </p>
+            </div>
+            <div className='text-right'>
+              <span className='inline-flex items-center px-2 py-1 text-sm font-semibold bg-indigo-50 text-indigo-700 rounded'>
+                #{appointment.appointment_number || '—'}
+              </span>
+            </div>
+          </div>
+        </div>
 
-      {/* Owner Information */}
-      <div>
-        <h4 className='text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
-          Owner
-        </h4>
-        <p className='text-gray-900 font-medium text-sm'>
-          {appointment.first_name} {appointment.last_name}
-        </p>
-        <p className='text-xs text-gray-600 break-words'>{appointment.email}</p>
+        {/* Veterinarian card */}
+        <div className='bg-white border border-gray-200 rounded-lg shadow-sm p-4'>
+          <h4 className='text-sm font-semibold text-gray-500 uppercase tracking-wide'>
+            Veterinarian
+          </h4>
+          <div className='mt-2'>
+            <p className='text-sm font-medium text-gray-900'>
+              {appointment.vet_first_name} {appointment.vet_last_name}
+            </p>
+            <p className='text-sm text-gray-600 mt-1'>{appointment.clinic_name}</p>
+            <div className='mt-3 flex gap-2'>
+              <span className='inline-block px-2 py-1 text-sm font-semibold bg-blue-50 text-blue-700 rounded capitalize'>
+                {appointment.status}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment card */}
+        <div className='bg-white border border-gray-200 rounded-lg shadow-sm p-4'>
+          <h4 className='text-sm font-semibold text-gray-500 uppercase tracking-wide'>
+            Payment
+          </h4>
+          <div className='mt-2 text-sm'>
+            <div className='flex justify-between'>
+              <span className='text-gray-600'>Status</span>
+              <span
+                className={`inline-block px-2 py-1 rounded text-sm font-semibold capitalize ${
+                  appointment.payment_status === 'pending'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : appointment.payment_status === 'paid'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                }`}
+              >
+                {appointment.payment_status}
+              </span>
+            </div>
+
+            <div className='flex justify-between mt-2'>
+              <span className='text-gray-600'>Method</span>
+              <span className='font-medium text-gray-900'>
+                {appointment.payment_info?.payment_method || '—'}
+              </span>
+            </div>
+
+            <div className='flex justify-between mt-2'>
+              <span className='text-gray-600'>Paid</span>
+              <span className='font-medium text-gray-900'>
+                ${Number(appointment.payment_info?.paid_amount ?? 0).toFixed(2)}
+              </span>
+            </div>
+
+            <div className='flex justify-between mt-2 border-t border-gray-100 pt-2'>
+              <span className='text-gray-600'>Total</span>
+              <span className='text-blue-700 font-bold'>
+                ${Number(appointment.payment_info?.total_amount ?? appointment.total_amount ?? 0).toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Appointment Date & Time */}
       <div className='grid grid-cols-2 gap-3'>
         <div>
-          <h4 className='text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
+          <h4 className='text-sm font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
             Date
           </h4>
           <p className='text-gray-900 text-sm'>
@@ -89,7 +158,7 @@ export default function AdminAppointmentDetail({
           </p>
         </div>
         <div>
-          <h4 className='text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
+          <h4 className='text-sm font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
             Time
           </h4>
           <p className='text-gray-900 text-sm'>
@@ -98,21 +167,10 @@ export default function AdminAppointmentDetail({
         </div>
       </div>
 
-      {/* Veterinarian & Clinic */}
-      <div>
-        <h4 className='text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
-          Veterinarian
-        </h4>
-        <p className='text-gray-900 font-medium text-sm'>
-          {appointment.vet_first_name} {appointment.vet_last_name}
-        </p>
-        <p className='text-xs text-gray-600'>{appointment.clinic_name}</p>
-      </div>
-
       {/* Appointment Type */}
       {appointment.appointment_type && (
         <div>
-          <h4 className='text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
+          <h4 className='text-sm font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
             Appointment Type
           </h4>
           <p className='text-gray-900 text-sm capitalize'>
@@ -124,14 +182,14 @@ export default function AdminAppointmentDetail({
       {/* Services */}
       {appointment.services && appointment.services.length > 0 && (
         <div>
-          <h4 className='text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide'>
+          <h4 className='text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide'>
             Services
           </h4>
           <div className='space-y-2 bg-gray-50 p-3 rounded border border-gray-200'>
             {appointment.services.map((service) => (
               <div
                 key={service.id}
-                className='text-xs text-gray-900 flex justify-between'
+                className='text-sm text-gray-900 flex justify-between'
               >
                 <span className='font-medium'>{service.name}</span>
                 <span className='text-gray-700'>
@@ -146,7 +204,7 @@ export default function AdminAppointmentDetail({
       {/* Chief Complaint */}
       {appointment.chief_complaint && (
         <div>
-          <h4 className='text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
+          <h4 className='text-sm font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
             Chief Complaint
           </h4>
           <p className='text-gray-900 text-sm'>{appointment.chief_complaint}</p>
@@ -156,14 +214,14 @@ export default function AdminAppointmentDetail({
       {/* Symptoms */}
       {appointment.symptoms && appointment.symptoms.length > 0 && (
         <div>
-          <h4 className='text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
+          <h4 className='text-sm font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
             Symptoms
           </h4>
           <div className='flex flex-wrap gap-1'>
             {appointment.symptoms.map((symptom, index) => (
               <span
                 key={index}
-                className='inline-block px-2 py-1 rounded text-xs bg-orange-100 text-orange-800'
+                className='inline-block px-2 py-1 rounded text-sm bg-orange-100 text-orange-800'
               >
                 {symptom}
               </span>
@@ -172,51 +230,13 @@ export default function AdminAppointmentDetail({
         </div>
       )}
 
-      {/* Status & Payment */}
-      <div className='grid grid-cols-2 gap-3'>
-        <div>
-          <h4 className='text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
-            Status
-          </h4>
-          <span className='inline-block px-2 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-800 capitalize'>
-            {appointment.status}
-          </span>
-        </div>
-        <div>
-          <h4 className='text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
-            Payment
-          </h4>
-          <span
-            className={`inline-block px-2 py-1 rounded text-xs font-semibold capitalize ${
-              appointment.payment_status === 'pending'
-                ? 'bg-yellow-100 text-yellow-800'
-                : appointment.payment_status === 'paid'
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-gray-100 text-gray-800'
-            }`}
-          >
-            {appointment.payment_status}
-          </span>
-        </div>
-      </div>
-
-      {/* Total Amount */}
-      <div className='bg-gradient-to-br from-blue-50 to-blue-100 p-3 rounded border border-blue-200'>
-        <h4 className='text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
-          Total Amount
-        </h4>
-        <p className='text-2xl font-bold text-blue-900'>
-          ${Number(appointment.total_amount || '0').toFixed(2)}
-        </p>
-      </div>
-
       {/* Notes */}
       {appointment.notes && (
         <div>
-          <h4 className='text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
+          <h4 className='text-sm font-semibold text-gray-700 mb-1 uppercase tracking-wide'>
             Notes
           </h4>
-          <p className='text-xs text-gray-700 bg-gray-50 p-2 rounded border border-gray-200 leading-relaxed'>
+          <p className='text-sm text-gray-700 bg-gray-50 p-2 rounded border border-gray-200 leading-relaxed'>
             {appointment.notes}
           </p>
         </div>

@@ -374,7 +374,7 @@ export default function VeterinarianListTable() {
   };
 
   return (
-    <div className='p-4 bg-white rounded-xl shadow-md'>
+    <div className='bg-white rounded-xl shadow-md'>
       {/* Error Banner */}
       {fetchError && (
         <div className='mb-4 p-3 bg-red-50 border border-red-200 rounded-lg'>

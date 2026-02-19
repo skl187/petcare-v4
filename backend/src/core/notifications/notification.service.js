@@ -40,8 +40,13 @@ const sendPushNotification = async (notification, template) => {
 
 const getTemplate = async (template_key, locale) => {
   if (!template_key) return null;
-  const r = await query(`SELECT * FROM get_notification_template($1, $2)`, [template_key, locale || 'en']);
-  return r.rows[0];
+  try {
+    const r = await query(`SELECT * FROM get_notification_template($1, $2)`, [template_key, locale || 'en']);
+    if (r.rows && r.rows.length > 0) return r.rows[0];
+  } catch (err) {
+    console.warn('getTemplate failed:', err.message);
+  }
+  return null;
 };
 
 const sendNotification = async (notification) => {

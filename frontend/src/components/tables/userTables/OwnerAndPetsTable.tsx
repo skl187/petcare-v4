@@ -265,7 +265,7 @@ export default function OwnerAndPetsTable() {
   };
 
   return (
-    <div className='p-4 bg-white rounded-xl shadow-md'>
+    <div className='bg-white rounded-xl shadow-md'>
       {loading && <div className='text-center py-4'>Loading...</div>}
 
       {/* Header Section */}

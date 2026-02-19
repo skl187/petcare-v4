@@ -125,4 +125,17 @@ export const API_ENDPOINTS = {
       `${API_BASE_URL}/api/reviews/veterinarian/${veterinarianId}`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/reviews/${id}`,
   },
+
+  // Notifications
+  NOTIFICATIONS: {
+    BASE: `${API_BASE_URL}/api/notifications`,
+    PREVIEW: `${API_BASE_URL}/api/notifications/preview`,
+    PENDING: `${API_BASE_URL}/api/notifications/pending`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/notifications/${id}`,
+    RESEND: (id: string) => `${API_BASE_URL}/api/notifications/${id}/resend`,
+    TEMPLATES: {
+      BASE: `${API_BASE_URL}/api/notifications/templates`,
+      DETAIL: (key: string) => `${API_BASE_URL}/api/notifications/templates/${key}`,
+    },
+  },
 } as const;

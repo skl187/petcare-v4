@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { MdAdd, MdEdit, MdClose } from 'react-icons/md';
 import { AppointmentDetail } from '../VeterinaryBookingsDetail';
 import MedicalRecordForm from './MedicalRecordForm';
+import { formatDate, formatTime, formatDateTime } from '../../../../../utils/formatDate';
 import PrescriptionForm from './PrescriptionForm';
 import LabTestForm from './LabTestForm';
 import VaccinationForm from './VaccinationForm';
@@ -475,7 +476,7 @@ export default function AppointmentWorkflowSection({
                             DATE
                           </p>
                           <p className='text-sm text-gray-900'>
-                            {new Date(record.record_date).toLocaleString()}
+                            {formatDateTime(record.record_date)}
                           </p>
                         </div>
                         <div>
@@ -550,10 +551,7 @@ export default function AppointmentWorkflowSection({
                             FOLLOW-UP DATE
                           </p>
                           <p className='text-sm text-gray-700'>
-                            {record.followup_date &&
-                              new Date(
-                                record.followup_date,
-                              ).toLocaleDateString()}
+                            {record.followup_date && formatDate(record.followup_date)}
                           </p>
                         </div>
                       )}
@@ -631,7 +629,7 @@ export default function AppointmentWorkflowSection({
                       {prescription.valid_until && (
                         <p className='text-sm text-gray-600'>
                           Valid Until:{' '}
-                          {new Date(prescription.valid_until).toLocaleString()}
+                          {formatDateTime(prescription.valid_until)}
                         </p>
                       )}
                     </div>
@@ -919,9 +917,7 @@ export default function AppointmentWorkflowSection({
                                   NEXT DUE DATE
                                 </p>
                                 <p className='text-sm text-gray-900'>
-                                  {new Date(
-                                    vaccination.next_due_date,
-                                  ).toLocaleDateString()}
+                                  {formatDate(vaccination.next_due_date)}
                                 </p>
                               </div>
                             )}

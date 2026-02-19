@@ -463,7 +463,7 @@ export default function PetBreedTable() {
   };
 
   return (
-    <div className='p-4 bg-white rounded-xl shadow-md'>
+    <div className='bg-white rounded-xl shadow-md'>
       {/* Header Section */}
       <TableToolbar
         onAddNew={handleAddNew}

@@ -60,7 +60,7 @@ const navItems: NavItem[] = [
       // { name: 'Employees', path: '/employees', pro: false },
       // { name: 'Employee Request List', path: '/empRequestList', pro: false },
       { name: 'Owners and pets', path: '/ownersAndPets', pro: false },
-      // { name: 'Booking Reviews', path: '/bookingReviews', pro: false },
+      { name: 'Appointment Reviews', path: '/bookingReviews', pro: false },
     ],
   },
   // {
@@ -144,14 +144,14 @@ const othersItems: NavItem[] = [
   //   name: 'Pages',
   //   path: '/appPage',
   // },
-  // {
-  //   icon: <MdOutlineNotificationsActive />,
-  //   name: 'Notifications',
-  //   subItems: [
-  //     { name: 'ListNotification', path: '/line-chart', pro: false },
-  //     { name: 'TemplateNotification', path: '/bar-chart', pro: false },
-  //   ],
-  // },
+  {
+    icon: <MdOutlineNotificationsActive />,
+    name: 'Notifications',
+    subItems: [
+      { name: 'Notification List', path: '/ListNotification', pro: false },
+      { name: 'Notification Templates', path: '/TemplateNotification', pro: false },
+    ],
+  },
   // {
   //   icon: <TbAppWindow />,
   //   name: 'App Banner',

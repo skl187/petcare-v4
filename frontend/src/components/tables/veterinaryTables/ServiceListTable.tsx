@@ -255,7 +255,7 @@ const ServiceListTable = () => {
   };
 
   return (
-    <div className='p-4 bg-white rounded-xl shadow-md'>
+    <div className='bg-white rounded-xl shadow-md'>
       {/* Toolbar */}
       <div className='flex items-center gap-3 mb-4 flex-wrap'>
         <button
