@@ -4,6 +4,13 @@ let SETTINGS_CACHE = {};
 
 let IS_LOADED = false;
 
+// Callbacks to run when settings are reloaded (e.g. reset email transporter cache)
+const onReloadCallbacks = [];
+
+function onSettingsReload(fn) {
+    onReloadCallbacks.push(fn);
+}
+
 async function loadSettings(){
     try {
     const res = await query(`SELECT key,value FROM app_settings`);
@@ -14,6 +21,10 @@ async function loadSettings(){
     });
 
     IS_LOADED = true;
+
+    // Notify subscribers that settings changed (e.g. reset cached transporters)
+    onReloadCallbacks.forEach(fn => { try { fn(); } catch { /* ignore */ } });
+
     console.log("✅ Settings loaded");
     } catch (err) {
         // If the settings table doesn't exist yet (migrations not run) or DB is unavailable,
@@ -43,5 +54,6 @@ module.exports = {
     loadSettings,
     getSetting,
     isLoaded,
-    getAllSettings
+    getAllSettings,
+    onSettingsReload
 };

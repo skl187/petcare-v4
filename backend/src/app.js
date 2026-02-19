@@ -7,9 +7,13 @@ const { initializeDatabase } = require('./core/db/pool');
 const { errorHandler } = require('./core/utils/response');
 const { authMiddleware } = require('./core/auth/auth.middleware');
 const { attachCheckPermission } = require('./core/rbac/rbac.middleware');
-const { loadSettings } = require('./core/settings/settings.service');
+const { loadSettings, onSettingsReload } = require('./core/settings/settings.service');
+const { resetTransporter } = require('./core/email/email.service');
 
 const routes = require('./routes');
+
+// Reset cached email transporter whenever settings are reloaded from DB
+onSettingsReload(() => resetTransporter());
 
 const app = express();
 

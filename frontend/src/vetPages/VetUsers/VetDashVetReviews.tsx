@@ -10,8 +10,8 @@ const VetDashVetReviews = () => {
         title='My Reviews - BracePet'
         description='View and manage reviews from your clients'
       />
-      <PageBreadcrumb pageTitle='My Reviews' />
-      <div className='space-y-6'>
+      {/* <PageBreadcrumb pageTitle='My Reviews' /> */}
+      <div className='space-y-6 p-4'>
         <ComponentCard title='Client Reviews'>
           <VetBookingReviewsTable />
         </ComponentCard>

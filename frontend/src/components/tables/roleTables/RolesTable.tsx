@@ -187,7 +187,7 @@ export default function RolesTable() {
   };
 
   return (
-    <div className='overflow-hidden rounded-xl border border-gray-200 bg-white'>
+    <div className='overflow-hidden rounded-xl border border-gray-200 bg-white p-4'>
       <TableToolbar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}

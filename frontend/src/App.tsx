@@ -60,20 +60,20 @@ import ManagePermissions from './sidebar/permissions/ManagePermissions';
 import AdminSettings from './pages/AdminSettings';
 
 // vetImports
-import VetDahboard from './vetSidebar/VetDashboard/VetDahboard';
-import VetServiceList from './vetSidebar/VetServices/VetServiceList';
-import VeterinaryBookings from './vetSidebar/VetServices/VeterinaryBookingsWrapper';
-import VetDashOwenerAndPets from './vetSidebar/VetUsers/VetDashOwenerAndPets';
-import VetDashVetReviews from './vetSidebar/VetUsers/VetDashVetReviews';
+import VetDahboard from './vetPages/VetDashboard/VetDahboard';
+import VetServiceList from './vetPages/VetServices/VetServiceList';
+import VeterinaryBookings from './vetPages/VetServices/VeterinaryBookingsWrapper';
+import VetDashOwenerAndPets from './vetPages/VetUsers/VetDashOwenerAndPets';
+import VetDashVetReviews from './vetPages/VetUsers/VetDashVetReviews';
 
 //Owner and pets
-import OwnerDashboard from './ownerSidebar/ownerDashboard/OwnerDashboard';
-import MyPets from './ownerSidebar/myPets/MyPets';
-import ViewBookingsHistory from './ownerSidebar/Bookings/BookingsHistory/ViewBookingsHistory';
-import ViewUpcomingBookings from './ownerSidebar/Bookings/UpcomingBookings/ViewUpcomingBookings';
-import Payments from './ownerSidebar/Payments/Payments';
-import MessageInbox from './ownerSidebar/Messages/Inbox/MessageInbox';
-import SendNewMessage from './ownerSidebar/Messages/SendMessage/SendNewMessage';
+import OwnerDashboard from './userPages/ownerDashboard/OwnerDashboard';
+import MyPets from './userPages/myPets/MyPets';
+import ViewBookingsHistory from './userPages/Bookings/BookingsHistory/ViewBookingsHistory';
+import ViewUpcomingBookings from './userPages/Bookings/UpcomingBookings/ViewUpcomingBookings';
+import Payments from './userPages/Payments/Payments';
+import MessageInbox from './userPages/Messages/Inbox/MessageInbox';
+import SendNewMessage from './userPages/Messages/SendMessage/SendNewMessage';
 import ResetPasswordForm from './components/auth/ResetPassword';
 import ForgotPassword from './components/auth/ForgotPassword';
 import VerifyEmail from './components/auth/VerifyEmail';

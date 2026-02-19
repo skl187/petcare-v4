@@ -18,6 +18,7 @@ const reviewsRoutes = require("./modules/reviews/reviews.routes");
 const settingsRoutes = require("./modules/settings/settings.routes");
 const notificationChannelsRoutes = require("./modules/notification-channels/notification-channels.routes");
 const notificationsRoutes = require("./modules/notifications/notifications.routes");
+const vetSchedulesRoutes = require("./modules/vet-schedules/vet-schedules.routes");
 
 const router = express.Router();
 
@@ -39,5 +40,6 @@ router.use('/settings', settingsRoutes);
 router.use('/setting', settingsRoutes);
 router.use('/notification-channels', notificationChannelsRoutes);
 router.use('/notifications', notificationsRoutes);
+router.use('/vet-schedules', vetSchedulesRoutes);
 
 module.exports = router;
