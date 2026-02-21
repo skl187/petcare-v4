@@ -26,7 +26,7 @@ export default function SortableTableHeader<T>({
       className={`${className} ${
         align === "left" ? "text-left" : 
         align === "center" ? "text-center" : "text-right"
-      } cursor-pointer hover:bg-gray-50 select-none`}
+      } cursor-pointer hover:bg-gray-50 select-none font-normal text-gray-700`}
       onClick={() => requestSort(columnKey)}
     >
       <div className="flex items-center gap-1">

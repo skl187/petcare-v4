@@ -15,7 +15,7 @@ import DeleteDialog from '../../../tables/tableComponents/DeleteDailog';
 import UpcomingBookingsForm from '../../../../adminPages/OwnerPageForms/BookingsForms/UpcomingBookingsForm/UpcomingBookingsForm';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
 import { API_ENDPOINTS } from '../../../../constants/api';
-import type { VetBooking } from '../../../vetTables/Veterinary/VeterninaryBookingsTable/VeterinaryBookingsTable';
+import type { VetBooking } from '../../../vetTables/Veterinary/ServiceListTable/VeterinaryBookingsTable';
 
 // --- API Constants ---
 const PETS_API = API_ENDPOINTS.PETS.BASE;

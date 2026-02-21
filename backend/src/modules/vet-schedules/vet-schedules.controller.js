@@ -146,6 +146,7 @@ const upsertSchedule = async (req, res) => {
  * Deletes all existing schedules for the vet+clinic and inserts the new ones in a transaction.
  */
 const bulkUpsertSchedules = async (req, res) => {
+  console.log('bulkUpsertSchedules called with body:', JSON.stringify(req.body));
   try {
     const { veterinarian_id, clinic_id, schedules } = req.body;
 
@@ -204,8 +205,9 @@ const bulkUpsertSchedules = async (req, res) => {
 
     res.json(successResponse(rows, 'Schedules updated'));
   } catch (err) {
-    console.error('Bulk upsert vet schedules error:', err.message);
-    res.status(500).json({ status: 'error', message: 'Failed to save schedules' });
+    console.error('Bulk upsert vet schedules error:', err);
+    // include error message in the response for easier debugging (may expose internal details in dev)
+    res.status(500).json({ status: 'error', message: err.message || 'Failed to save schedules' });
   }
 };
 

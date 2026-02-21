@@ -14,7 +14,7 @@ import SortableTableHeader from '../../../tables/tableComponents/SortableTableHe
 import ImageHoverPreview from '../../../tables/tableComponents/ImageHoverPreview';
 import { MdEdit } from 'react-icons/md';
 import { API_ENDPOINTS } from '../../../../constants/api';
-import type { VetBooking } from '../../../vetTables/Veterinary/VeterninaryBookingsTable/VeterinaryBookingsTable';
+import type { VetBooking } from '../../../vetTables/Veterinary/ServiceListTable/VeterinaryBookingsTable';
 
 export type BookingStatus = 'Completed' | 'Cancelled';
 

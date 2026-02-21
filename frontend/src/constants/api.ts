@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
     RESET_PASSWORD: `${API_BASE_URL}/api/auth/reset-password`,
     VERIFY_EMAIL: `${API_BASE_URL}/api/auth/verify-email`,
     RESEND_VERIFICATION: `${API_BASE_URL}/api/auth/resend-verification`,
+    ME: `${API_BASE_URL}/api/auth/me`,
   },
 
   // Pets
@@ -137,5 +138,21 @@ export const API_ENDPOINTS = {
       BASE: `${API_BASE_URL}/api/notifications/templates`,
       DETAIL: (key: string) => `${API_BASE_URL}/api/notifications/templates/${key}`,
     },
+  },
+
+  // Vet Schedules
+  VET_SCHEDULES: `${API_BASE_URL}/api/vet-schedules`,
+
+  // Vet Clinic Mappings
+  VET_CLINIC_MAPPINGS: `${API_BASE_URL}/api/vet-clinic-mappings`,
+
+  // Split Payments
+  SPLIT_PAYMENTS: {
+    BASE: (appointmentId: string) =>
+      `${API_BASE_URL}/api/vet-appointments/${appointmentId}/payments`,
+    DETAIL: (appointmentId: string, paymentId: string) =>
+      `${API_BASE_URL}/api/vet-appointments/${appointmentId}/payments/${paymentId}`,
+    SUMMARY: (appointmentId: string) =>
+      `${API_BASE_URL}/api/vet-appointments/${appointmentId}/payment-summary`,
   },
 } as const;

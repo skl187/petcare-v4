@@ -16,8 +16,8 @@ import SortableTableHeader from '../tableComponents/SortableTableHeader';
 import { TableToolbar } from '../tableComponents/TableToolbar';
 import DeleteDialog from '../tableComponents/DeleteDailog';
 import { API_ENDPOINTS } from '../../../constants/api';
-import VeterinaryBookingsDetail from '../../../adminPages/VetPageForms/Veterinary/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
-import AdminAppointmentDetail from '../../../adminPages/VetPageForms/Veterinary/AdminAppointmentDetail/AdminAppointmentDetail';
+import VeterinaryBookingsDetail from '../../../adminPages/PageForms/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
+import AdminAppointmentDetail from '../../../adminPages/PageForms/AdminAppointmentDetail';
 import { useAuth } from '../../auth/AuthContext';
 
 export interface Booking {

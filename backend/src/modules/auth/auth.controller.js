@@ -6,6 +6,7 @@ const { successResponse } = require('../../core/utils/response');
 //for reset password and email verification
 const crypto = require('crypto');
 const { sendVerificationEmail } = require('../../core/email/email.service');
+const { NODE_ENV } = require('../../config/env');
 
 const register = async (req, res) => {
   try {
@@ -25,12 +26,13 @@ const register = async (req, res) => {
 
     // Create user within transaction
     const result = await transaction(async (client) => {
-      // Insert user
+      // Insert user - auto-verify in development so we can work without email sending
+      const isVerified = NODE_ENV === 'development';
       const userResult = await client.query(
         `INSERT INTO users (email, password_hash, first_name, last_name, display_name, status, is_email_verified)
          VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING id, email, first_name, last_name, display_name`,
-        [email, password_hash, first_name, last_name, `${first_name} ${last_name}`, 'pending', false]
+        [email, password_hash, first_name, last_name, `${first_name} ${last_name}`, 'pending', isVerified]
       );
 
       const user = userResult.rows[0];
@@ -59,16 +61,19 @@ const register = async (req, res) => {
        );
     }
 
-      // Generate email verification token
-      const verificationToken = crypto.randomBytes(32).toString('hex');
-      const verificationTokenHash = crypto.createHash('sha256').update(verificationToken).digest('hex');
-      const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      let verificationToken = null;
+      // Generate email verification token only if we didn't auto-verify
+      if (!isVerified) {
+        verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationTokenHash = crypto.createHash('sha256').update(verificationToken).digest('hex');
+        const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-      await client.query(
-        `INSERT INTO email_verifications (user_id, token, token_hash, expires_at, request_ip)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [user.id, verificationToken, verificationTokenHash, verificationExpiresAt, req.ip || null]
-      );
+        await client.query(
+          `INSERT INTO email_verifications (user_id, token, token_hash, expires_at, request_ip)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [user.id, verificationToken, verificationTokenHash, verificationExpiresAt, req.ip || null]
+        );
+      }
 
       return { user, verificationToken };
     });
@@ -76,12 +81,16 @@ const register = async (req, res) => {
     // Log audit
     //req.auditLog('register', 'user', { email });
 
-    // Send verification email
-    try {
-      await sendVerificationEmail(result.user.email, result.verificationToken, result.user.first_name);
-    } catch (emailErr) {
-      console.error('Failed to send verification email:', emailErr);
-      // Don't fail registration if email fails
+    // Send verification email unless we auto-verified in development
+    if (NODE_ENV !== 'development') {
+      try {
+        await sendVerificationEmail(result.user.email, result.verificationToken, result.user.first_name);
+      } catch (emailErr) {
+        console.error('Failed to send verification email:', emailErr);
+        // Don't fail registration if email fails
+      }
+    } else {
+      console.log('Development mode - skipping verification email');
     }
 
     // Generate token
@@ -95,7 +104,9 @@ const register = async (req, res) => {
       ...successResponse({
         user: result.user,
         token,
-        message: 'Registration successful. Please check your email to verify your account.'
+        message: NODE_ENV === 'development'
+          ? 'Registration successful. (Email verification skipped in development.)'
+          : 'Registration successful. Please check your email to verify your account.'
       })
     });
 

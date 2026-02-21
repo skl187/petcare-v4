@@ -13,11 +13,11 @@ import Images from './adminPages/UiElements/Images';
 import Badges from './adminPages/UiElements/Badges';
 import Avatars from './adminPages/UiElements/Avatars';
 import Buttons from './adminPages/UiElements/Buttons';
-import LineChart from './adminPages/Charts/LineChart';
-import BarChart from './adminPages/Charts/BarChart';
-import Calendar from './adminPages/Calendar';
+import LineChart from './adminPages/UiElements/LineChart';
+import BarChart from './adminPages/UiElements/BarChart';
+import Calendar from './adminPages/UiElements/Calendar';
 import FormElements from './adminPages/Forms/FormElements';
-import Blank from './adminPages/Blank';
+import Blank from './adminPages/UiElements/Blank';
 import AppLayout from './layout/AppLayout';
 import { ScrollToTop } from './components/common/ScrollToTop';
 import Home from './adminPages/Dashboard/Home';
@@ -26,7 +26,6 @@ import Reports from './sidebar/reports/Reports';
 import CategoryList from './sidebar/veterinary/CategoryList';
 import Employees from './adminPages/users/Employees';
 import EmpRequestList from './adminPages/users/EmpRequestList';
-import BookingReviews from './adminPages/users/BookingReviews';
 import Tax from './sidebar/finance/Tax';
 import EmployeeEarnings from './sidebar/finance/EmployeeEarnings';
 import DailyBookings from './sidebar/overallReports/DailyBookings';
@@ -63,6 +62,7 @@ import ServiceList from './adminPages/veterinary/ServiceList';
 import PetCenterList from './adminPages/veterinary/petCentersList';
 // users
 import OwnerAndPets from './adminPages/users/OwnerAndPets';
+import BookingReviews from './adminPages/users/BookingReviews';
 // notifications
 import ListNotification from './adminPages/notifications/ListNotification';
 import TemplateNotification from './adminPages/notifications/TemplateNotification';
@@ -81,17 +81,18 @@ import VetServiceList from './vetPages/VetServices/VetServiceList';
 import VeterinaryBookings from './vetPages/VetServices/VeterinaryBookingsWrapper';
 import VetDashOwenerAndPets from './vetPages/VetUsers/VetDashOwenerAndPets';
 import VetDashVetReviews from './vetPages/VetUsers/VetDashVetReviews';
+import AvailabilitySettings from './vetPages/AvailabilitySettings/AvailabilitySettings';
 
 //Owner and pets
 import OwnerDashboard from './userPages/ownerDashboard/OwnerDashboard';
 import MyPets from './userPages/myPets/MyPets';
-import ViewBookingsHistory from './userPages/Bookings/BookingsHistory/ViewBookingsHistory';
-import ViewUpcomingBookings from './userPages/Bookings/UpcomingBookings/ViewUpcomingBookings';
+import ViewBookingsHistory from './userPages/Bookings/ViewBookingsHistory';
+import ViewUpcomingBookings from './userPages/Bookings/ViewUpcomingBookings';
 import Payments from './userPages/Payments/Payments';
 import MessageInbox from './userPages/Messages/Inbox/MessageInbox';
 import SendNewMessage from './userPages/Messages/SendMessage/SendNewMessage';
 import ToastContainer from './components/ui/toast/ToastContainer';
-import { VeterinaryBookingsDetail } from './adminPages/VetPageForms/Veterinary/VeterinaryBookingsDetail';
+import { VeterinaryBookingsDetail } from './adminPages/PageForms/VeterinaryBookingsDetail';
 import ProfileWithLayout from './adminPages/ProfileWithLayout';
 
 export default function App() {
@@ -223,6 +224,7 @@ export default function App() {
                 <Route path='/vet/services' element={<VetServiceList />} />
                 <Route path='/vet/owners' element={<VetDashOwenerAndPets />} />
                 <Route path='/vet/reviews' element={<VetDashVetReviews />} />
+                <Route path='/vet/availability' element={<AvailabilitySettings />} />
               </Route>
             </Route>
 
