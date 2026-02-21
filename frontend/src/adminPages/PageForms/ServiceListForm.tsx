@@ -5,6 +5,7 @@ import Badge from '../../components/ui/badge/Badge';
 import { API_ENDPOINTS } from '../../constants/api';
 
 export interface ServiceFormData {
+  clinic_id: string;
   code: string;
   name: string;
   slug: string;
@@ -15,6 +16,8 @@ export interface ServiceFormData {
 
 export interface ServiceForEdit {
   id: string;
+  clinic_id?: string;
+  clinic_name?: string;
   code: string;
   name: string;
   slug: string;
@@ -53,6 +56,7 @@ export default function ServiceListForm({
     mode: 'onChange',
     defaultValues: service
       ? {
+          clinic_id: service.clinic_id || '',
           code: service.code,
           name: service.name,
           slug: service.slug,
@@ -61,6 +65,7 @@ export default function ServiceListForm({
           status: service.status === 1 ? 1 : 0,
         }
       : {
+          clinic_id: '',
           code: '',
           name: '',
           slug: '',
@@ -75,6 +80,10 @@ export default function ServiceListForm({
     message: string;
     type: 'success' | 'error';
   } | null>(null);
+  const [clinics, setClinics] = useState<
+    Array<{ clinic_id: string; clinic_name: string }>
+  >([]);
+  const [clinicsLoading, setClinicsLoading] = useState(false);
   const bannerTimerRef = useRef<number | null>(null);
   const closeTimerRef = useRef<number | null>(null);
 
@@ -94,6 +103,7 @@ export default function ServiceListForm({
   useEffect(() => {
     if (service) {
       const formData: ServiceFormData = {
+        clinic_id: service.clinic_id || '',
         code: service.code || '',
         name: service.name || '',
         slug: service.slug || '',
@@ -104,6 +114,53 @@ export default function ServiceListForm({
       reset(formData, { keepDefaultValues: false });
     }
   }, [service, reset]);
+
+  // Fetch clinics on mount
+  useEffect(() => {
+    const fetchClinics = async () => {
+      try {
+        setClinicsLoading(true);
+        const token = sessionStorage.getItem('token');
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch(API_ENDPOINTS.VET_SERVICES.CLINICS, {
+          method: 'GET',
+          headers,
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch clinics');
+        }
+
+        const result = await response.json();
+        const clinicsList = Array.isArray(result.data) ? result.data : [];
+        setClinics(
+          clinicsList.map((c: any) => ({
+            clinic_id: c.id,
+            clinic_name: c.name,
+          })),
+        );
+
+        // Set clinic value appropriately
+        if (service && service.clinic_id) {
+          // If editing, set the service's clinic
+          setValue('clinic_id', service.clinic_id);
+        } else if (!service && clinicsList.length > 0) {
+          // If adding new, set first clinic as default
+          setValue('clinic_id', clinicsList[0].id);
+        }
+      } catch (error) {
+        console.error('Failed to fetch clinics:', error);
+      } finally {
+        setClinicsLoading(false);
+      }
+    };
+
+    fetchClinics();
+  }, [service, setValue]);
 
   // Auto-dismiss success banners after 5s
   useEffect(() => {
@@ -142,6 +199,7 @@ export default function ServiceListForm({
     setBanner(null);
 
     const payload = {
+      clinic_id: data.clinic_id,
       code: data.code,
       name: data.name,
       slug: data.slug || slugify(data.name),
@@ -161,9 +219,9 @@ export default function ServiceListForm({
       let responseData: any;
 
       if (service) {
-        // PUT
+        // PATCH
         res = await fetch(API_ENDPOINTS.VET_SERVICES.DETAIL(service.id), {
-          method: 'PUT',
+          method: 'PATCH',
           headers,
           body: JSON.stringify(payload),
         });
@@ -212,7 +270,8 @@ export default function ServiceListForm({
     }
   };
 
-  const getStatusColor = (status: number) => (status === 1 ? 'success' : 'error');
+  const getStatusColor = (status: number) =>
+    status === 1 ? 'success' : 'error';
 
   return (
     <div className='p-2 mx-auto max-w-3xl md:p-3'>
@@ -283,7 +342,9 @@ export default function ServiceListForm({
               <div className='bg-white border border-gray-200 rounded-lg p-4 sticky top-2'>
                 {/* Service Code Section */}
                 <div className='text-center border-b pb-2 mb-2'>
-                  <p className='text-xs text-gray-500 uppercase tracking-wide'>Service Code</p>
+                  <p className='text-xs text-gray-500 uppercase tracking-wide'>
+                    Service Code
+                  </p>
                   <p className='text-sm font-semibold text-gray-800 mt-1'>
                     {codeValue || 'N/A'}
                   </p>
@@ -291,7 +352,9 @@ export default function ServiceListForm({
 
                 {/* Service Name Section */}
                 <div className='text-center border-b pb-2 mb-2'>
-                  <p className='text-xs text-gray-500 uppercase tracking-wide'>Service Name</p>
+                  <p className='text-xs text-gray-500 uppercase tracking-wide'>
+                    Service Name
+                  </p>
                   <h3 className='text-base font-bold text-gray-800 mt-1 truncate'>
                     {nameValue || 'Service'}
                   </h3>
@@ -299,11 +362,10 @@ export default function ServiceListForm({
 
                 {/* Status */}
                 <div className='text-center'>
-                  <p className='text-xs text-gray-500 uppercase tracking-wide mb-2'>Status</p>
-                  <Badge 
-                    size='sm' 
-                    color={getStatusColor(statusValue)}
-                  >
+                  <p className='text-xs text-gray-500 uppercase tracking-wide mb-2'>
+                    Status
+                  </p>
+                  <Badge size='sm' color={getStatusColor(statusValue)}>
                     {statusValue === 1 ? 'Active' : 'Inactive'}
                   </Badge>
                   <select
@@ -323,16 +385,63 @@ export default function ServiceListForm({
               {/* Service Information Card */}
               <div className='bg-white border border-gray-200 rounded-lg p-4'>
                 <div className='flex items-center mb-3'>
-                  <svg className='w-4 h-4 text-gray-700 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                  <svg
+                    className='w-4 h-4 text-gray-700 mr-2'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                    />
                   </svg>
-                  <h3 className='text-base font-semibold text-gray-800'>Service Details</h3>
+                  <h3 className='text-base font-semibold text-gray-800'>
+                    Service Details
+                  </h3>
                 </div>
 
                 <div className='space-y-3'>
+                  {/* Clinic */}
+                  <div>
+                    <label
+                      className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'
+                      htmlFor='clinic_id'
+                    >
+                      Clinic <span className='text-red-500'>*</span>
+                    </label>
+                    <select
+                      id='clinic_id'
+                      disabled={isLoading || clinicsLoading}
+                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                        errors.clinic_id ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      {...register('clinic_id', {
+                        required: 'Clinic is required',
+                      })}
+                    >
+                      <option value=''>Select a clinic...</option>
+                      {clinics.map((clinic) => (
+                        <option key={clinic.clinic_id} value={clinic.clinic_id}>
+                          {clinic.clinic_name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.clinic_id && (
+                      <span className='text-xs text-red-600 mt-0.5 block'>
+                        {errors.clinic_id.message}
+                      </span>
+                    )}
+                  </div>
+
                   {/* Code */}
                   <div>
-                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1' htmlFor='code'>
+                    <label
+                      className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'
+                      htmlFor='code'
+                    >
                       Service Code
                     </label>
                     <input
@@ -352,13 +461,18 @@ export default function ServiceListForm({
                       })}
                     />
                     {errors.code && (
-                      <span className='text-xs text-red-600 mt-0.5 block'>{errors.code.message}</span>
+                      <span className='text-xs text-red-600 mt-0.5 block'>
+                        {errors.code.message}
+                      </span>
                     )}
                   </div>
 
                   {/* Name */}
                   <div>
-                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1' htmlFor='name'>
+                    <label
+                      className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'
+                      htmlFor='name'
+                    >
                       Service Name
                     </label>
                     <input
@@ -378,13 +492,18 @@ export default function ServiceListForm({
                       })}
                     />
                     {errors.name && (
-                      <span className='text-xs text-red-600 mt-0.5 block'>{errors.name.message}</span>
+                      <span className='text-xs text-red-600 mt-0.5 block'>
+                        {errors.name.message}
+                      </span>
                     )}
                   </div>
 
                   {/* Slug */}
                   <div>
-                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1' htmlFor='slug'>
+                    <label
+                      className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'
+                      htmlFor='slug'
+                    >
                       Slug
                     </label>
                     <input
@@ -395,7 +514,9 @@ export default function ServiceListForm({
                       value={watch('slug')}
                       className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600'
                     />
-                    <p className='text-xs text-gray-500 mt-1'>Automatically generated from name</p>
+                    <p className='text-xs text-gray-500 mt-1'>
+                      Automatically generated from name
+                    </p>
                   </div>
                 </div>
               </div>
@@ -403,16 +524,31 @@ export default function ServiceListForm({
               {/* Service Parameters Card */}
               <div className='bg-white border border-gray-200 rounded-lg p-4'>
                 <div className='flex items-center mb-3'>
-                  <svg className='w-4 h-4 text-gray-700 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                  <svg
+                    className='w-4 h-4 text-gray-700 mr-2'
+                    fill='none'
+                    stroke='currentColor'
+                    viewBox='0 0 24 24'
+                  >
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                    />
                   </svg>
-                  <h3 className='text-base font-semibold text-gray-800'>Service Parameters</h3>
+                  <h3 className='text-base font-semibold text-gray-800'>
+                    Service Parameters
+                  </h3>
                 </div>
 
                 <div className='grid grid-cols-2 gap-3'>
                   {/* Duration */}
                   <div>
-                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1' htmlFor='duration'>
+                    <label
+                      className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'
+                      htmlFor='duration'
+                    >
                       Duration (min)
                     </label>
                     <input
@@ -422,7 +558,9 @@ export default function ServiceListForm({
                       disabled={isLoading}
                       placeholder='30'
                       className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                        errors.default_duration_minutes ? 'border-red-500' : 'border-gray-300'
+                        errors.default_duration_minutes
+                          ? 'border-red-500'
+                          : 'border-gray-300'
                       }`}
                       {...register('default_duration_minutes', {
                         required: 'Duration is required',
@@ -433,13 +571,18 @@ export default function ServiceListForm({
                       })}
                     />
                     {errors.default_duration_minutes && (
-                      <span className='text-xs text-red-600 mt-0.5 block'>{errors.default_duration_minutes.message}</span>
+                      <span className='text-xs text-red-600 mt-0.5 block'>
+                        {errors.default_duration_minutes.message}
+                      </span>
                     )}
                   </div>
 
                   {/* Fee */}
                   <div>
-                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1' htmlFor='fee'>
+                    <label
+                      className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'
+                      htmlFor='fee'
+                    >
                       Default Fee ($)
                     </label>
                     <input
@@ -450,7 +593,9 @@ export default function ServiceListForm({
                       disabled={isLoading}
                       placeholder='50.00'
                       className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                        errors.default_fee ? 'border-red-500' : 'border-gray-300'
+                        errors.default_fee
+                          ? 'border-red-500'
+                          : 'border-gray-300'
                       }`}
                       {...register('default_fee', {
                         required: 'Default fee is required',
@@ -461,7 +606,9 @@ export default function ServiceListForm({
                       })}
                     />
                     {errors.default_fee && (
-                      <span className='text-xs text-red-600 mt-0.5 block'>{errors.default_fee.message}</span>
+                      <span className='text-xs text-red-600 mt-0.5 block'>
+                        {errors.default_fee.message}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -486,14 +633,32 @@ export default function ServiceListForm({
             >
               {isLoading ? (
                 <span className='flex items-center justify-center'>
-                  <svg className='animate-spin -ml-1 mr-2 h-4 w-4 text-white' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
-                    <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
-                    <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
+                  <svg
+                    className='animate-spin -ml-1 mr-2 h-4 w-4 text-white'
+                    xmlns='http://www.w3.org/2000/svg'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                  >
+                    <circle
+                      className='opacity-25'
+                      cx='12'
+                      cy='12'
+                      r='10'
+                      stroke='currentColor'
+                      strokeWidth='4'
+                    ></circle>
+                    <path
+                      className='opacity-75'
+                      fill='currentColor'
+                      d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                    ></path>
                   </svg>
                   {service ? 'Updating...' : 'Creating...'}
                 </span>
+              ) : service ? (
+                'Update Service'
               ) : (
-                service ? 'Update Service' : 'Add Service'
+                'Add Service'
               )}
             </button>
           </div>

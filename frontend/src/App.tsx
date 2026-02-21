@@ -42,7 +42,6 @@ import AccessControl from './sidebar/accessControl/AccessControl';
 import SystemServices from './sidebar/systemServices/SystemServices';
 import AppPageDetail from './sidebar/pages/AppPageDetail';
 
-
 import SignIn from './authPages/SignIn';
 import SignUp from './authPages/SignUp';
 import ResetPasswordForm from './authPages/ResetPassword';
@@ -82,6 +81,7 @@ import VeterinaryBookings from './vetPages/VetServices/VeterinaryBookingsWrapper
 import VetDashOwenerAndPets from './vetPages/VetUsers/VetDashOwenerAndPets';
 import VetDashVetReviews from './vetPages/VetUsers/VetDashVetReviews';
 import AvailabilitySettings from './vetPages/AvailabilitySettings/AvailabilitySettings';
+import PaymentList from './vetPages/Payments/PaymentList';
 
 //Owner and pets
 import OwnerDashboard from './userPages/ownerDashboard/OwnerDashboard';
@@ -126,7 +126,10 @@ export default function App() {
             >
               <Route element={<AppLayout />}>
                 <Route path='/home' element={<Home />} />
-                <Route path='/todaysBookings' element={<TodaysAppointments />} />
+                <Route
+                  path='/todaysBookings'
+                  element={<TodaysAppointments />}
+                />
                 <Route path='/reports' element={<Reports />} />
                 {/* veterinary */}
                 <Route path='/vetBookings' element={<VetBookings />} />
@@ -224,7 +227,11 @@ export default function App() {
                 <Route path='/vet/services' element={<VetServiceList />} />
                 <Route path='/vet/owners' element={<VetDashOwenerAndPets />} />
                 <Route path='/vet/reviews' element={<VetDashVetReviews />} />
-                <Route path='/vet/availability' element={<AvailabilitySettings />} />
+                <Route
+                  path='/vet/availability'
+                  element={<AvailabilitySettings />}
+                />
+                <Route path='/vet/payments' element={<PaymentList />} />
               </Route>
             </Route>
 
@@ -250,7 +257,6 @@ export default function App() {
                 <Route path='/owner/new-message' element={<SendNewMessage />} />
               </Route>
             </Route>
-            
           </Route>
 
           {/* Fallback Route for 404 */}

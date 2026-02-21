@@ -15,6 +15,7 @@ import Switch from '../../form/switch/Switch';
 import { IoIosCloseCircle, IoIosCheckmarkCircle } from 'react-icons/io';
 import DeleteDialog from '../tableComponents/DeleteDailog';
 import { API_ENDPOINTS } from '../../../constants/api';
+import { useAuth } from '../../auth/AuthContext';
 
 const VETERINARIANS_API = API_ENDPOINTS.VETERINARIANS.BASE;
 const CLINICS_API = API_ENDPOINTS.CLINICS.BASE;
@@ -44,6 +45,16 @@ export interface Veterinarian {
 }
 
 export default function VeterinarianListTable() {
+  const { user } = useAuth();
+
+  // Check if user is a veterinarian
+  const isVeterinarian = user?.roles?.some((role: any) => {
+    const slug = typeof role === 'string' ? role : role?.slug || role?.name;
+    return ['veterinary', 'veterinarian', 'doctor'].includes(
+      (slug || '').toLowerCase(),
+    );
+  });
+
   // State
   const [veterinarians, setVeterinarians] = useState<Veterinarian[]>([]);
   const [clinics, setClinics] = useState<Clinic[]>([]);
@@ -68,6 +79,7 @@ export default function VeterinarianListTable() {
   // Fetch Clinics
   const fetchClinics = useCallback(async () => {
     try {
+      setFetchError('');
       const response = await fetch(CLINICS_API, {
         method: 'GET',
         headers: {
@@ -202,21 +214,32 @@ export default function VeterinarianListTable() {
     }
   }, [clinics, vetServices]);
 
-  // Initial load - fetch clinics and services first, then veterinarians
+  // Initial load - fetch clinics and optionally services
   useEffect(() => {
     const initializeData = async () => {
       await fetchClinics();
-      await fetchVetServices();
+      // Only fetch vet services if user is a veterinarian
+      if (isVeterinarian) {
+        await fetchVetServices();
+      }
     };
     initializeData();
-  }, [fetchClinics, fetchVetServices]);
+  }, [fetchClinics, fetchVetServices, isVeterinarian]);
 
-  // Fetch veterinarians when clinics and services are loaded
+  // Fetch veterinarians when clinics are loaded (and services if applicable)
   useEffect(() => {
-    if (clinics.length > 0 && vetServices.length > 0) {
-      fetchVeterinarians();
+    if (isVeterinarian) {
+      // For veterinarians, wait for both clinics and services
+      if (clinics.length > 0 && vetServices.length > 0) {
+        fetchVeterinarians();
+      }
+    } else {
+      // For admins, only need clinics
+      if (clinics.length > 0) {
+        fetchVeterinarians();
+      }
     }
-  }, [clinics, vetServices, fetchVeterinarians]);
+  }, [clinics, vetServices, fetchVeterinarians, isVeterinarian]);
 
   // Filter
   const filtered = veterinarians.filter((v) => {

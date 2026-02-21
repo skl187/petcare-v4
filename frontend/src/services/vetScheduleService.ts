@@ -16,8 +16,8 @@ interface ApiResponse<T> {
 
 interface Schedule {
   id?: string;
-  veterinarian_id: string;
-  clinic_id: string;
+  veterinarian_id?: string;
+  clinic_id?: string;
   day_of_week: number;
   start_time: string;
   end_time: string;
@@ -29,7 +29,7 @@ interface Schedule {
 
 interface ScheduleException {
   id?: string;
-  veterinarian_id: string;
+  veterinarian_id?: string;
   clinic_id?: string;
   exception_date: string;
   exception_type: 'leave' | 'holiday' | 'emergency' | 'conference' | 'other';
@@ -40,22 +40,18 @@ interface ScheduleException {
 }
 
 // Get all schedules for a veterinarian
-export const getVetSchedules = async (veterinarian_id: string, clinic_id?: string) => {
+export const getVetSchedules = async () => {
   try {
-    const params = new URLSearchParams({ veterinarian_id });
-    if (clinic_id) {
-      params.append('clinic_id', clinic_id);
-    }
-    const url = `${API_ENDPOINTS.VET_SCHEDULES || 'http://localhost:3000/api/vet-schedules'}?${params}`;
+    const url = `${API_ENDPOINTS.VET_SCHEDULES.BASE}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch vet schedules: ${response.statusText}`);
     }
-    
+
     const result: ApiResponse<Schedule[]> = await response.json();
     return result.data || [];
   } catch (error) {
@@ -73,11 +69,11 @@ export const upsertSchedule = async (schedule: Schedule) => {
       headers: getAuthHeaders(),
       body: JSON.stringify(schedule),
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to upsert schedule: ${response.statusText}`);
     }
-    
+
     const result: ApiResponse<Schedule> = await response.json();
     return result.data;
   } catch (error) {
@@ -86,29 +82,27 @@ export const upsertSchedule = async (schedule: Schedule) => {
   }
 };
 
-// Bulk update schedules for a vet at a clinic (entire week)
-export const bulkUpsertSchedules = async (veterinarian_id: string, clinic_id: string, schedules: Schedule[]) => {
+// Bulk update schedules for a vet (entire week)
+export const bulkUpsertSchedules = async (schedules: Schedule[]) => {
   try {
-    const url = `${API_ENDPOINTS.VET_SCHEDULES || 'http://localhost:3000/api/vet-schedules'}/bulk`;
+    const url = `${API_ENDPOINTS.VET_SCHEDULES.BASE}/bulk`;
     const response = await fetch(url, {
       method: 'PUT',
       headers: getAuthHeaders(),
-      body: JSON.stringify({
-        veterinarian_id,
-        clinic_id,
-        schedules
-      }),
+      body: JSON.stringify({ schedules }),
     });
-    
+
     if (!response.ok) {
       // try to read any error message body for more detail
       let bodyText = '';
       try {
         bodyText = await response.text();
       } catch {}
-      throw new Error(`Failed to bulk upsert schedules: ${response.status} ${response.statusText} ${bodyText}`);
+      throw new Error(
+        `Failed to bulk upsert schedules: ${response.status} ${response.statusText} ${bodyText}`,
+      );
     }
-    
+
     const result: ApiResponse<Schedule[]> = await response.json();
     return result.data || [];
   } catch (error) {
@@ -125,11 +119,11 @@ export const deleteSchedule = async (scheduleId: string) => {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to delete schedule: ${response.statusText}`);
     }
-    
+
     return response.json();
   } catch (error) {
     console.error('Error deleting schedule:', error);
@@ -139,27 +133,27 @@ export const deleteSchedule = async (scheduleId: string) => {
 
 // Get schedule exceptions
 export const getScheduleExceptions = async (
-  veterinarian_id: string,
-  clinic_id?: string,
   from_date?: string,
-  to_date?: string
+  to_date?: string,
 ) => {
   try {
-    const params = new URLSearchParams({ veterinarian_id });
-    if (clinic_id) params.append('clinic_id', clinic_id);
+    const params = new URLSearchParams();
     if (from_date) params.append('from_date', from_date);
     if (to_date) params.append('to_date', to_date);
 
-    const url = `${API_ENDPOINTS.VET_SCHEDULES || 'http://localhost:3000/api/vet-schedules'}/exceptions?${params}`;
+    const queryString = params.toString() ? `?${params}` : '';
+    const url = `${API_ENDPOINTS.VET_SCHEDULES.EXCEPTIONS}${queryString}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
-    
+
     if (!response.ok) {
-      throw new Error(`Failed to fetch schedule exceptions: ${response.statusText}`);
+      throw new Error(
+        `Failed to fetch schedule exceptions: ${response.statusText}`,
+      );
     }
-    
+
     const result: ApiResponse<ScheduleException[]> = await response.json();
     return result.data || [];
   } catch (error) {
@@ -171,17 +165,19 @@ export const getScheduleExceptions = async (
 // Create a schedule exception
 export const createScheduleException = async (exception: ScheduleException) => {
   try {
-    const url = `${API_ENDPOINTS.VET_SCHEDULES || 'http://localhost:3000/api/vet-schedules'}/exceptions`;
+    const url = `${API_ENDPOINTS.VET_SCHEDULES.EXCEPTIONS}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(exception),
     });
-    
+
     if (!response.ok) {
-      throw new Error(`Failed to create schedule exception: ${response.statusText}`);
+      throw new Error(
+        `Failed to create schedule exception: ${response.statusText}`,
+      );
     }
-    
+
     const result: ApiResponse<ScheduleException> = await response.json();
     return result.data;
   } catch (error) {
@@ -193,16 +189,18 @@ export const createScheduleException = async (exception: ScheduleException) => {
 // Delete a schedule exception
 export const deleteScheduleException = async (exceptionId: string) => {
   try {
-    const url = `${API_ENDPOINTS.VET_SCHEDULES || 'http://localhost:3000/api/vet-schedules'}/exceptions/${exceptionId}`;
+    const url = `${API_ENDPOINTS.VET_SCHEDULES.EXCEPTIONS}/${exceptionId}`;
     const response = await fetch(url, {
       method: 'DELETE',
       headers: getAuthHeaders(),
     });
-    
+
     if (!response.ok) {
-      throw new Error(`Failed to delete schedule exception: ${response.statusText}`);
+      throw new Error(
+        `Failed to delete schedule exception: ${response.statusText}`,
+      );
     }
-    
+
     return response.json();
   } catch (error) {
     console.error('Error deleting schedule exception:', error);
@@ -217,5 +215,5 @@ export default {
   deleteSchedule,
   getScheduleExceptions,
   createScheduleException,
-  deleteScheduleException
+  deleteScheduleException,
 };

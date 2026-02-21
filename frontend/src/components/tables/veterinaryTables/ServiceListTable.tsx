@@ -14,8 +14,7 @@ import Pagination from '../tableComponents/Pagination';
 import { IoIosCloseCircle, IoIosCheckmarkCircle } from 'react-icons/io';
 import Switch from '../../form/switch/Switch';
 import { API_ENDPOINTS } from '../../../constants/api';
-
-const API_BASE = API_ENDPOINTS.VET_SERVICES.BASE;
+import { useAuth } from '../../auth/AuthContext';
 
 export interface VetService {
   id: string;
@@ -25,9 +24,30 @@ export interface VetService {
   default_duration_minutes: number;
   default_fee: number;
   status: number;
+  clinic_id?: string;
+  clinic_name?: string;
 }
 
 const ServiceListTable = () => {
+  const { user } = useAuth();
+
+  // Check if user is an admin/superadmin
+  const isAdmin = user?.roles?.some((role: any) => {
+    const slug = typeof role === 'string' ? role : role?.slug || role?.name;
+    return ['admin', 'superadmin'].includes((slug || '').toLowerCase());
+  });
+
+  // Get API base URL
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
+  // Determine API endpoint based on user role
+  // For admins: use /api/vet-services (all services)
+  // For veterinarians: use /api/vet-services/my (own services)
+  const API_BASE = isAdmin
+    ? `${API_BASE_URL}/api/vet-services`
+    : API_ENDPOINTS.VET_SERVICES.BASE;
+
   // State
   const [services, setServices] = useState<VetService[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -78,6 +98,8 @@ const ServiceListTable = () => {
         default_duration_minutes: Number(it.default_duration_minutes) || 0,
         default_fee: Number(it.default_fee) || 0,
         status: Number(it.status) ?? 1,
+        clinic_id: it.clinic_id ?? '',
+        clinic_name: it.clinic_name ?? '',
       }));
 
       setServices(items);
@@ -87,7 +109,7 @@ const ServiceListTable = () => {
     } finally {
       setIsLoadingData(false);
     }
-  }, []);
+  }, [API_BASE]);
 
   // Initial load
   useEffect(() => {
@@ -394,6 +416,9 @@ const ServiceListTable = () => {
                 <TableCell className='p-2 py-3 text-left text-sm text-gray-700 font-medium min-w-[150px]'>
                   Service Name
                 </TableCell>
+                <TableCell className='p-2 py-3 text-left text-sm text-gray-700 font-medium min-w-[130px]'>
+                  Clinic
+                </TableCell>
                 <TableCell className='p-2 py-3 text-left text-sm text-gray-700 font-medium min-w-[140px]'>
                   Duration (min)
                 </TableCell>
@@ -436,6 +461,11 @@ const ServiceListTable = () => {
                     </TableCell>
                     <TableCell className='p-2 py-4 text-sm text-gray-900 font-medium'>
                       {service.name}
+                    </TableCell>
+                    <TableCell className='p-2 py-4 text-sm text-gray-700'>
+                      <span className='px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700'>
+                        {service.clinic_name || 'N/A'}
+                      </span>
                     </TableCell>
                     <TableCell className='p-2 py-4 text-sm text-gray-700'>
                       {service.default_duration_minutes}

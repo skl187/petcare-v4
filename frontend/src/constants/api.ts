@@ -58,8 +58,9 @@ export const API_ENDPOINTS = {
 
   // Vet Services
   VET_SERVICES: {
-    BASE: `${API_BASE_URL}/api/vet-services`,
-    DETAIL: (id: string) => `${API_BASE_URL}/api/vet-services/${id}`,
+    BASE: `${API_BASE_URL}/api/vet-services/my`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/vet-services/my/${id}`,
+    CLINICS: `${API_BASE_URL}/api/vet-services/my/clinics`,
   },
 
   // Clinics
@@ -136,12 +137,17 @@ export const API_ENDPOINTS = {
     RESEND: (id: string) => `${API_BASE_URL}/api/notifications/${id}/resend`,
     TEMPLATES: {
       BASE: `${API_BASE_URL}/api/notifications/templates`,
-      DETAIL: (key: string) => `${API_BASE_URL}/api/notifications/templates/${key}`,
+      DETAIL: (key: string) =>
+        `${API_BASE_URL}/api/notifications/templates/${key}`,
     },
   },
 
   // Vet Schedules
-  VET_SCHEDULES: `${API_BASE_URL}/api/vet-schedules`,
+  VET_SCHEDULES: {
+    BASE: `${API_BASE_URL}/api/vet-schedules/my`,
+    EXCEPTIONS: `${API_BASE_URL}/api/vet-schedules/exceptions/my`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/vet-schedules/${id}`,
+  },
 
   // Vet Clinic Mappings
   VET_CLINIC_MAPPINGS: `${API_BASE_URL}/api/vet-clinic-mappings`,

@@ -26,7 +26,9 @@ interface VetInfo {
   clinics: VetClinic[];
 }
 
-const VetAvailabilitySettings = () => {  const { user } = useAuth();  const [vetInfo, setVetInfo] = useState<VetInfo | null>(null);
+const VetAvailabilitySettings = () => {
+  const { user } = useAuth();
+  const [vetInfo, setVetInfo] = useState<VetInfo | null>(null);
   const [selectedClinicId, setSelectedClinicId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +56,7 @@ const VetAvailabilitySettings = () => {  const { user } = useAuth();  const [vet
       const isVet = user.roles?.some((role: any) => {
         const slug = typeof role === 'string' ? role : role?.slug || role?.name;
         return ['veterinary', 'veterinarian', 'doctor'].includes(
-          (slug || '').toLowerCase()
+          (slug || '').toLowerCase(),
         );
       });
       if (!isVet) {
@@ -66,7 +68,8 @@ const VetAvailabilitySettings = () => {  const { user } = useAuth();  const [vet
       const response = await fetch(url, {
         method: 'GET',
         headers: getAuthHeaders(),
-      });``
+      });
+      ``;
 
       if (!response.ok) {
         throw new Error('Failed to fetch veterinarian information');
@@ -77,12 +80,13 @@ const VetAvailabilitySettings = () => {  const { user } = useAuth();  const [vet
       const vets: any[] = Array.isArray(data.data?.data)
         ? data.data.data
         : Array.isArray(data.data)
-        ? data.data
-        : Array.isArray(data)
-        ? data
-        : [];
+          ? data.data
+          : Array.isArray(data)
+            ? data
+            : [];
 
-      const veterinarian = vets.find((v: any) => v.user_id === user.id) || vets[0];
+      const veterinarian =
+        vets.find((v: any) => v.user_id === user.id) || vets[0];
       if (!veterinarian) {
         throw new Error('No veterinarian record found for this user');
       }
@@ -102,7 +106,10 @@ const VetAvailabilitySettings = () => {  const { user } = useAuth();  const [vet
       });
       setSelectedClinicId(clinics.length > 0 ? clinics[0].clinic_id : null);
     } catch (err) {
-      setError((err as Error).message || 'Failed to load vet information. Please try again.');
+      setError(
+        (err as Error).message ||
+          'Failed to load vet information. Please try again.',
+      );
       console.error(err);
     } finally {
       setLoading(false);
@@ -111,8 +118,8 @@ const VetAvailabilitySettings = () => {  const { user } = useAuth();  const [vet
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className='flex items-center justify-center min-h-[400px]'>
+        <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600'></div>
       </div>
     );
   }
@@ -120,33 +127,35 @@ const VetAvailabilitySettings = () => {  const { user } = useAuth();  const [vet
   return (
     <>
       <PageMeta
-        title="Availability Settings"
-        description="Manage your schedule and availability"
+        title='Availability Settings'
+        description='Manage your schedule and availability'
       />
-      <div className="p-4 md:p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Availability Settings</h1>
-          <p className="text-gray-600">Manage your weekly schedule and time off</p>
+      <div className='p-3 md:p-4'>
+        <div className='mb-4'>
+          <h1 className='text-2xl font-bold mb-1'>Availability Settings</h1>
+          <p className='text-sm text-gray-600'>
+            Manage your weekly schedule and time off
+          </p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 border border-red-200 bg-red-50 rounded-lg">
-            <p className="text-red-800">{error}</p>
+          <div className='mb-4 p-3 border border-red-200 bg-red-50 rounded-lg text-sm'>
+            <p className='text-red-800'>{error}</p>
           </div>
         )}
 
         {/* Clinic Selector */}
         {vetInfo && vetInfo.clinics.length > 1 && (
-          <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className='mb-4 bg-white rounded-lg shadow-sm border border-gray-200 p-3'>
+            <label className='block text-xs font-medium text-gray-700 mb-2'>
               Select Clinic
             </label>
             <select
               value={selectedClinicId || ''}
               onChange={(e) => setSelectedClinicId(e.target.value)}
-              className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className='w-full md:w-64 px-2 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500'
             >
-              <option value="">Choose a clinic...</option>
+              <option value=''>Choose a clinic...</option>
               {vetInfo.clinics.map((clinic) => (
                 <option key={clinic.clinic_id} value={clinic.clinic_id}>
                   {clinic.name}
@@ -159,7 +168,7 @@ const VetAvailabilitySettings = () => {  const { user } = useAuth();  const [vet
 
         {/* Schedule Management */}
         {vetInfo && selectedClinicId && (
-          <div className="space-y-6">
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
             <VetScheduleAvailability
               veterinarian_id={vetInfo.id}
               clinic_id={selectedClinicId}
@@ -172,9 +181,10 @@ const VetAvailabilitySettings = () => {  const { user } = useAuth();  const [vet
         )}
 
         {vetInfo && vetInfo.clinics.length === 0 && (
-          <div className="p-4 border border-yellow-200 bg-yellow-50 rounded-lg">
-            <p className="text-yellow-800">
-              You are not associated with any clinics yet. Please contact an administrator to add you to a clinic.
+          <div className='p-3 border border-yellow-200 bg-yellow-50 rounded-lg text-sm'>
+            <p className='text-yellow-800'>
+              You are not associated with any clinics yet. Please contact an
+              administrator to add you to a clinic.
             </p>
           </div>
         )}
