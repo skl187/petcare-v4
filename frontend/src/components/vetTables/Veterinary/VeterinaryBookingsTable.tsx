@@ -15,7 +15,7 @@ import { TableToolbar } from '../../tables/tableComponents/TableToolbar';
 import ImageHoverPreview from '../../tables/tableComponents/ImageHoverPreview';
 import VeterinaryBookingsForm, {
   VetBookingFormData,
-} from '../../../adminPages/PageForms/VeterinaryBookingsForm';
+} from '../../../adminPages/AdminPageForms/VeterinaryBookingsForm';
 import { API_ENDPOINTS } from '../../../constants/api';
 import { useAuth } from '../../auth/AuthContext';
 
@@ -77,19 +77,13 @@ export default function VeterinaryBookingsTable({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const columns = [
-    {
-      key: 'appointmentNumber',
-      label: 'Appointment #',
-      className: 'min-w-[120px]',
-    },
-    { key: 'date', label: 'Date', className: 'min-w-[120px]' },
-    { key: 'time', label: 'Time', className: 'min-w-[100px]' },
-    { key: 'petName', label: 'Pet', className: 'min-w-[150px]' },
-    { key: 'ownerName', label: 'Owner', className: 'min-w-[150px]' },
-    { key: 'service', label: 'Service', className: 'min-w-[160px]' },
-    { key: 'status', label: 'Status', className: 'min-w-[120px]' },
-  ] as const;
+  const sortColumns = [
+    { key: 'appointmentNumber' as const, label: 'Appt #' },
+    { key: 'petName' as const, label: 'Patient & Owner' },
+    { key: 'date' as const, label: 'Date & Time' },
+    { key: 'service' as const, label: 'Service' },
+    { key: 'status' as const, label: 'Status' },
+  ];
 
   const filtered = useMemo(() => {
     return rows
@@ -347,95 +341,108 @@ export default function VeterinaryBookingsTable({
         <div className='p-8 text-center text-gray-500'>No bookings found.</div>
       ) : (
         <div className='w-full overflow-x-auto rounded-lg border border-gray-200'>
-          <div className='min-w-[900px]'>
+          <div className='min-w-[700px]'>
             <Table className='w-full'>
               <TableHeader className='bg-gray-50'>
                 <TableRow>
-                  {columns.map((col) => (
+                  {sortColumns.map((col) => (
                     <SortableTableHeader<VetBooking>
                       key={col.key}
                       columnKey={col.key as keyof VetBooking}
                       label={col.label}
                       sortConfig={sortConfig}
                       requestSort={requestSort}
-                      className={`p-2 text-left ${col.className}`}
+                      className='p-2 py-4 text-left text-xs text-gray-500 font-semibold uppercase tracking-wide'
                     />
                   ))}
-                  <TableCell className='p-2'>Actions</TableCell>
+                  <TableCell className='p-2 py-4 text-xs text-gray-500 font-semibold uppercase tracking-wide'>
+                    Actions
+                  </TableCell>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {currentItems.map((r) => (
-                  <TableRow key={r.id} className='hover:bg-blue-50'>
-                    <TableCell className='p-2'>
+                  <TableRow
+                    key={r.id}
+                    className='hover:bg-gray-50 border-b border-gray-100 last:border-0'
+                  >
+                    {/* Appointment # */}
+                    <TableCell className='px-3 py-3'>
                       <button
-                        className='text-gray-900 hover:text-gray-600 font-medium'
+                        className='text-xs text-gray-800 bg-gray-100 px-2 py-1 rounded whitespace-nowrap hover:bg-gray-200'
                         onClick={() => handleViewDetail(r)}
                       >
-                        {r.appointmentNumber}
+                        {r.appointmentNumber || 'N/A'}
                       </button>
                     </TableCell>
-                    <TableCell className='p-2'>
+
+                    {/* Patient & Owner */}
+                    <TableCell className='px-3 py-3 min-w-[150px]'>
                       <button
-                        className='text-gray-900 hover:text-gray-600'
+                        className='flex flex-col gap-0.5 text-left'
                         onClick={() => handleViewDetail(r)}
                       >
-                        {r.date}
+                        <div className='flex items-center gap-2'>
+                          <ImageHoverPreview
+                            src={r.petPhoto || '/images/pets/placeholder.jpg'}
+                            alt={r.petName}
+                            className='w-7 h-7 rounded-full flex-shrink-0'
+                          />
+                          <span className='text-sm text-gray-900 leading-tight'>
+                            {r.petName || 'N/A'}
+                          </span>
+                        </div>
+                        <span className='text-xs text-gray-400 leading-tight pl-9'>
+                          {r.ownerName || 'N/A'}
+                        </span>
                       </button>
                     </TableCell>
-                    <TableCell className='p-2'>
+
+                    {/* Date & Time */}
+                    <TableCell className='px-3 py-3 min-w-[130px]'>
                       <button
-                        className='text-gray-900 hover:text-gray-600'
+                        className='flex flex-col gap-0.5 text-left'
                         onClick={() => handleViewDetail(r)}
                       >
-                        {r.time}
+                        <span className='text-sm text-gray-900 leading-tight'>
+                          {r.date
+                            ? new Date(r.date).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })
+                            : 'N/A'}
+                        </span>
+                        <span className='text-xs text-gray-400 leading-tight'>
+                          {r.time || 'N/A'}
+                        </span>
                       </button>
                     </TableCell>
-                    <TableCell className='p-2'>
-                      <button
-                        className='text-gray-900 hover:text-gray-600 flex items-center gap-2'
-                        onClick={() => handleViewDetail(r)}
-                      >
-                        <ImageHoverPreview
-                          src={r.petPhoto || '/images/pets/placeholder.jpg'}
-                          alt={r.petName}
-                          className='w-8 h-8 rounded-full'
-                        />
-                        {r.petName}
-                      </button>
+
+                    {/* Service */}
+                    <TableCell className='px-3 py-3 min-w-[150px]'>
+                      <span className='text-sm text-gray-900'>
+                        {r.service || 'N/A'}
+                      </span>
                     </TableCell>
-                    <TableCell className='p-2'>
-                      <button
-                        className='text-gray-900 hover:text-gray-600'
-                        onClick={() => handleViewDetail(r)}
-                      >
-                        {r.ownerName}
-                      </button>
-                    </TableCell>
-                    <TableCell className='p-2'>
-                      <button
-                        className='text-gray-900 hover:text-gray-600'
-                        onClick={() => handleViewDetail(r)}
-                      >
-                        {r.service}
-                      </button>
-                    </TableCell>
-                    <TableCell className='p-2'>
-                      <button
-                        className='inline-block'
-                        onClick={() => handleViewDetail(r)}
-                      >
+
+                    {/* Status */}
+                    <TableCell className='px-3 py-3'>
+                      <button onClick={() => handleViewDetail(r)}>
                         <Badge size='sm' color={statusColor(r.status)}>
                           {r.status}
                         </Badge>
                       </button>
                     </TableCell>
-                    <TableCell className='p-2'>
+
+                    {/* Actions */}
+                    <TableCell className='px-3 py-3'>
                       <button
                         onClick={() => handleEdit(r)}
-                        className='text-gray-700 hover:text-gray-900'
+                        className='text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50'
+                        title='View / Edit'
                       >
-                        <MdEdit />
+                        <MdEdit className='w-5 h-5' />
                       </button>
                     </TableCell>
                   </TableRow>

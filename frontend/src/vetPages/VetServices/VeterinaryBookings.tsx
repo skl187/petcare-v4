@@ -2,7 +2,7 @@ import { useState } from 'react';
 import PageMeta from '../../components/common/PageMeta';
 import ComponentCard from '../../components/common/ComponentCard';
 import VeterinaryBookingsTable from '../../components/vetTables/Veterinary/VeterinaryBookingsTable';
-import VeterinaryBookingsDetail from '../../adminPages/PageForms/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
+import VeterinaryBookingsDetail from '../../adminPages/AdminPageForms/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
 
 const VeterinaryBookings = () => {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<

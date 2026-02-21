@@ -14,3 +14,4 @@ backend/node_modules/
 .docs
 .sql
 readme.md
+API_TESTING_FLOW.md

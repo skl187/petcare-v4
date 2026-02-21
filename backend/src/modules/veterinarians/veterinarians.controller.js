@@ -8,8 +8,23 @@ const { hashPassword } = require('../../core/auth/password.service');
 
 const list = async (req, res) => {
   try {
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 100, clinic_id } = req.query;
     const offset = (page - 1) * limit;
+
+    const conditions = ['v.deleted_at IS NULL'];
+    const params = [limit, offset];
+
+    if (clinic_id) {
+      params.push(clinic_id);
+      conditions.push(
+        `EXISTS (
+          SELECT 1 FROM vet_clinic_mappings vcm
+          WHERE vcm.veterinarian_id = v.id
+            AND vcm.clinic_id = $${params.length}
+            AND vcm.deleted_at IS NULL
+        )`
+      );
+    }
 
     const result = await query(
       `SELECT v.id, v.user_id, v.employee_id, v.license_number, v.specialization, v.experience_years, 
@@ -33,15 +48,14 @@ const list = async (req, res) => {
          JOIN vet_clinics c ON c.id = m.clinic_id AND c.deleted_at IS NULL
          WHERE m.veterinarian_id = v.id AND m.deleted_at IS NULL
        ) mappings ON true
-       WHERE v.deleted_at IS NULL
+       WHERE ${conditions.join(' AND ')}
        ORDER BY v.created_at DESC
        LIMIT $1 OFFSET $2`,
-      [limit, offset]
+      params
     );
 
     res.json(successResponse({ data: result.rows, page: parseInt(page), limit: parseInt(limit) }));
   } catch (err) {
-    // logger.error('List veterinarians failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to fetch' });
   }
 };

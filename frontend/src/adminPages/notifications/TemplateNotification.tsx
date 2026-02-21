@@ -1,7 +1,7 @@
 import React from 'react';
 import PageMeta from '../../components/common/PageMeta';
 import ComponentCard from '../../components/common/ComponentCard';
-import NotificationTemplateTable from '../../components/tables/notifications/NotificationTemplateTable';
+import NotificationTemplateTable from '../../components/tables/AdminTables/NotificationTemplateTable';
 
 const TemplateNotification: React.FC = () => {
   return (

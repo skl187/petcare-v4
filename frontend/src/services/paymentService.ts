@@ -27,6 +27,27 @@ export interface Payment {
   appointment_status: string;
 }
 
+/** Admin payment — extends Payment with joined owner / pet / vet / clinic data */
+export interface AdminPayment extends Payment {
+  owner_first_name: string;
+  owner_last_name: string;
+  owner_email: string;
+  pet_name: string;
+  vet_first_name: string;
+  vet_last_name: string;
+  clinic_name: string;
+  appointment_time: string;
+}
+
+/** Owner/user payment — extends Payment with joined pet / vet / clinic data */
+export interface UserPayment extends Payment {
+  pet_name: string;
+  vet_first_name: string;
+  vet_last_name: string;
+  clinic_name: string;
+  appointment_time: string;
+}
+
 export interface PaymentResponse {
   status: string;
   message: string;
@@ -63,6 +84,28 @@ export const getVetPayments = async (): Promise<Payment[]> => {
     console.error('Error fetching payments:', error);
     throw error;
   }
+};
+
+/**
+ * Admin — fetch all payments across all vets
+ */
+export const getAllPayments = async (): Promise<AdminPayment[]> => {
+  const url = `${API_BASE_URL}/api/payments/all`;
+  const response = await fetch(url, { method: 'GET', headers: getAuthHeaders() });
+  if (!response.ok) throw new Error(`Failed to fetch payments: ${response.statusText}`);
+  const result = await response.json();
+  return result.data || [];
+};
+
+/**
+ * Owner — fetch own payments
+ */
+export const getUserPayments = async (): Promise<UserPayment[]> => {
+  const url = `${API_BASE_URL}/api/payments/user`;
+  const response = await fetch(url, { method: 'GET', headers: getAuthHeaders() });
+  if (!response.ok) throw new Error(`Failed to fetch payments: ${response.statusText}`);
+  const result = await response.json();
+  return result.data || [];
 };
 
 /**

@@ -63,16 +63,18 @@ import PetCenterList from './adminPages/veterinary/petCentersList';
 import OwnerAndPets from './adminPages/users/OwnerAndPets';
 import BookingReviews from './adminPages/users/BookingReviews';
 // notifications
-import ListNotification from './adminPages/notifications/ListNotification';
-import TemplateNotification from './adminPages/notifications/TemplateNotification';
+import ListNotification from './adminPages/Notifications/ListNotification';
+import TemplateNotification from './adminPages/Notifications/TemplateNotification';
 // pets
 import PetType from './adminPages/pets/PetType';
 import PetBreed from './adminPages/pets/PetBreed';
+// payments
+import AdminPayments from './adminPages/Payments/AdminPayments';
 // roles
 import ManageRoles from './adminPages/roles/manageRoles';
 import ManagePermissions from './adminPages/roles/managePermissions';
 // settings
-import AdminSettings from './adminPages/settings';
+import AdminSettings from './adminPages/Settings';
 
 // Veterinary Imports
 import VetDahboard from './vetPages/VetDashboard/VetDahboard';
@@ -92,7 +94,7 @@ import Payments from './userPages/Payments/Payments';
 import MessageInbox from './userPages/Messages/Inbox/MessageInbox';
 import SendNewMessage from './userPages/Messages/SendMessage/SendNewMessage';
 import ToastContainer from './components/ui/toast/ToastContainer';
-import { VeterinaryBookingsDetail } from './adminPages/PageForms/VeterinaryBookingsDetail';
+import { VeterinaryBookingsDetail } from './adminPages/AdminPageForms/VeterinaryBookingsDetail';
 import ProfileWithLayout from './adminPages/ProfileWithLayout';
 
 export default function App() {
@@ -164,6 +166,8 @@ export default function App() {
                 {/* Pet */}
                 <Route path='/petType' element={<PetType />} />
                 <Route path='/petBreed' element={<PetBreed />} />
+                {/* Payments */}
+                <Route path='/admin/payments' element={<AdminPayments />} />
                 {/* Pages */}
                 <Route path='/appPage' element={<AppPage />} />
                 <Route path='/appPage/:slug' element={<AppPageDetail />} />

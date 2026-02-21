@@ -1252,6 +1252,174 @@ const getAppointmentMedicalData = async (req, res) => {
 
 
 
+// ============================================================================
+// SEND EMAIL NOTIFICATION FOR APPOINTMENT
+// POST /api/appointments/:id/send-notification
+// Body (optional): { template_key, locale }
+// ============================================================================
+const sendNotification = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { template_key = 'appointment_notification', locale = 'en' } = req.body || {};
+
+    // Fetch appointment with user + pet + vet + clinic info
+    const apptRes = await query(
+      `SELECT
+         a.id, a.appointment_number, a.appointment_date, a.appointment_time,
+         a.status, a.appointment_type, a.chief_complaint, a.total_amount,
+         a.consultation_fee, a.duration_minutes,
+         u.id AS user_id, u.email AS user_email, u.first_name, u.last_name,
+         p.name AS pet_name,
+         v.id AS vet_id,
+         vu.first_name AS vet_first_name, vu.last_name AS vet_last_name,
+         c.name AS clinic_name, c.contact_email AS clinic_email
+       FROM vet_appointments a
+       JOIN users u ON u.id = a.user_id
+       JOIN pets p ON p.id = a.pet_id
+       JOIN veterinarians v ON v.id = a.veterinarian_id
+       JOIN users vu ON vu.id = v.user_id
+       JOIN vet_clinics c ON c.id = a.clinic_id
+       WHERE a.id = $1 AND a.deleted_at IS NULL`,
+      [id]
+    );
+
+    if (apptRes.rows.length === 0) {
+      return res.status(404).json({ status: 'error', message: 'Appointment not found' });
+    }
+
+    const appt = apptRes.rows[0];
+
+    if (!appt.user_email) {
+      return res.status(400).json({ status: 'error', message: 'User has no email address' });
+    }
+
+    // Build template payload variables
+    const payload = {
+      owner_name: `${appt.first_name || ''} ${appt.last_name || ''}`.trim(),
+      pet_name: appt.pet_name || 'your pet',
+      appointment_number: appt.appointment_number,
+      appointment_date: new Date(appt.appointment_date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+      appointment_time: appt.appointment_time,
+      appointment_type: appt.appointment_type || 'consultation',
+      status: appt.status,
+      vet_name: `Dr. ${appt.vet_first_name || ''} ${appt.vet_last_name || ''}`.trim(),
+      clinic_name: appt.clinic_name,
+      total_amount: appt.total_amount || '0.00',
+      chief_complaint: appt.chief_complaint || ''
+    };
+
+    // Try to fetch template; fall back to built-in HTML
+    const tplRes = await query(`SELECT * FROM get_notification_template($1, $2)`, [template_key, locale]);
+    const tpl = tplRes.rows[0];
+
+    let subject, bodyHtml, bodyText;
+
+    const renderTpl = (str, vars) => {
+      if (!str) return str;
+      return str.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] !== undefined ? vars[k] : `{{${k}}}`);
+    };
+
+    if (tpl) {
+      subject = renderTpl(tpl.subject, payload) || `Appointment Reminder – ${appt.appointment_number}`;
+      bodyHtml = renderTpl(tpl.body_html, payload) || renderTpl(tpl.body, payload);
+      bodyText = renderTpl(tpl.body, payload);
+    } else {
+      // Built-in fallback template when no DB template exists
+      subject = `Appointment Reminder – ${appt.appointment_number}`;
+      bodyHtml = `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+          <h2 style="color:#4f46e5;margin-bottom:4px">PetCare Appointment Reminder</h2>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0"/>
+          <p>Hi <strong>${payload.owner_name}</strong>,</p>
+          <p>This is a reminder about your upcoming appointment for <strong>${payload.pet_name}</strong>.</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0">
+            <tr><td style="padding:8px 0;color:#6b7280;width:40%">Appointment #</td><td style="padding:8px 0;font-weight:600">${payload.appointment_number}</td></tr>
+            <tr><td style="padding:8px 0;color:#6b7280">Date</td><td style="padding:8px 0;font-weight:600">${payload.appointment_date}</td></tr>
+            <tr><td style="padding:8px 0;color:#6b7280">Time</td><td style="padding:8px 0;font-weight:600">${payload.appointment_time}</td></tr>
+            <tr><td style="padding:8px 0;color:#6b7280">Type</td><td style="padding:8px 0;font-weight:600">${payload.appointment_type}</td></tr>
+            <tr><td style="padding:8px 0;color:#6b7280">Veterinarian</td><td style="padding:8px 0;font-weight:600">${payload.vet_name}</td></tr>
+            <tr><td style="padding:8px 0;color:#6b7280">Clinic</td><td style="padding:8px 0;font-weight:600">${payload.clinic_name}</td></tr>
+            <tr><td style="padding:8px 0;color:#6b7280">Status</td><td style="padding:8px 0;font-weight:600;text-transform:capitalize">${payload.status}</td></tr>
+          </table>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0"/>
+          <p style="color:#6b7280;font-size:12px">If you need to reschedule or have questions, please contact <strong>${payload.clinic_name}</strong> directly.</p>
+          <p style="color:#6b7280;font-size:12px">PetCare Team</p>
+        </div>`;
+      bodyText = `Hi ${payload.owner_name},\n\nReminder: Appointment ${payload.appointment_number} for ${payload.pet_name} on ${payload.appointment_date} at ${payload.appointment_time} with ${payload.vet_name} at ${payload.clinic_name}.\n\nStatus: ${payload.status}\n\nPetCare Team`;
+    }
+
+    // Send email via email service
+    const { sendEmail } = require('../../core/email/email.service');
+    let sendResult = null;
+    let notifStatus = 'sent';
+    let sendError = null;
+
+    try {
+      sendResult = await sendEmail({
+        to: appt.user_email,
+        subject,
+        html: bodyHtml,
+        text: bodyText
+      });
+    } catch (emailErr) {
+      notifStatus = 'failed';
+      sendError = emailErr.message;
+    }
+
+    // Record in notifications table
+    const notifInsert = await query(
+      `INSERT INTO notifications (user_id, notification_key, channel, target, template_key, locale, payload, scheduled_at, sent_at, status, error)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, now(), $8, $9, $10) RETURNING id`,
+      [
+        appt.user_id,
+        'appointment_notification',
+        'email',
+        JSON.stringify({ email: appt.user_email }),
+        tpl ? template_key : 'appointment_notification_builtin',
+        locale,
+        JSON.stringify(payload),
+        notifStatus === 'sent' ? new Date() : null,
+        notifStatus,
+        sendError
+      ]
+    );
+
+    const notifId = notifInsert.rows[0]?.id;
+
+    // Log in notification_logs
+    if (notifId) {
+      await query(
+        `INSERT INTO notification_logs (notification_id, channel, provider, provider_message_id, status, response)
+         VALUES ($1, 'email', 'smtp', $2, $3, $4)`,
+        [
+          notifId,
+          sendResult?.messageId || null,
+          notifStatus === 'sent' ? 'sent' : 'failed',
+          JSON.stringify(sendResult || { error: sendError })
+        ]
+      );
+    }
+
+    if (notifStatus === 'failed') {
+      return res.status(500).json({ status: 'error', message: `Email delivery failed: ${sendError}` });
+    }
+
+    return res.json({
+      status: 'success',
+      message: `Notification sent to ${appt.user_email}`,
+      data: {
+        notification_id: notifId,
+        sent_to: appt.user_email,
+        subject,
+        appointment_number: appt.appointment_number
+      }
+    });
+  } catch (err) {
+    console.error('sendNotification error:', err.message);
+    res.status(500).json({ status: 'error', message: 'Failed to send notification' });
+  }
+};
+
 module.exports = {
   listAppointments,
   getVetAppointmentsByFilter,
@@ -1264,5 +1432,6 @@ module.exports = {
   updateAppointmentStatus,
   processPayment,
   getPaymentInfo,
-  rescheduleAppointment
+  rescheduleAppointment,
+  sendNotification
 };

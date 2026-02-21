@@ -2,7 +2,7 @@ import { useState } from 'react';
 import PageMeta from '../../components/common/PageMeta';
 import ComponentCard from '../../components/common/ComponentCard';
 import UpcomingBookingsTable from '../../components/ownerTables/Bookings/UpcomingBookingsTable';
-import VeterinaryBookingsDetail from '../../adminPages/PageForms/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
+import VeterinaryBookingsDetail from '../../adminPages/AdminPageForms/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
 import type { VetBooking } from '../../components/vetTables/Veterinary/VeterinaryBookingsTable';
 
 const ViewUpcomingBookings = () => {

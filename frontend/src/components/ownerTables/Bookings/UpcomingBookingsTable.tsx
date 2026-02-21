@@ -19,9 +19,6 @@ import type { VetBooking } from '../../vetTables/Veterinary/VeterinaryBookingsTa
 
 // --- API Constants ---
 const PETS_API = API_ENDPOINTS.PETS.BASE;
-const VETERINARIANS_API = API_ENDPOINTS.VETERINARIANS.BASE;
-const CLINICS_API = API_ENDPOINTS.CLINICS.BASE;
-const VET_SERVICES_API = API_ENDPOINTS.VET_SERVICES.BASE;
 const OWNER_API_ORIGIN = new URL(
   API_ENDPOINTS.OWNER_BOOKINGS.BASE(),
   window.location.origin,
@@ -116,9 +113,6 @@ export default function UpcomingBookingsTable({
 }: UpcomingBookingsTableProps) {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [pets, setPets] = useState<Pet[]>([]);
-  const [veterinarians, setVeterinarians] = useState<Veterinarian[]>([]);
-  const [clinics, setClinics] = useState<Clinic[]>([]);
-  const [vetServices, setVetServices] = useState<VetService[]>([]);
 
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -170,95 +164,6 @@ export default function UpcomingBookingsTable({
     }
   }, []);
 
-  // Fetch Veterinarians
-  const fetchVeterinarians = useCallback(async () => {
-    try {
-      const response = await fetch(VETERINARIANS_API, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok)
-        throw new Error(`Failed to fetch veterinarians: ${response.status}`);
-      const result = await response.json();
-      const list = Array.isArray(result.data?.data)
-        ? result.data.data
-        : Array.isArray(result.data)
-          ? result.data
-          : [];
-      setVeterinarians(
-        list.map((v: any) => ({
-          id: String(v.id),
-          first_name: v.first_name ?? '',
-          last_name: v.last_name ?? '',
-        })),
-      );
-    } catch (error) {
-      console.error('Error fetching veterinarians:', error);
-    }
-  }, []);
-
-  // Fetch Clinics
-  const fetchClinics = useCallback(async () => {
-    try {
-      const response = await fetch(CLINICS_API, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok)
-        throw new Error(`Failed to fetch clinics: ${response.status}`);
-      const result = await response.json();
-      const list = Array.isArray(result.data?.data)
-        ? result.data.data
-        : Array.isArray(result.data)
-          ? result.data
-          : [];
-      setClinics(
-        list.map((c: any) => ({
-          id: String(c.id),
-          name: c.name ?? '',
-        })),
-      );
-    } catch (error) {
-      console.error('Error fetching clinics:', error);
-    }
-  }, []);
-
-  // Fetch Vet Services
-  const fetchVetServices = useCallback(async () => {
-    try {
-      const response = await fetch(VET_SERVICES_API, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok)
-        throw new Error(`Failed to fetch vet services: ${response.status}`);
-      const result = await response.json();
-      const list = Array.isArray(result.data?.data)
-        ? result.data.data
-        : Array.isArray(result.data)
-          ? result.data
-          : [];
-      setVetServices(
-        list.map((s: any) => ({
-          id: String(s.id),
-          name: s.name ?? '',
-          default_fee: Number(s.default_fee) || 0,
-        })),
-      );
-    } catch (error) {
-      console.error('Error fetching vet services:', error);
-    }
-  }, []);
-
   // Fetch Appointments
   const fetchAppointments = useCallback(async () => {
     setIsLoadingData(true);
@@ -306,11 +211,7 @@ export default function UpcomingBookingsTable({
         const serviceNames =
           a.services && Array.isArray(a.services)
             ? a.services.map((s: any) => s.name).filter(Boolean)
-            : extractedServiceIds
-                .map(
-                  (sid: string) => vetServices.find((s) => s.id === sid)?.name,
-                )
-                .filter(Boolean) || [];
+            : [];
 
         return {
           id: String(a.id),
@@ -359,33 +260,28 @@ export default function UpcomingBookingsTable({
     } finally {
       setIsLoadingData(false);
     }
-  }, [pets, veterinarians, clinics, vetServices, filter]);
+  }, [pets, filter]);
 
   // Initial load
   useEffect(() => {
     fetchPets();
-    fetchVeterinarians();
-    fetchClinics();
-    fetchVetServices();
-  }, [fetchPets, fetchVeterinarians, fetchClinics, fetchVetServices]);
+  }, [fetchPets]);
 
-  // Fetch appointments when dependencies loaded
+  // Fetch appointments after pets loaded
   useEffect(() => {
-    if (pets.length > 0 && veterinarians.length > 0) {
+    if (pets.length > 0) {
       fetchAppointments();
     }
-  }, [pets, veterinarians, clinics, vetServices, fetchAppointments]);
+  }, [pets, fetchAppointments]);
 
   // Columns
-  const columns = [
-    { key: 'appointment_date', label: 'Date', className: 'min-w-[120px]' },
-    { key: 'appointment_time', label: 'Time', className: 'min-w-[100px]' },
-    { key: 'pet_name', label: 'Pet', className: 'min-w-[180px]' },
-    { key: 'vet_name', label: 'Vet', className: 'min-w-[200px]' },
-    { key: 'appointment_type', label: 'Type', className: 'min-w-[150px]' },
-    { key: 'status', label: 'Status', className: 'min-w-[140px]' },
-    { key: 'total_amount', label: 'Amount', className: 'min-w-[100px]' },
-  ] as const;
+  const sortColumns = [
+    { key: 'appointment_number', label: 'Appt #' },
+    { key: 'appointment_date', label: 'Date & Time' },
+    { key: 'pet_name', label: 'Pet & Vet' },
+    { key: 'appointment_type', label: 'Type' },
+    { key: 'total_amount', label: 'Amount & Status' },
+  ];
 
   // Filter + search
   const filteredData = useMemo(() => {
@@ -629,9 +525,8 @@ export default function UpcomingBookingsTable({
         </div>
       ) : (
         <>
-          {/* Table */}
           <div className='w-full overflow-x-auto rounded-lg border border-gray-200'>
-            <div className='min-w-[1100px]'>
+            <div className='min-w-[800px]'>
               <Table className='w-full'>
                 <TableHeader className='bg-gray-50'>
                   <TableRow>
@@ -644,18 +539,16 @@ export default function UpcomingBookingsTable({
                         onChange={toggleSelectAll}
                       />
                     </TableCell>
-                    {columns.map((col) => (
+                    {sortColumns.map((col) => (
                       <th
-                        key={col.key as string}
-                        className={`p-2 py-4 text-left text-sm font-medium cursor-pointer hover:bg-gray-50 ${col.className}`}
-                        onClick={() => (requestSort as any)(col.key as string)}
+                        key={col.key}
+                        className='p-2 py-4 text-left text-xs text-gray-500 font-semibold uppercase tracking-wide cursor-pointer hover:bg-gray-100'
+                        onClick={() => (requestSort as any)(col.key)}
                       >
-                        <div className='flex items-center gap-1'>
-                          {col.label}
-                        </div>
+                        {col.label}
                       </th>
                     ))}
-                    <TableCell className='w-36 p-2 py-4 text-sm font-medium'>
+                    <TableCell className='p-2 py-4 text-xs text-gray-500 font-semibold uppercase tracking-wide'>
                       Actions
                     </TableCell>
                   </TableRow>
@@ -665,7 +558,7 @@ export default function UpcomingBookingsTable({
                   {isLoadingData ? (
                     <TableRow>
                       <td
-                        colSpan={columns.length + 2}
+                        colSpan={sortColumns.length + 2}
                         className='p-8 text-center text-gray-500'
                       >
                         Loading appointments...
@@ -674,7 +567,7 @@ export default function UpcomingBookingsTable({
                   ) : currentItems.length === 0 ? (
                     <TableRow>
                       <td
-                        colSpan={columns.length + 2}
+                        colSpan={sortColumns.length + 2}
                         className='p-8 text-center text-gray-500'
                       >
                         No appointments found
@@ -682,52 +575,85 @@ export default function UpcomingBookingsTable({
                     </TableRow>
                   ) : (
                     currentItems.map((a) => (
-                      <TableRow key={a.id} className='hover:bg-gray-50'>
-                        <TableCell className='p-2 py-4'>
+                      <TableRow key={a.id} className='hover:bg-gray-50 border-b border-gray-100 last:border-0'>
+                        <TableCell className='px-3 py-3'>
                           <Checkbox
                             checked={selectedRows.includes(a.id)}
                             onChange={() => toggleSelectRow(a.id)}
                           />
                         </TableCell>
 
-                        <TableCell className='p-2 py-4 text-sm'>
-                          {a.appointment_date}
-                        </TableCell>
-                        <TableCell className='p-2 py-4 text-sm'>
-                          {a.appointment_time}
-                        </TableCell>
-
-                        <TableCell className='p-2 py-4 text-sm font-medium'>
-                          {a.pet_name || '-'}
-                        </TableCell>
-                        <TableCell className='p-2 py-4 text-sm'>
-                          {a.vet_name || '-'}
-                        </TableCell>
-                        <TableCell className='p-2 py-4 text-sm'>
-                          {a.appointment_type || 'Not specified'}
+                        {/* Appt # */}
+                        <TableCell className='px-3 py-3'>
+                          <span className='text-xs text-gray-800 bg-gray-100 px-2 py-1 rounded whitespace-nowrap'>
+                            {a.appointment_number || 'N/A'}
+                          </span>
                         </TableCell>
 
-                        <TableCell className='p-2 py-4'>
-                          <Badge size='sm' color={statusColor(a.status)}>
-                            {a.status}
-                          </Badge>
+                        {/* Date & Time */}
+                        <TableCell className='px-3 py-3 min-w-[130px]'>
+                          <div className='flex flex-col gap-0.5'>
+                            <span className='text-sm text-gray-900 leading-tight'>
+                              {a.appointment_date
+                                ? new Date(a.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                                : 'N/A'}
+                            </span>
+                            <span className='text-xs text-gray-400 leading-tight'>
+                              {a.appointment_time || 'N/A'}
+                            </span>
+                          </div>
                         </TableCell>
 
-                        <TableCell className='p-2 py-4 text-sm font-medium'>
-                          ${a.total_amount.toFixed(2)}
+                        {/* Pet & Vet */}
+                        <TableCell className='px-3 py-3 min-w-[150px]'>
+                          <div className='flex flex-col gap-0.5'>
+                            <div className='flex items-center gap-2'>
+                              {a.petPhoto && (
+                                <img
+                                  src={a.petPhoto}
+                                  alt={a.pet_name || ''}
+                                  className='w-7 h-7 rounded-full flex-shrink-0 object-cover'
+                                />
+                              )}
+                              <span className='text-sm text-gray-900 leading-tight'>
+                                {a.pet_name || 'N/A'}
+                              </span>
+                            </div>
+                            <span className={`text-xs text-gray-400 leading-tight ${a.petPhoto ? 'pl-9' : ''}`}>
+                              {a.vet_name || 'N/A'}
+                            </span>
+                          </div>
                         </TableCell>
 
-                        <TableCell className='p-2 py-4'>
+                        {/* Type */}
+                        <TableCell className='px-3 py-3 min-w-[120px]'>
+                          <span className='text-sm text-gray-900'>
+                            {a.appointment_type || 'N/A'}
+                          </span>
+                        </TableCell>
+
+                        {/* Amount & Status */}
+                        <TableCell className='px-3 py-3'>
+                          <div className='flex flex-col gap-1'>
+                            <span className='text-sm text-gray-800'>
+                              ${a.total_amount.toFixed(2)}
+                            </span>
+                            <Badge size='sm' color={statusColor(a.status)}>
+                              {a.status}
+                            </Badge>
+                          </div>
+                        </TableCell>
+
+                        {/* Actions */}
+                        <TableCell className='px-3 py-3'>
                           <div className='flex gap-2'>
-                            {/* View button - always show */}
                             <button
                               onClick={() => {
                                 if (onSelectAppointment) {
                                   onSelectAppointment({
                                     id: a.id,
                                     appointmentId: a.id,
-                                    appointmentNumber:
-                                      a.appointment_number || '',
+                                    appointmentNumber: a.appointment_number || '',
                                     petId: a.pet_id,
                                     petName: a.pet_name || '',
                                     petPhoto: a.petPhoto,
@@ -745,17 +671,15 @@ export default function UpcomingBookingsTable({
                             >
                               <MdEdit className='w-5 h-5' />
                             </button>
-                            {/* Delete button - only show when status is NOT in_progress or scheduled */}
-                            {a.status !== 'in_progress' &&
-                              a.status !== 'scheduled' && (
-                                <button
-                                  onClick={() => handleDelete(a)}
-                                  className='text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50'
-                                  title='Delete'
-                                >
-                                  <MdDelete className='w-5 h-5' />
-                                </button>
-                              )}
+                            {a.status !== 'in_progress' && a.status !== 'scheduled' && (
+                              <button
+                                onClick={() => handleDelete(a)}
+                                className='text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50'
+                                title='Delete'
+                              >
+                                <MdDelete className='w-5 h-5' />
+                              </button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -784,9 +708,6 @@ export default function UpcomingBookingsTable({
         <UpcomingBookingsForm
           booking={editAppointment as any}
           pets={pets}
-          veterinarians={veterinarians}
-          clinics={clinics}
-          vetServices={vetServices}
           onSubmit={editAppointment ? confirmEdit : confirmAddNew}
           onCancel={() => {
             setIsAddDialogOpen(false);

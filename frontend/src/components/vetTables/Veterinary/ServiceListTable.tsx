@@ -16,7 +16,7 @@ import { TableToolbar } from '../../tables/tableComponents/TableToolbar';
 import Switch from '../../form/switch/Switch';
 import ServiceListForm, {
   ServiceFormData,
-} from '../../../adminPages/PageForms/ServiceListForm';
+} from '../../../adminPages/AdminPageForms/ServiceListForm';
 import DeleteDialog from '../../tables/tableComponents/DeleteDailog';
 
 export type ServiceStatus = 'Active' | 'Inactive';

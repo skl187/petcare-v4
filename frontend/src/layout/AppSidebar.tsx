@@ -10,6 +10,7 @@ import {
   MdOutlineSettings,
   MdOutlineNotificationsActive,
   MdOutlineSecurity,
+  MdOutlinePayments,
 } from 'react-icons/md';
 // Assume these icons are imported from an icon library
 import { ChevronDownIcon, HorizontaLDots } from '../icons';
@@ -50,6 +51,13 @@ const navItems: NavItem[] = [
     subItems: [
       { name: 'Owners and pets', path: '/ownersAndPets', pro: false },
       { name: 'Appointment Reviews', path: '/bookingReviews', pro: false },
+    ],
+  },
+  {
+    icon: <MdOutlinePayments />,
+    name: 'Finance',
+    subItems: [
+      { name: 'Payments', path: '/admin/payments', pro: false },
     ],
   },
 ];

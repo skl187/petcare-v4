@@ -47,6 +47,7 @@ export const API_ENDPOINTS = {
   APPOINTMENTS: {
     BASE: `${API_BASE_URL}/api/appointments`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/appointments/${id}`,
+    SEND_NOTIFICATION: (id: string) => `${API_BASE_URL}/api/appointments/${id}/send-notification`,
   },
 
   // Owner Bookings
@@ -61,6 +62,8 @@ export const API_ENDPOINTS = {
     BASE: `${API_BASE_URL}/api/vet-services/my`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/vet-services/my/${id}`,
     CLINICS: `${API_BASE_URL}/api/vet-services/my/clinics`,
+    ACTIVE_FOR_BOOKING: (vetId: string, clinicId: string) =>
+      `${API_BASE_URL}/api/vet-services/active?vet_id=${vetId}&clinic_id=${clinicId}`,
   },
 
   // Clinics
@@ -72,6 +75,7 @@ export const API_ENDPOINTS = {
   VETERINARIANS: {
     BASE: `${API_BASE_URL}/api/veterinarians`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/veterinarians/${id}`,
+    BY_CLINIC: (clinicId: string) => `${API_BASE_URL}/api/veterinarians?clinic_id=${clinicId}&limit=100`,
   },
 
   // Roles
@@ -147,6 +151,10 @@ export const API_ENDPOINTS = {
     BASE: `${API_BASE_URL}/api/vet-schedules/my`,
     EXCEPTIONS: `${API_BASE_URL}/api/vet-schedules/exceptions/my`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/vet-schedules/${id}`,
+    FOR_BOOKING: (vetId: string, clinicId: string) =>
+      `${API_BASE_URL}/api/vet-schedules?veterinarian_id=${vetId}&clinic_id=${clinicId}`,
+    EXCEPTIONS_FOR_BOOKING: (vetId: string, clinicId: string) =>
+      `${API_BASE_URL}/api/vet-schedules/exceptions?veterinarian_id=${vetId}&clinic_id=${clinicId}`,
   },
 
   // Vet Clinic Mappings

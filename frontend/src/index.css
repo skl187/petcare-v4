@@ -40,18 +40,32 @@ layer(base);
   --color-white: #ffffff;
   --color-black: #101828;
 
-  --color-brand-25: #f2f7ff;
-  --color-brand-50: #ecf3ff;
-  --color-brand-100: #dde9ff;
-  --color-brand-200: #c2d6ff;
-  --color-brand-300: #9cb9ff;
-  --color-brand-400: #7592ff;
-  --color-brand-500: #465fff;
-  --color-brand-600: #3641f5;
-  --color-brand-700: #2a31d8;
-  --color-brand-800: #252dae;
-  --color-brand-900: #262e89;
-  --color-brand-950: #161950;
+  /* ── Primary teal palette (matches logo) ── */
+  --color-brand-25: #f0faf7;
+  --color-brand-50: #e0f5ee;
+  --color-brand-100: #c2ebe0;
+  --color-brand-200: #86d5be;
+  --color-brand-300: #4ebf9c;
+  --color-brand-400: #28a87e;
+  --color-brand-500: #3dab84;
+  --color-brand-600: #2a9570;
+  --color-brand-700: #22785a;
+  --color-brand-800: #1d6049;
+  --color-brand-900: #184e3c;
+  --color-brand-950: #0c2d22;
+
+  /* Override Tailwind's default blue → same teal (single source for bg-blue-* classes) */
+  --color-blue-50: #e0f5ee;
+  --color-blue-100: #c2ebe0;
+  --color-blue-200: #86d5be;
+  --color-blue-300: #4ebf9c;
+  --color-blue-400: #28a87e;
+  --color-blue-500: #3dab84;
+  --color-blue-600: #2a9570;
+  --color-blue-700: #22785a;
+  --color-blue-800: #1d6049;
+  --color-blue-900: #184e3c;
+  --color-blue-950: #0c2d22;
 
   --color-blue-light-25: #f5fbff;
   --color-blue-light-50: #f0f9ff;

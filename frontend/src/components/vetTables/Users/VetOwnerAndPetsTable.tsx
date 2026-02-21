@@ -12,7 +12,7 @@ import SortableTableHeader from "../../tables/tableComponents/SortableTableHeade
 import { TableToolbar } from "../../tables/tableComponents/TableToolbar";
 import ImageHoverPreview from "../../tables/tableComponents/ImageHoverPreview";
 import Switch from "../../form/switch/Switch";
-import VetOwnerAndPetsForm, {VetOwnerMinimalEditable} from "../../../adminPages/PageForms/VetOwnerAndPetsForm";
+import VetOwnerAndPetsForm, {VetOwnerMinimalEditable} from "../../../adminPages/AdminPageForms/VetOwnerAndPetsForm";
 
 export type OwnerStatus = "Active" | "Blocked";
 

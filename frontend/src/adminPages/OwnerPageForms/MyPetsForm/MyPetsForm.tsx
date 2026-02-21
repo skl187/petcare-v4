@@ -376,309 +376,301 @@ export default function MyPetForm({
       )}
 
       <FormCard title={pet ? 'Edit Pet' : 'Add New Pet'} onClose={onCancel}>
-        <form onSubmit={handleSubmit(handleForm)} className='space-y-6'>
-          {/* Pet Type and Breed */}
-          <div className='grid grid-cols-2 gap-4'>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Pet Type <span className='text-red-500'>*</span>
-              </label>
-              <Controller
-                name='petTypeId'
-                control={control}
-                rules={{ required: 'Pet type is required' }}
-                render={({ field }) => (
-                  <select
-                    {...field}
-                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  >
-                    <option value=''>Select Pet Type</option>
-                    {petTypes.map((pt) => (
-                      <option key={pt.id} value={pt.id}>
-                        {pt.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              />
-              {errors.petTypeId && (
-                <span className='text-red-500 text-sm'>
-                  {errors.petTypeId.message}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Breed <span className='text-red-500'>*</span>
-              </label>
-              <Controller
-                name='breedId'
-                control={control}
-                rules={{ required: 'Breed is required' }}
-                render={({ field }) => (
-                  <select
-                    {...field}
-                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  >
-                    <option value=''>Select Breed</option>
-                    {displayBreeds.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              />
-              {errors.breedId && (
-                <span className='text-red-500 text-sm'>
-                  {errors.breedId.message}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Name and Slug */}
-          <div className='grid grid-cols-2 gap-4'>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Pet Name <span className='text-red-500'>*</span>
-              </label>
-              <input
-                type='text'
-                {...register('name', { required: 'Pet name is required' })}
-                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                placeholder='Enter pet name'
-              />
-              {errors.name && (
-                <span className='text-red-500 text-sm'>
-                  {errors.name.message}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Slug{' '}
-                <span className='text-gray-500 text-xs'>(auto-generated)</span>
-              </label>
-              <input
-                type='text'
-                {...register('slug')}
-                className='w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700 cursor-not-allowed'
-                readOnly
-              />
-            </div>
-          </div>
-
-          {/* Date of Birth and Gender */}
-          <div className='grid grid-cols-2 gap-4'>
-            <Controller
-              name='dateOfBirth'
-              control={control}
-              rules={{ required: 'Date of birth is required' }}
-              render={({ field }) => (
-                <DatePickerInput
-                  label='Date of Birth'
-                  value={field.value ? new Date(field.value) : null}
-                  onChange={(date) => {
-                    if (date) {
-                      const year = date.getFullYear();
-                      const month = String(date.getMonth() + 1).padStart(
-                        2,
-                        '0',
-                      );
-                      const day = String(date.getDate()).padStart(2, '0');
-                      field.onChange(`${year}-${month}-${day}`);
-                    }
-                  }}
-                  onBlur={field.onBlur}
-                  required={true}
-                  error={errors.dateOfBirth?.message}
-                />
-              )}
-            />
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Gender <span className='text-red-500'>*</span>
-              </label>
-              <div className='flex gap-4 mt-2'>
-                {(['male', 'female', 'other'] as const).map((option) => (
-                  <label key={option} className='flex items-center gap-2'>
-                    <input
-                      type='radio'
-                      value={option}
-                      {...register('gender', {
-                        required: 'Gender is required',
-                      })}
-                      className='w-4 h-4'
+        <form onSubmit={handleSubmit(handleForm)}>
+          <div className='grid lg:grid-cols-2 gap-6'>
+            {/* LEFT COL: Pet Identity + Physical Details */}
+            <div className='space-y-4'>
+              {/* Pet Identity Card */}
+              <div className='bg-white border border-gray-200 rounded-lg p-4'>
+                <h4 className='text-sm font-semibold text-gray-800 mb-4'>Pet Identity</h4>
+                <div className='grid grid-cols-2 gap-3'>
+                  <div>
+                    <label className='block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'>
+                      Pet Type <span className='text-red-500'>*</span>
+                    </label>
+                    <Controller
+                      name='petTypeId'
+                      control={control}
+                      rules={{ required: 'Pet type is required' }}
+                      render={({ field }) => (
+                        <select
+                          {...field}
+                          className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                        >
+                          <option value=''>Select Pet Type</option>
+                          {petTypes.map((pt) => (
+                            <option key={pt.id} value={pt.id}>
+                              {pt.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     />
-                    <span className='text-sm capitalize'>{option}</span>
-                  </label>
-                ))}
+                    {errors.petTypeId && (
+                      <p className='text-xs text-red-600 mt-1'>{errors.petTypeId.message}</p>
+                    )}
+            </div>
+
+                  <div>
+                    <label className='block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'>
+                      Breed <span className='text-red-500'>*</span>
+                    </label>
+                    <Controller
+                      name='breedId'
+                      control={control}
+                      rules={{ required: 'Breed is required' }}
+                      render={({ field }) => (
+                        <select
+                          {...field}
+                          className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                        >
+                          <option value=''>Select Breed</option>
+                          {displayBreeds.map((b) => (
+                            <option key={b.id} value={b.id}>
+                              {b.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    />
+                    {errors.breedId && (
+                      <p className='text-xs text-red-600 mt-1'>{errors.breedId.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className='block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'>
+                      Pet Name <span className='text-red-500'>*</span>
+                    </label>
+                    <input
+                      type='text'
+                      {...register('name', { required: 'Pet name is required' })}
+                      className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                      placeholder='Enter pet name'
+                    />
+                    {errors.name && (
+                      <p className='text-xs text-red-600 mt-1'>{errors.name.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className='block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'>
+                      Slug <span className='text-gray-400 normal-case font-normal text-xs'>(auto-generated)</span>
+                    </label>
+                    <input
+                      type='text'
+                      {...register('slug')}
+                      className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed'
+                      readOnly
+                    />
+                  </div>
+                </div>
               </div>
-              {errors.gender && (
-                <span className='text-red-500 text-sm'>
-                  {errors.gender.message}
-                </span>
-              )}
+
+              {/* Physical Details Card */}
+              <div className='bg-white border border-gray-200 rounded-lg p-4'>
+                <h4 className='text-sm font-semibold text-gray-800 mb-4'>Physical Details</h4>
+                <div className='grid grid-cols-2 gap-3'>
+                  <div>
+                    <Controller
+                      name='dateOfBirth'
+                      control={control}
+                      rules={{ required: 'Date of birth is required' }}
+                      render={({ field }) => (
+                        <DatePickerInput
+                          label='Date of Birth'
+                          value={field.value ? new Date(field.value) : null}
+                          onChange={(date) => {
+                            if (date) {
+                              const year = date.getFullYear();
+                              const month = String(date.getMonth() + 1).padStart(2, '0');
+                              const day = String(date.getDate()).padStart(2, '0');
+                              field.onChange(`${year}-${month}-${day}`);
+                            }
+                          }}
+                          onBlur={field.onBlur}
+                          required={true}
+                          error={errors.dateOfBirth?.message}
+                        />
+                      )}
+                    />
+                  </div>
+
+                  <div>
+                    <label className='block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'>
+                      Size <span className='text-red-500'>*</span>
+                    </label>
+                    <input
+                      type='text'
+                      {...register('size', { required: 'Size is required' })}
+                      className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                      placeholder='e.g., Small, Medium, Large'
+                    />
+                    {errors.size && (
+                      <p className='text-xs text-red-600 mt-1'>{errors.size.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className='grid grid-cols-3 gap-3 mt-3'>
+                  <div className='col-span-2'>
+                    <label className='block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'>
+                      Weight <span className='text-red-500'>*</span>
+                    </label>
+                    <input
+                      type='number'
+                      step='0.1'
+                      {...register('weight', {
+                        required: 'Weight is required',
+                        min: { value: 0, message: 'Weight must be positive' },
+                      })}
+                      className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                      placeholder='Enter weight'
+                    />
+                    {errors.weight && (
+                      <p className='text-xs text-red-600 mt-1'>{errors.weight.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className='block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'>
+                      Unit
+                    </label>
+                    <Controller
+                      name='weightUnit'
+                      control={control}
+                      render={({ field }) => (
+                        <select
+                          {...field}
+                          className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                        >
+                          <option value='kg'>kg</option>
+                          <option value='lb'>lb</option>
+                        </select>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <div className='grid grid-cols-3 gap-3 mt-3'>
+                  <div className='col-span-2'>
+                    <label className='block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'>
+                      Height <span className='text-red-500'>*</span>
+                    </label>
+                    <input
+                      type='number'
+                      step='0.1'
+                      {...register('height', {
+                        required: 'Height is required',
+                        min: { value: 0, message: 'Height must be positive' },
+                      })}
+                      className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                      placeholder='Enter height'
+                    />
+                    {errors.height && (
+                      <p className='text-xs text-red-600 mt-1'>{errors.height.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className='block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5'>
+                      Unit
+                    </label>
+                    <Controller
+                      name='heightUnit'
+                      control={control}
+                      render={({ field }) => (
+                        <select
+                          {...field}
+                          className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                        >
+                          <option value='cm'>cm</option>
+                          <option value='inch'>inch</option>
+                        </select>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+
             </div>
-          </div>
 
-          {/* Size */}
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Size <span className='text-red-500'>*</span>
-            </label>
-            <input
-              type='text'
-              {...register('size', { required: 'Size is required' })}
-              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-              placeholder='e.g., Small, Medium, Large'
-            />
-            {errors.size && (
-              <span className='text-red-500 text-sm'>
-                {errors.size.message}
-              </span>
-            )}
-          </div>
+            {/* RIGHT COL: Gender + Status row, then Notes */}
+            <div className='space-y-4'>
+              {/* Gender + Status side by side */}
+              <div className='grid grid-cols-2 gap-4'>
+                {/* Gender Card */}
+                <div className='bg-white border border-gray-200 rounded-lg p-4'>
+                  <h4 className='text-sm font-semibold text-gray-800 mb-4'>Gender</h4>
+                  <div className='space-y-2'>
+                    {(['male', 'female', 'other'] as const).map((option) => (
+                      <label key={option} className='flex items-center gap-3 cursor-pointer'>
+                        <input
+                          type='radio'
+                          value={option}
+                          {...register('gender', { required: 'Gender is required' })}
+                          className='w-4 h-4 text-blue-600'
+                        />
+                        <span className='text-sm text-gray-700 capitalize'>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                  {errors.gender && (
+                    <p className='text-xs text-red-600 mt-2'>{errors.gender.message}</p>
+                  )}
+                </div>
 
-          {/* Weight */}
-          <div className='grid grid-cols-3 gap-4'>
-            <div className='col-span-2'>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Weight <span className='text-red-500'>*</span>
-              </label>
-              <input
-                type='number'
-                step='0.1'
-                {...register('weight', {
-                  required: 'Weight is required',
-                  min: { value: 0, message: 'Weight must be positive' },
-                })}
-                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                placeholder='Enter weight'
-              />
-              {errors.weight && (
-                <span className='text-red-500 text-sm'>
-                  {errors.weight.message}
-                </span>
-              )}
+                {/* Status Card */}
+                <div className='bg-white border border-gray-200 rounded-lg p-4'>
+                  <h4 className='text-sm font-semibold text-gray-800 mb-4'>Status</h4>
+                  <div className='mb-3'>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${Number(status) === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      {Number(status) === 1 ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                  <Controller
+                    name='status'
+                    control={control}
+                    render={({ field }) => (
+                      <select
+                        {...field}
+                        className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                      >
+                        <option value={1}>Active</option>
+                        <option value={0}>Inactive</option>
+                      </select>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Additional Notes Card */}
+              <div className='bg-white border border-gray-200 rounded-lg p-4'>
+                <h4 className='text-sm font-semibold text-gray-800 mb-4'>Additional Notes</h4>
+                <textarea
+                  {...register('additionalInfo.notes')}
+                  className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  rows={3}
+                  placeholder='Add any additional notes about the pet'
+                />
+              </div>
             </div>
 
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Unit
-              </label>
-              <Controller
-                name='weightUnit'
-                control={control}
-                render={({ field }) => (
-                  <select
-                    {...field}
-                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  >
-                    <option value='kg'>kg</option>
-                    <option value='lb'>lb</option>
-                  </select>
-                )}
-              />
+            {/* ACTIONS */}
+            <div className='lg:col-span-2 flex justify-end gap-3 pt-4 border-t'>
+              <button
+                type='button'
+                onClick={onCancel}
+                className='px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50'
+              >
+                Cancel
+              </button>
+              <button
+                type='submit'
+                disabled={isLoading}
+                className='px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400'
+              >
+                {isLoading ? 'Saving...' : pet ? 'Update' : 'Add'}
+              </button>
             </div>
-          </div>
-
-          {/* Height */}
-          <div className='grid grid-cols-3 gap-4'>
-            <div className='col-span-2'>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Height <span className='text-red-500'>*</span>
-              </label>
-              <input
-                type='number'
-                step='0.1'
-                {...register('height', {
-                  required: 'Height is required',
-                  min: { value: 0, message: 'Height must be positive' },
-                })}
-                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                placeholder='Enter height'
-              />
-              {errors.height && (
-                <span className='text-red-500 text-sm'>
-                  {errors.height.message}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Unit
-              </label>
-              <Controller
-                name='heightUnit'
-                control={control}
-                render={({ field }) => (
-                  <select
-                    {...field}
-                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  >
-                    <option value='cm'>cm</option>
-                    <option value='inch'>inch</option>
-                  </select>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Additional Info */}
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Additional Notes
-            </label>
-            <textarea
-              {...register('additionalInfo.notes')}
-              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-              rows={3}
-              placeholder='Add any additional notes about the pet'
-            />
-          </div>
-
-          {/* Status */}
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
-              Status <span className='text-red-500'>*</span>
-            </label>
-            <Controller
-              name='status'
-              control={control}
-              render={({ field }) => (
-                <select
-                  {...field}
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                >
-                  <option value={1}>Active</option>
-                  <option value={0}>Inactive</option>
-                </select>
-              )}
-            />
-          </div>
-
-          {/* Buttons */}
-          <div className='flex justify-end gap-3 pt-4 border-t'>
-            <button
-              type='button'
-              onClick={onCancel}
-              className='px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium'
-            >
-              Cancel
-            </button>
-            <button
-              type='submit'
-              disabled={isLoading}
-              className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-medium'
-            >
-              {isLoading ? 'Saving...' : pet ? 'Update' : 'Add'}
-            </button>
           </div>
         </form>
       </FormCard>

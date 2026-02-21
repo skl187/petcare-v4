@@ -14,114 +14,61 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 
                 <pre class="bg-gray-900 text-green-400 p-4 rounded overflow-auto max-h-auto font-mono text-sm">
-# GET /api/reviews/veterinarian/:veterinarianId
-``` json
-
+```bash
 {
-  "success": true,
-  "data": {
-    "veterinarian": {
-      "id": "550e8400-e29b-41d4-a716-446655440000",
-      "user_id": "550e8400-e29b-41d4-a716-446655440001",
-      "license_number": "VET-2024-001",
-      "specialization": "Small Animal Surgery",
-      "experience_years": 8,
-      "rating": 4.8,
-      "total_appointments": 245,
-      "first_name": "Dr. Sarah",
-      "last_name": "Johnson",
-      "avatar_url": "https://cdn.example.com/avatars/vet-001.jpg"
+  "status": "success",
+  "message": "Success",
+  "data": [
+    {
+      "id": "530fe43a-2bd7-49e0-a229-6ba1a49a9ad5",
+      "appointment_id": "819cba56-30b4-4fbf-b51d-320ad9cabb24",
+      "user_id": "e2db943d-d5db-420b-905c-8ba12325b693",
+      "payment_method": "cash",
+      "transaction_id": null,
+      "consultation_fee": "0.00",
+      "other_charges": "0.00",
+      "subtotal": "99.80",
+      "discount_amount": "0.00",
+      "tax_amount": "0.00",
+      "total_amount": "99.80",
+      "paid_amount": "99.80",
+      "payment_status": "pending",
+      "payment_date": null,
+      "created_by": null,
+      "updated_by": null,
+      "created_at": "2026-01-27T08:51:42.476Z",
+      "updated_at": "2026-01-27T08:51:42.476Z",
+      "clinic_id": "5444d315-73e2-4d85-8f92-1b4e4fbd0e52",
+      "appointment_date": "2026-02-01T18:30:00.000Z",
+      "appointment_status": "completed"
     },
-    "reviews": [
-      {
-        "id": "660e8400-e29b-41d4-a716-446655440000",
-        "rating": 5.0,
-        "review_text": "Excellent care for my dog! Dr. Johnson was very knowledgeable and took time to explain everything.",
-        "professionalism_rating": 5,
-        "knowledge_rating": 5,
-        "communication_rating": 5,
-        "facility_rating": 4,
-        "is_verified": true,
-        "is_anonymous": false,
-        "user": {
-          "id": "550e8400-e29b-41d4-a716-446655440002",
-          "display_name": "John Doe",
-          "avatar_url": "https://cdn.example.com/avatars/user-002.jpg"
-        },
-        "appointment": {
-          "id": "770e8400-e29b-41d4-a716-446655440000",
-          "appointment_date": "2026-01-15",
-          "appointment_type": "checkup"
-        },
-        "created_at": "2026-01-20T10:30:00Z",
-        "updated_at": "2026-01-20T10:30:00Z"
-      },
-      {
-        "id": "660e8400-e29b-41d4-a716-446655440001",
-        "rating": 4.5,
-        "review_text": "Great veterinarian. The facility could be cleaner though.",
-        "professionalism_rating": 5,
-        "knowledge_rating": 4,
-        "communication_rating": 5,
-        "facility_rating": 3,
-        "is_verified": true,
-        "is_anonymous": false,
-        "user": {
-          "id": "550e8400-e29b-41d4-a716-446655440003",
-          "display_name": "Jane Smith",
-          "avatar_url": "https://cdn.example.com/avatars/user-003.jpg"
-        },
-        "appointment": {
-          "id": "770e8400-e29b-41d4-a716-446655440001",
-          "appointment_date": "2026-01-10",
-          "appointment_type": "vaccination"
-        },
-        "created_at": "2026-01-18T14:20:00Z",
-        "updated_at": "2026-01-18T14:20:00Z"
-      }
-    ],
-    "pagination": {
-      "total": 24,
-      "page": 1,
-      "limit": 10,
-      "pages": 3
-    },
-    "summary": {
-      "average_rating": 4.8,
-      "total_reviews": 24,
-      "review_breakdown": {
-        "five_star": 18,
-        "four_star": 5,
-        "three_star": 1,
-        "two_star": 0,
-        "one_star": 0
-      }
+    {
+      "id": "3cc88d1e-e34b-4895-b3fa-0358d26501ff",
+      "appointment_id": "105111f2-ba6a-49fb-b354-5b83ac806bd8",
+      "user_id": "812681aa-5982-48a3-991d-c4cedd7e6575",
+      "payment_method": "cash",
+      "transaction_id": null,
+      "consultation_fee": "0.00",
+      "other_charges": "0.00",
+      "subtotal": "49.80",
+      "discount_amount": "0.00",
+      "tax_amount": "0.00",
+      "total_amount": "49.80",
+      "paid_amount": "49.80",
+      "payment_status": "pending",
+      "payment_date": null,
+      "created_by": null,
+      "updated_by": null,
+      "created_at": "2026-02-13T18:27:45.796Z",
+      "updated_at": "2026-02-13T18:27:45.796Z",
+      "clinic_id": "5444d315-73e2-4d85-8f92-1b4e4fbd0e52",
+      "appointment_date": "2026-02-16T18:30:00.000Z",
+      "appointment_status": "scheduled"
     }
-  },
-  "message": "Reviews retrieved successfully"
+  ],
+  "timestamp": "2026-02-21T14:59:46.224Z"
 }
 ```
-
-```json
-curl -X POST http://localhost:3000/api/settings \
-  -H "Content-Type: application/json" \
-  -d '{
-    "namespace": "tenant_acme",
-    "key": "smtp_config",
-    "value": {
-      "host": "smtp.office365.com",
-      "port": 587,
-      "secure": false,
-      "username": "notifications@acme.com",
-      "password": "acme-smtp-password-123",
-      "from_name": "Acme Corp",
-      "from_email": "notifications@acme.com"
-    },
-    "description": "SMTP configuration for Acme Corp tenant",
-    "is_secret": true,
-    "is_active": true
-  }'
-  ```
 </pre>
             </div>
         </div>

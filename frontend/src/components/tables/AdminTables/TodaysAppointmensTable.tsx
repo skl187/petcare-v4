@@ -1,4 +1,4 @@
-import { MdEdit, MdDelete, MdAdd } from 'react-icons/md';
+import { MdEdit, MdDelete, MdAdd, MdCheckCircle, MdErrorOutline, MdOutlineRocketLaunch } from 'react-icons/md';
 import { useState, useEffect } from 'react';
 import {
   Table,
@@ -16,8 +16,8 @@ import SortableTableHeader from '../tableComponents/SortableTableHeader';
 import { TableToolbar } from '../tableComponents/TableToolbar';
 import DeleteDialog from '../tableComponents/DeleteDailog';
 import { API_ENDPOINTS } from '../../../constants/api';
-import VeterinaryBookingsDetail from '../../../adminPages/PageForms/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
-import AdminAppointmentDetail from '../../../adminPages/PageForms/AdminAppointmentDetail';
+import VeterinaryBookingsDetail from '../../../adminPages/AdminPageForms/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
+import AdminAppointmentDetail from '../../../adminPages/AdminPageForms/AdminAppointmentDetail';
 import { useAuth } from '../../auth/AuthContext';
 
 export interface Booking {
@@ -85,6 +85,11 @@ export default function TodaysAppointmentsTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Send notification states
+  const [sendingNotifId, setSendingNotifId] = useState<string | null>(null);
+  const [notifSentIds, setNotifSentIds] = useState<Set<string>>(new Set());
+  const [notifErrorIds, setNotifErrorIds] = useState<Set<string>>(new Set());
+
   // Fetch appointments from API
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -125,53 +130,15 @@ export default function TodaysAppointmentsTable() {
     fetchAppointments();
   }, []);
 
-  const columns = [
-    {
-      key: 'appointment_number',
-      label: 'Appointment #',
-      className: 'min-w-[150px] text-gray-700 font-semibold max-w-[200px]',
-    },
-    {
-      key: 'first_name',
-      label: 'Owner',
-      className: 'min-w-[150px] text-gray-700 font-semibold max-w-[200px]',
-    },
-    {
-      key: 'pet_name',
-      label: 'Pet',
-      className: 'min-w-[120px] text-gray-700 max-w-[150px]',
-    },
-    {
-      key: 'appointment_date',
-      label: 'Date & Time',
-      className: 'min-w-[150px] text-gray-700 font-semibold max-w-[200px]',
-    },
-    {
-      key: 'vet_first_name',
-      label: 'Veterinarian',
-      className: 'min-w-[150px] text-gray-700 max-w-[200px]',
-    },
-    {
-      key: 'clinic_name',
-      label: 'Clinic',
-      className: 'min-w-[150px] text-gray-700 max-w-[200px]',
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      className: 'min-w-[120px] text-gray-700 max-w-[150px]',
-    },
-    {
-      key: 'payment_status',
-      label: 'Payment Status',
-      className: 'min-w-[150px] text-gray-700 max-w-[200px]',
-    },
-    {
-      key: 'total_amount',
-      label: 'Total Amount',
-      className: 'min-w-[120px] text-gray-700 max-w-[150px]',
-    },
-  ] as const;
+  // Sortable column keys used by useSort
+  const sortColumns = [
+    { key: 'appointment_number' as const, label: 'Appt #' },
+    { key: 'first_name' as const, label: 'Pet & Owner' },
+    { key: 'appointment_date' as const, label: 'Date & Time' },
+    { key: 'vet_first_name' as const, label: 'Veterinarian & Clinic' },
+    { key: 'status' as const, label: 'Status' },
+    { key: 'total_amount' as const, label: 'Amount' },
+  ];
 
   // Filtered data based on search and status
   const filteredData = bookings
@@ -285,6 +252,35 @@ export default function TodaysAppointmentsTable() {
     setIsAddDialogOpen(true);
   };
 
+  const handleSendNotification = async (bookingId: string) => {
+    if (sendingNotifId === bookingId) return;
+    setSendingNotifId(bookingId);
+    setNotifErrorIds((prev) => { const s = new Set(prev); s.delete(bookingId); return s; });
+    try {
+      const token = sessionStorage.getItem('token');
+      const res = await fetch(API_ENDPOINTS.APPOINTMENTS.SEND_NOTIFICATION(bookingId), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.message || 'Failed to send notification');
+      }
+      setNotifSentIds((prev) => new Set(prev).add(bookingId));
+      // Auto-clear success state after 4 s
+      setTimeout(() => setNotifSentIds((prev) => { const s = new Set(prev); s.delete(bookingId); return s; }), 4000);
+    } catch {
+      setNotifErrorIds((prev) => new Set(prev).add(bookingId));
+      setTimeout(() => setNotifErrorIds((prev) => { const s = new Set(prev); s.delete(bookingId); return s; }), 4000);
+    } finally {
+      setSendingNotifId(null);
+    }
+  };
+
   const confirmAddNew = () => {
     // For now, we'll just close the dialog since API integration would be needed here
     setIsAddDialogOpen(false);
@@ -364,9 +360,7 @@ export default function TodaysAppointmentsTable() {
 
           {/* Table - Made horizontally scrollable on small screens */}
           <div className='w-full overflow-x-auto rounded-lg border border-gray-200'>
-            <div className='min-w-[1024px]'>
-              {' '}
-              {/* Minimum width to ensure all columns are visible */}
+            <div className='min-w-[900px]'>
               <Table className='w-full'>
                 <TableHeader className='bg-gray-50'>
                   <TableRow>
@@ -376,17 +370,17 @@ export default function TodaysAppointmentsTable() {
                         onChange={toggleSelectAll}
                       />
                     </TableCell>
-                    {columns.map((column) => (
+                    {sortColumns.map((column) => (
                       <SortableTableHeader<Booking>
                         key={column.key}
                         columnKey={column.key}
                         label={column.label}
                         sortConfig={sortConfig}
                         requestSort={requestSort}
-                        className={`p-2 py-4 text-left text-sm text-gray-100 font-medium ${column.className}`}
+                        className='p-2 py-4 text-left text-xs text-gray-500 font-semibold uppercase tracking-wide'
                       />
                     ))}
-                    <TableCell className='w-24 p-2 py-4 text-sm font-medium'>
+                    <TableCell className='p-2 py-4 text-xs text-gray-500 font-semibold uppercase tracking-wide'>
                       Actions
                     </TableCell>
                   </TableRow>
@@ -394,71 +388,144 @@ export default function TodaysAppointmentsTable() {
 
                 <TableBody>
                   {currentItems.map((booking) => (
-                    <TableRow key={booking.id} className='hover:bg-gray-50'>
-                      <TableCell className='p-2 py-4'>
+                    <TableRow
+                      key={booking.id}
+                      className='hover:bg-gray-50 border-b border-gray-100 last:border-0'
+                    >
+                      <TableCell className='px-3 py-3'>
                         <Checkbox
                           checked={selectedRows.includes(booking.id)}
                           onChange={() => toggleSelectRow(booking.id)}
                         />
                       </TableCell>
-                      {columns.map((column) => (
-                        <TableCell
-                          key={`${booking.id}-${column.key}`}
-                          className={`p-2 py-4 text-sm text-gray-900 ${column.className}`}
-                        >
-                          {column.key === 'appointment_date' ? (
-                            new Date(
-                              booking.appointment_date,
-                            ).toLocaleDateString() +
-                            ' ' +
-                            booking.appointment_time
-                          ) : column.key === 'total_amount' ? (
-                            `$${booking.total_amount || '0.00'}`
-                          ) : column.key === 'status' ? (
-                            <Badge
-                              size='sm'
-                              color={
-                                booking.status === 'scheduled'
-                                  ? 'info'
-                                  : booking.status === 'completed'
-                                    ? 'success'
-                                    : booking.status === 'cancelled'
-                                      ? 'error'
-                                      : 'warning'
-                              }
-                            >
-                              {booking.status}
-                            </Badge>
-                          ) : column.key === 'payment_status' ? (
-                            <Badge
-                              size='sm'
-                              color={
-                                booking.payment_status === 'paid'
-                                  ? 'success'
+
+                      {/* Appointment # */}
+                      <TableCell className='px-3 py-3'>
+                        <span className='text-xs text-gray-800 bg-gray-100 px-2 py-1 rounded whitespace-nowrap'>
+                          {booking.appointment_number || 'N/A'}
+                        </span>
+                      </TableCell>
+
+                      {/* Patient & Owner */}
+                      <TableCell className='px-3 py-3 min-w-[150px]'>
+                        <div className='flex flex-col gap-0.5'>
+                          <span className='text-sm text-gray-900 leading-tight'>
+                            {booking.pet_name || 'N/A'}
+                          </span>
+                          <span className='text-xs text-gray-400 leading-tight'>
+                            {`${booking.first_name || ''} ${booking.last_name || ''}`.trim() || 'N/A'}
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      {/* Date & Time */}
+                      <TableCell className='px-3 py-3 min-w-[130px]'>
+                        <div className='flex flex-col gap-0.5'>
+                          <span className='text-sm text-gray-900 leading-tight'>
+                            {new Date(booking.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </span>
+                          <span className='text-xs text-gray-400 leading-tight'>
+                            {booking.appointment_time || 'N/A'}
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      {/* Veterinarian & Clinic */}
+                      <TableCell className='px-3 py-3 min-w-[160px]'>
+                        <div className='flex flex-col gap-0.5'>
+                          <span className='text-sm text-gray-900 leading-tight'>
+                            {`Dr. ${booking.vet_first_name || ''} ${booking.vet_last_name || ''}`.trim() === 'Dr.' ? 'N/A' : `Dr. ${booking.vet_first_name || ''} ${booking.vet_last_name || ''}`.trim()}
+                          </span>
+                          <span className='text-xs text-gray-400 leading-tight'>
+                            {booking.clinic_name || 'N/A'}
+                          </span>
+                        </div>
+                      </TableCell>
+
+                      {/* Status */}
+                      <TableCell className='px-3 py-3'>
+                        <Badge
+                          size='sm'
+                          color={
+                            booking.status === 'scheduled'
+                              ? 'info'
+                              : booking.status === 'completed'
+                                ? 'success'
+                                : booking.status === 'cancelled'
+                                  ? 'error'
                                   : 'warning'
-                              }
-                            >
-                              {booking.payment_status}
-                            </Badge>
-                          ) : (
-                            (booking as any)[column.key] || 'N/A'
-                          )}
-                        </TableCell>
-                      ))}
-                      <TableCell className='p-2 py-4'>
-                        <div className='flex gap-2'>
+                          }
+                        >
+                          {booking.status}
+                        </Badge>
+                      </TableCell>
+
+                      {/* Amount & Payment */}
+                      <TableCell className='px-3 py-3'>
+                        <div className='flex flex-col gap-1'>
+                          <span className='text-sm text-gray-800'>
+                            ${booking.total_amount || '0.00'}
+                          </span>
+                          <Badge
+                            size='sm'
+                            color={booking.payment_status === 'paid' ? 'success' : 'warning'}
+                          >
+                            {booking.payment_status}
+                          </Badge>
+                        </div>
+                      </TableCell>
+
+                      <TableCell className='px-3 py-3'>
+                        <div className='flex gap-2 items-center'>
+                          {/* Send email notification */}
+                          <button
+                            onClick={() => handleSendNotification(booking.id)}
+                            disabled={sendingNotifId === booking.id}
+                            title={
+                              notifSentIds.has(booking.id)
+                                ? 'Notification sent!'
+                                : notifErrorIds.has(booking.id)
+                                  ? 'Send failed – click to retry'
+                                  : 'Send email notification'
+                            }
+                            className={
+                              'p-1 rounded transition-colors ' +
+                              (notifSentIds.has(booking.id)
+                                ? 'text-green-600 hover:text-green-800 hover:bg-green-50'
+                                : notifErrorIds.has(booking.id)
+                                  ? 'text-red-500 hover:text-red-700 hover:bg-red-50'
+                                  : sendingNotifId === booking.id
+                                    ? 'text-gray-400 cursor-wait'
+                                    : 'text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50')
+                            }
+                          >
+                            {notifSentIds.has(booking.id) ? (
+                              <MdCheckCircle className='w-5 h-5' />
+                            ) : notifErrorIds.has(booking.id) ? (
+                              <MdErrorOutline className='w-5 h-5' />
+                            ) : sendingNotifId === booking.id ? (
+                              <svg className='w-5 h-5 animate-spin' fill='none' viewBox='0 0 24 24'><circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'/><path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8v8z'/></svg>
+                            ) : (
+                              <MdOutlineRocketLaunch className='w-5 h-5' />
+                            )}
+                          </button>
+                          {/* Edit button */}
                           <button
                             onClick={() => handleEdit(booking)}
                             className='text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50'
+                            title='View / Edit'
                           >
                             <MdEdit className='w-5 h-5' />
                           </button>
+                          {/* Delete button */}
                           <button
                             onClick={() => handleDelete(booking.id)}
                             className='text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50'
+                            title='Delete'
                           >
                             <MdDelete className='w-5 h-5' />
                           </button>
+                          
                         </div>
                       </TableCell>
                     </TableRow>

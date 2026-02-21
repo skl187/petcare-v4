@@ -114,4 +114,15 @@ router.post(
   createPrescription
 );
 
+// ============================================================================
+// SEND EMAIL NOTIFICATION
+// POST /api/appointments/:id/send-notification
+// Body (optional): { template_key, locale }
+// ============================================================================
+router.post(
+  '/:id/send-notification',
+  requireAuth,
+  appointmentsController.sendNotification
+);
+
 module.exports = router;

@@ -10,7 +10,7 @@ import { TableToolbar } from '../tableComponents/TableToolbar';
 import DeleteDialog from '../tableComponents/DeleteDailog';
 import Switch from '../../form/switch/Switch';
 import { IoIosCloseCircle, IoIosCheckmarkCircle } from 'react-icons/io';
-import NotificationTemplateForm from '../../../adminPages/notifications/NotificationTemplateForm';
+import NotificationTemplateForm from '../../../adminPages/Forms/NotificationForms/TemplateNotificationForm';
 import { listTemplates, deleteTemplate, updateTemplate } from '../../../services/notificationService';
 
 export interface NotificationTemplateItem {
