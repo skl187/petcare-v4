@@ -5,7 +5,7 @@ import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
 import Checkbox from "../../../components/form/input/Checkbox";
 import { API_ENDPOINTS } from "../../../constants/api";
-import { Role } from "../../../components/tables/roleTables/RolesTable";
+import { Role } from "../../../components/tables/AdminTables/RolesTable";
 
 interface Permission {
   id: string;

@@ -256,101 +256,44 @@ export default function PetTypeForm({
         <form
           id='pet-type-form'
           onSubmit={handleSubmit(handleForm)}
-          className='space-y-8'
+          className='space-y-4'
         >
-          <section className='space-y-6'>
-            <h3 className='text-lg font-semibold text-gray-800 border-b pb-2'>
-              Pet Type Image
-            </h3>
-            <div className='flex flex-col items-center space-y-4'>
-              <ImageUpload
-                label='Upload Pet Type Image'
-                shape='circle'
-                size='md'
-                maxSizeMB={3}
-                value={imageValue}
-                onChange={(file) =>
-                  setValue('image', file || undefined, {
-                    shouldDirty: true,
-                    shouldTouch: true,
-                  })
-                }
-                showRemove
-              />
-            </div>
-          </section>
+          {/* Profile Layout: Left Sidebar + Right Content */}
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
+            {/* Left Sidebar - Profile Card */}
+            <div className='lg:col-span-1'>
+              <div className='bg-white border border-gray-200 rounded-lg p-4 sticky top-2'>
+                {/* Pet Type Image */}
+                <div className='flex flex-col items-center border-b pb-2 mb-2'>
+                  <ImageUpload
+                    label='Pet Type Image'
+                    shape='circle'
+                    size='sm'
+                    maxSizeMB={3}
+                    value={imageValue}
+                    onChange={(file) =>
+                      setValue('image', file || undefined, {
+                        shouldDirty: true,
+                        shouldTouch: true,
+                      })
+                    }
+                    showRemove
+                  />
+                </div>
 
-          <section className='space-y-6'>
-            <h3 className='text-lg font-semibold text-gray-800 border-b pb-2'>
-              Pet Type Details
-            </h3>
-            <div className='grid grid-cols-1 gap-6'>
-              <div className='flex flex-col space-y-2'>
-                <label
-                  className='text-sm font-medium text-gray-700'
-                  htmlFor='name'
-                >
-                  Pet Type Name *
-                </label>
-                <input
-                  id='name'
-                  type='text'
-                  disabled={isLoading}
-                  className={`px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
-                  {...register('name', {
-                    required: 'Pet type name is required',
-                    minLength: {
-                      value: 2,
-                      message: 'Pet type name must be at least 2 characters',
-                    },
-                  })}
-                />
-                {errors.name && (
-                  <span className='text-sm text-red-600'>
-                    {errors.name.message}
-                  </span>
-                )}
-              </div>
+                {/* Pet Type Name Section */}
+                <div className='text-center border-b pb-2 mb-2'>
+                  <h2 className='text-lg font-bold text-gray-800'>
+                    {nameValue || 'Pet Type'}
+                  </h2>
+                  <p className='text-xs text-gray-500 mt-1'>Pet Category</p>
+                </div>
 
-              <div className='flex flex-col space-y-2'>
-                <label
-                  className='text-sm font-medium text-gray-700'
-                  htmlFor='slug'
-                >
-                  Slug
-                </label>
-                <input
-                  id='slug'
-                  type='text'
-                  readOnly
-                  disabled
-                  value={slugValue}
-                  className='px-4 py-2 border rounded-md bg-gray-50'
-                />
-                {/* register slug hidden so it's included in submitted data */}
-                <input type='hidden' {...register('slug')} />
-                <p className='text-xs text-gray-500'>
-                  Automatically generated from name
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className='space-y-6'>
-            <h3 className='text-lg font-semibold text-gray-800 border-b pb-2'>
-              Status
-            </h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              <div className='flex flex-col space-y-2'>
-                <label className='text-sm font-medium text-gray-700'>
-                  Status
-                </label>
-                <div className='flex items-center gap-3'>
-                  <Badge size='sm' color={status === 1 ? 'success' : 'error'}>
-                    {status === 1 ? 'Active' : 'Inactive'}
-                  </Badge>
+                {/* Status */}
+                <div className='text-center'>
+                  <p className='text-xs text-gray-500 uppercase tracking-wide mb-2'>Status</p>
                   <select
-                    className='px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300'
+                    className='w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
                     value={String(status)}
                     disabled={isLoading}
                     onChange={(e) =>
@@ -360,24 +303,92 @@ export default function PetTypeForm({
                     <option value='1'>Active</option>
                     <option value='0'>Inactive</option>
                   </select>
+                  <div className='mt-2'>
+                    <Badge size='sm' color={status === 1 ? 'success' : 'error'}>
+                      {status === 1 ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </div>
-          </section>
 
-          <div className='flex flex-col-reverse sm:flex-row justify-end gap-4 pt-6'>
+            {/* Right Content - Information Grid */}
+            <div className='lg:col-span-2 space-y-4'>
+              {/* Pet Type Details Card */}
+              <div className='bg-white border border-gray-200 rounded-lg p-4'>
+                <div className='flex items-center mb-3'>
+                  <svg className='w-4 h-4 text-gray-700 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                  </svg>
+                  <h3 className='text-base font-semibold text-gray-800'>Pet Type Details</h3>
+                </div>
+
+                <div className='space-y-3'>
+                  {/* Pet Type Name */}
+                  <div>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      Pet Type Name
+                    </label>
+                    <input
+                      id='name'
+                      type='text'
+                      disabled={isLoading}
+                      placeholder='Enter pet type name'
+                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                        errors.name ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      {...register('name', {
+                        required: 'Pet type name is required',
+                        minLength: {
+                          value: 2,
+                          message: 'Pet type name must be at least 2 characters',
+                        },
+                      })}
+                    />
+                    {errors.name && (
+                      <span className='text-xs text-red-600 mt-0.5 block'>
+                        {errors.name.message}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Slug */}
+                  <div>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      Slug
+                    </label>
+                    <input
+                      id='slug'
+                      type='text'
+                      readOnly
+                      disabled
+                      value={slugValue}
+                      className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600'
+                    />
+                    <input type='hidden' {...register('slug')} />
+                    <p className='text-xs text-gray-500 mt-1'>
+                      Automatically generated from name
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Form Actions */}
+          <div className='flex justify-end gap-2 pt-3 border-t'>
             <button
               type='button'
               onClick={onCancel}
               disabled={isLoading}
-              className='px-6 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition'
+              className='px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium disabled:opacity-50'
             >
               Cancel
             </button>
             <button
               type='submit'
               disabled={isLoading}
-              className='px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition disabled:opacity-70'
+              className='px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-medium'
             >
               {isLoading ? (
                 <span className='flex items-center'>

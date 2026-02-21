@@ -58,6 +58,7 @@ const SystemServiceForm: React.FC<SystemServiceFormProps> = ({
 
   // Watch form values
   const status = watch("status");
+  const name = watch("name");
 
   // Status badge color
   const getStatusColor = (status: string) => 
@@ -86,168 +87,183 @@ const SystemServiceForm: React.FC<SystemServiceFormProps> = ({
   };
 
   return (
-    <div className="p-4 mx-auto max-w-4xl md:p-6">
+    <div className="p-2 mx-auto max-w-3xl md:p-3">
       <FormCard
-        title={service ? "Edit Service" : "Create Service"}
+        title={service ? "Edit Service" : "Add New Service"}
         onClose={onCancel}
       >
         <form 
           id="service-form" 
           onSubmit={handleSubmit(onFormSubmit)} 
-          className="space-y-8"
+          className="space-y-4"
         >
-          {/* Service Image Section */}
-          <section className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
-              Service Image
-            </h3>
-            
-            <div className="flex flex-col items-center space-y-4">
-              <div className="relative w-32 h-32">
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Service preview"
-                    className="w-full h-full rounded-lg object-cover border-2 border-gray-200"
-                  />
-                ) : (
-                  <div className="w-full h-full rounded-lg bg-gray-100 flex items-center justify-center">
-                    <span className="text-gray-400 text-sm">No image</span>
+          {/* Profile Layout: Left Sidebar + Right Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Left Sidebar - Service Image Card */}
+            <div className="lg:col-span-1">
+              <div className="bg-white border border-gray-200 rounded-lg p-4 sticky top-2">
+                {/* Service Image */}
+                <div className="flex flex-col items-center space-y-3">
+                  <div className="relative w-28 h-28">
+                    {imagePreview ? (
+                      <img
+                        src={imagePreview}
+                        alt="Service preview"
+                        className="w-full h-full rounded-lg object-cover border-2 border-gray-200"
+                      />
+                    ) : (
+                      <div className="w-full h-full rounded-lg bg-gray-100 flex items-center justify-center">
+                        <span className="text-gray-400 text-xs text-center">No image</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              
-              <div className="flex gap-3">
-                <div>
-                  <input
-                    type="file"
-                    id="image"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageChange}
-                  />
-                  <label
-                    htmlFor="image"
-                    className="block px-4 py-2 bg-indigo-600 text-white text-center rounded-md hover:bg-indigo-700 cursor-pointer transition duration-200"
-                  >
-                    {imagePreview ? "Change Image" : "Upload Image"}
-                  </label>
-                </div>
-                
-                {imagePreview && (
-                  <button
-                    type="button"
-                    onClick={removeImage}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-            </div>
-          </section>
 
-          {/* Service Information Section */}
-          <section className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
-              Service Details
-            </h3>
-            
-            <div className="grid grid-cols-1 gap-6">
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-medium text-gray-700" htmlFor="name">
-                  Service Name *
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  className={`px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                    errors.name ? "border-red-500" : "border-gray-300"
-                  }`}
-                  {...register("name", { 
-                    required: "Service name is required",
-                    minLength: {
-                      value: 2,
-                      message: "Service name must be at least 2 characters"
-                    }
-                  })}
-                />
-                {errors.name && (
-                  <span className="text-sm text-red-600">{errors.name.message}</span>
-                )}
-              </div>
+                  {/* Service Name Display */}
+                  <div className="text-center border-t pt-3 w-full">
+                    <h3 className="text-sm font-bold text-gray-800 truncate">
+                      {name || "Service Name"}
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">Service</p>
+                  </div>
 
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-medium text-gray-700" htmlFor="description">
-                  Description *
-                </label>
-                <textarea
-                  id="description"
-                  rows={3}
-                  className={`px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                    errors.description ? "border-red-500" : "border-gray-300"
-                  }`}
-                  {...register("description", { 
-                    required: "Description is required",
-                    minLength: {
-                      value: 10,
-                      message: "Description must be at least 10 characters"
-                    }
-                  })}
-                />
-                {errors.description && (
-                  <span className="text-sm text-red-600">{errors.description.message}</span>
-                )}
-              </div>
-            </div>
-          </section>
+                  {/* Status Badge */}
+                  <div className="w-full">
+                    <p className="text-xs text-gray-500 uppercase tracking-wide text-center mb-2">Status</p>
+                    <Badge 
+                      size="sm" 
+                      color={getStatusColor(status)}
+                      className="w-full text-center justify-center"
+                    >
+                      {status}
+                    </Badge>
+                  </div>
 
-          {/* Status Section */}
-          <section className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
-              Status
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Status
-                </label>
-                <div className="flex items-center gap-3">
-                  <Badge 
-                    size="sm" 
-                    color={getStatusColor(status)}
-                  >
-                    {status}
-                  </Badge>
-                  <select
-                    className={`px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500`}
-                    value={status}
-                    onChange={(e) => 
-                      setValue("status", e.target.value as "Active" | "Inactive")
-                    }
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
+                  {/* Image Upload Buttons */}
+                  <div className="w-full flex flex-col gap-2 pt-2 border-t">
+                    <input
+                      type="file"
+                      id="image"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageChange}
+                    />
+                    <label
+                      htmlFor="image"
+                      className="block px-3 py-2 bg-blue-600 text-white text-center rounded-md hover:bg-blue-700 cursor-pointer transition duration-200 text-xs font-medium"
+                    >
+                      {imagePreview ? "Change" : "Upload"}
+                    </label>
+                    
+                    {imagePreview && (
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 text-xs font-medium"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-          </section>
+
+            {/* Right Content - Information Grid */}
+            <div className="lg:col-span-2 space-y-4">
+              {/* Service Details Card */}
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center mb-3">
+                  <svg className="w-4 h-4 text-gray-700 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <h3 className="text-base font-semibold text-gray-800">Service Details</h3>
+                </div>
+
+                <div className="space-y-3">
+                  {/* Service Name */}
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1" htmlFor="name">
+                      Service Name
+                    </label>
+                    <input
+                      id="name"
+                      type="text"
+                      placeholder="Enter service name"
+                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                        errors.name ? "border-red-500" : "border-gray-300"
+                      }`}
+                      {...register("name", { 
+                        required: "Service name is required",
+                        minLength: {
+                          value: 2,
+                          message: "Service name must be at least 2 characters"
+                        }
+                      })}
+                    />
+                    {errors.name && (
+                      <span className="text-xs text-red-600 mt-0.5 block">{errors.name.message}</span>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1" htmlFor="description">
+                      Description
+                    </label>
+                    <textarea
+                      id="description"
+                      rows={4}
+                      placeholder="Enter service description"
+                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition resize-none ${
+                        errors.description ? "border-red-500" : "border-gray-300"
+                      }`}
+                      {...register("description", { 
+                        required: "Description is required",
+                        minLength: {
+                          value: 10,
+                          message: "Description must be at least 10 characters"
+                        }
+                      })}
+                    />
+                    {errors.description && (
+                      <span className="text-xs text-red-600 mt-0.5 block">{errors.description.message}</span>
+                    )}
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1">
+                      Status
+                    </label>
+                    <select
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+                      value={status}
+                      onChange={(e) => 
+                        setValue("status", e.target.value as "Active" | "Inactive")
+                      }
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Form Actions */}
-          <div className="flex flex-col-reverse sm:flex-row justify-end space-y-4 sm:space-y-0 sm:space-x-4 pt-6">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
             <button
               type="button"
               onClick={onCancel}
-              className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-200"
+              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition duration-200 text-sm font-medium disabled:opacity-70"
               disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-200 disabled:opacity-70"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 text-sm font-medium disabled:opacity-70 flex items-center justify-center"
               disabled={isSubmitting}
             >
               {isSubmitting ? (

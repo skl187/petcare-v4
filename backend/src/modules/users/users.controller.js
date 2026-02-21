@@ -214,6 +214,42 @@ const updateUser = async (req, res) => {
   }
 };
 
+const activateUser = async (req, res) => {
+  try {
+    const hasPermission = await req.checkPermission('activate', 'user');
+    if (!hasPermission) {
+      return res.status(403).json({ 
+        status: 'error',
+        message: '403 Forbidden: Does not have permission to activate this user.' 
+      });
+    }
+
+    const { id } = req.params;
+    const {status} = req.body; 
+
+    const result = await query(
+      `UPDATE users SET status = ${status} WHERE id = $1 AND deleted_at IS NULL RETURNING id`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ 
+        status: 'error',
+        message: 'User not found' 
+      });
+    }
+
+    req.auditLog('activate', 'user', { userId: id });
+
+    res.json(successResponse(null, 'User Activated successfully'));
+  } catch (err) {
+    res.status(500).json({ 
+      status: 'error',
+      message: 'Failed to activate user' 
+    });
+  }
+};
+
 const deleteUser = async (req, res) => {
   try {
     const hasPermission = await req.checkPermission('delete', 'user');
@@ -255,6 +291,7 @@ module.exports = {
   getUserById,
   createUser,
   updateUser,
+  activateUser,
   deleteUser,
   getUserPets
 };

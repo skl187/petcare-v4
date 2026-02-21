@@ -171,6 +171,7 @@ export default function VetListForm({
     formState: { errors },
     reset,
     control,
+    watch,
   } = useForm<VeterinarianFormData>({
     mode: 'onChange',
     defaultValues: veterinarian
@@ -346,7 +347,7 @@ export default function VetListForm({
   };
 
   return (
-    <div className='p-4 mx-auto max-w-4xl md:p-6'>
+    <div className='p-2 mx-auto max-w-3xl md:p-3'>
       {/* Banner */}
       {banner && (
         <div
@@ -406,262 +407,285 @@ export default function VetListForm({
         title={veterinarian ? 'Edit Veterinarian' : 'Add New Veterinarian'}
         onClose={onCancel}
       >
-        <form onSubmit={handleSubmit(handleForm)} className='space-y-6'>
-          {/* Basic Information */}
-          <section className='space-y-4'>
-            <h3 className='text-lg font-semibold text-gray-800 border-b pb-2'>
-              Basic Information
-            </h3>
+        <form onSubmit={handleSubmit(handleForm)} className='space-y-4'>
+          {/* Profile Layout: Left Sidebar + Right Content */}
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
+            {/* Left Sidebar - Profile Card */}
+            <div className='lg:col-span-1'>
+              <div className='bg-white border border-gray-200 rounded-lg p-4 sticky top-2'>
+                {/* Profile Name Section */}
+                <div className='text-center border-b pb-2 mb-2'>
+                  <h2 className='text-lg font-bold text-gray-800'>
+                    {watch('first_name') && watch('last_name')
+                      ? `${watch('first_name')} ${watch('last_name')}`
+                      : 'Veterinarian'}
+                  </h2>
+                  <p className='text-xs text-gray-500 mt-1'>Veterinary Professional</p>
+                </div>
 
-            <div className='grid grid-cols-2 gap-4'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  First Name <span className='text-red-500'>*</span>
-                </label>
-                <input
-                  type='text'
-                  {...register('first_name', {
-                    required: 'First name is required',
-                    minLength: {
-                      value: 2,
-                      message: 'First name must be at least 2 characters',
-                    },
-                  })}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.first_name ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder='Enter first name'
-                  disabled={isLoading}
-                />
-                {errors.first_name && (
-                  <span className='text-red-500 text-sm'>
-                    {errors.first_name.message}
-                  </span>
-                )}
-              </div>
+                {/* License Number */}
+                <div className='text-center border-b pb-2 mb-2'>
+                  <p className='text-xs text-gray-500 uppercase tracking-wide'>License</p>
+                  <p className='text-xs font-semibold text-gray-700 mt-1'>
+                    {watch('license_number') || 'N/A'}
+                  </p>
+                </div>
 
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Last Name <span className='text-red-500'>*</span>
-                </label>
-                <input
-                  type='text'
-                  {...register('last_name', {
-                    required: 'Last name is required',
-                    minLength: {
-                      value: 2,
-                      message: 'Last name must be at least 2 characters',
-                    },
-                  })}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.last_name ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder='Enter last name'
-                  disabled={isLoading}
-                />
-                {errors.last_name && (
-                  <span className='text-red-500 text-sm'>
-                    {errors.last_name.message}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Email <span className='text-red-500'>*</span>
-              </label>
-              <input
-                type='email'
-                {...register('email', {
-                  required: 'Email is required',
-                  pattern: {
-                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: 'Invalid email format',
-                  },
-                })}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder='Enter email address'
-                disabled={isLoading}
-                autoComplete='off'
-              />
-              {errors.email && (
-                <span className='text-red-500 text-sm'>
-                  {errors.email.message}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                License Number <span className='text-red-500'>*</span>
-              </label>
-              <input
-                type='text'
-                {...register('license_number', {
-                  required: 'License number is required',
-                  minLength: {
-                    value: 3,
-                    message: 'License number must be at least 3 characters',
-                  },
-                })}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.license_number ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder='e.g., LIC-67890'
-                disabled={isLoading}
-              />
-              {errors.license_number && (
-                <span className='text-red-500 text-sm'>
-                  {errors.license_number.message}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Password <span className='text-red-500'>*</span>
-              </label>
-              <input
-                type='password'
-                {...register('password', {
-                  required: 'Password is required',
-                  minLength: {
-                    value: 6,
-                    message: 'Password must be at least 6 characters',
-                  },
-                  pattern: {
-                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                    message:
-                      'Password must contain at least one uppercase letter, one lowercase letter, and one number',
-                  },
-                })}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  errors.password ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder='Enter password'
-                disabled={isLoading}
-              />
-              {errors.password && (
-                <span className='text-red-500 text-sm'>
-                  {errors.password.message}
-                </span>
-              )}
-            </div>
-          </section>
-
-          {/* Clinic and Services */}
-          <section className='space-y-4'>
-            <h3 className='text-lg font-semibold text-gray-800 border-b pb-2'>
-              Assignment
-            </h3>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Pet Care Center <span className='text-red-500'>*</span>
-              </label>
-              <Controller
-                name='vet_clinic_id'
-                control={control}
-                rules={{ required: 'Pet Care Center is required' }}
-                render={({ field }) => (
-                  <select
-                    {...field}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.vet_clinic_id
-                        ? 'border-red-500'
-                        : 'border-gray-300'
-                    }`}
-                    disabled={isLoading}
-                  >
-                    <option value=''>Select Pet Care Center</option>
-                    {clinics.map((clinic) => (
-                      <option key={clinic.id} value={clinic.id}>
-                        {clinic.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              />
-              {errors.vet_clinic_id && (
-                <span className='text-red-500 text-sm'>
-                  {errors.vet_clinic_id.message}
-                </span>
-              )}
-            </div>
-
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Services <span className='text-red-500'>*</span>
-              </label>
-              <Controller
-                name='vet_service_ids'
-                control={control}
-                rules={{
-                  validate: (value) =>
-                    (value && value.length > 0) ||
-                    'At least one service must be selected',
-                }}
-                render={({ field }) => (
-                  <ServiceMultiSelect
-                    services={services}
-                    selectedIds={field.value || []}
-                    onChange={field.onChange}
-                    disabled={isLoading}
-                    hasError={!!errors.vet_service_ids}
+                {/* Status */}
+                <div className='text-center'>
+                  <p className='text-xs text-gray-500 uppercase tracking-wide mb-2'>Status</p>
+                  <Controller
+                    name='status'
+                    control={control}
+                    render={({ field }) => (
+                      <select
+                        {...field}
+                        className='w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                        disabled={isLoading}
+                      >
+                        <option value={1}>Active</option>
+                        <option value={0}>Inactive</option>
+                      </select>
+                    )}
                   />
-                )}
-              />
-              {errors.vet_service_ids && (
-                <span className='text-red-500 text-sm'>
-                  {errors.vet_service_ids.message}
-                </span>
-              )}
+                </div>
+              </div>
             </div>
-          </section>
 
-          {/* Status */}
-          <section className='space-y-4'>
-            <h3 className='text-lg font-semibold text-gray-800 border-b pb-2'>
-              Status
-            </h3>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Status <span className='text-red-500'>*</span>
-              </label>
-              <Controller
-                name='status'
-                control={control}
-                render={({ field }) => (
-                  <select
-                    {...field}
-                    className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                    disabled={isLoading}
-                  >
-                    <option value={1}>Active</option>
-                    <option value={0}>Inactive</option>
-                  </select>
-                )}
-              />
+            {/* Right Content - Information Grid */}
+            <div className='lg:col-span-2 space-y-4'>
+              {/* Basic Information Section */}
+              <div className='bg-white border border-gray-200 rounded-lg p-4'>
+                <div className='flex items-center mb-3'>
+                  <svg className='w-4 h-4 text-gray-700 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                  </svg>
+                  <h3 className='text-base font-semibold text-gray-800'>Basic Information</h3>
+                </div>
+
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-3 mb-3'>
+                  {/* First Name */}
+                  <div>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      First Name
+                    </label>
+                    <input
+                      type='text'
+                      {...register('first_name', {
+                        required: 'First name is required',
+                        minLength: {
+                          value: 2,
+                          message: 'First name must be at least 2 characters',
+                        },
+                      })}
+                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                        errors.first_name ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder='Enter first name'
+                      disabled={isLoading}
+                    />
+                    {errors.first_name && (
+                      <span className='text-xs text-red-600 mt-0.5 block'>{errors.first_name.message}</span>
+                    )}
+                  </div>
+
+                  {/* Last Name */}
+                  <div>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      Last Name
+                    </label>
+                    <input
+                      type='text'
+                      {...register('last_name', {
+                        required: 'Last name is required',
+                        minLength: {
+                          value: 2,
+                          message: 'Last name must be at least 2 characters',
+                        },
+                      })}
+                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                        errors.last_name ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder='Enter last name'
+                      disabled={isLoading}
+                    />
+                    {errors.last_name && (
+                      <span className='text-xs text-red-600 mt-0.5 block'>{errors.last_name.message}</span>
+                    )}
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      Email
+                    </label>
+                    <input
+                      type='email'
+                      {...register('email', {
+                        required: 'Email is required',
+                        pattern: {
+                          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                          message: 'Invalid email format',
+                        },
+                      })}
+                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                        errors.email ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder='Enter email address'
+                      disabled={isLoading}
+                      autoComplete='off'
+                    />
+                    {errors.email && (
+                      <span className='text-xs text-red-600 mt-0.5 block'>{errors.email.message}</span>
+                    )}
+                  </div>
+
+                  {/* License Number */}
+                  <div>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      License Number
+                    </label>
+                    <input
+                      type='text'
+                      {...register('license_number', {
+                        required: 'License number is required',
+                        minLength: {
+                          value: 3,
+                          message: 'License number must be at least 3 characters',
+                        },
+                      })}
+                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                        errors.license_number ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder='e.g., LIC-67890'
+                      disabled={isLoading}
+                    />
+                    {errors.license_number && (
+                      <span className='text-xs text-red-600 mt-0.5 block'>{errors.license_number.message}</span>
+                    )}
+                  </div>
+
+                  {/* Password */}
+                  <div className='md:col-span-2'>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      Password
+                    </label>
+                    <input
+                      type='password'
+                      {...register('password', {
+                        required: veterinarian ? false : 'Password is required',
+                        minLength: {
+                          value: 6,
+                          message: 'Password must be at least 6 characters',
+                        },
+                        pattern: {
+                          value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                          message: 'Password must contain at least one uppercase letter, one lowercase letter, and one number',
+                        },
+                        validate: (value) => {
+                          if (!veterinarian && !value) return 'Password is required';
+                          return true;
+                        },
+                      })}
+                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                        errors.password ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      placeholder={veterinarian ? 'Leave blank to keep current password' : 'Enter password'}
+                      disabled={isLoading}
+                    />
+                    {errors.password && (
+                      <span className='text-xs text-red-600 mt-0.5 block'>{errors.password.message}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Assignment Section */}
+              <div className='bg-white border border-gray-200 rounded-lg p-4'>
+                <div className='flex items-center mb-3'>
+                  <svg className='w-4 h-4 text-gray-700 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z' />
+                  </svg>
+                  <h3 className='text-base font-semibold text-gray-800'>Assignment</h3>
+                </div>
+
+                <div className='space-y-3'>
+                  {/* Pet Care Center */}
+                  <div>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      Pet Care Center
+                    </label>
+                    <Controller
+                      name='vet_clinic_id'
+                      control={control}
+                      rules={{ required: 'Pet Care Center is required' }}
+                      render={({ field }) => (
+                        <select
+                          {...field}
+                          className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                            errors.vet_clinic_id ? 'border-red-500' : 'border-gray-300'
+                          }`}
+                          disabled={isLoading}
+                        >
+                          <option value=''>Select Pet Care Center</option>
+                          {clinics.map((clinic) => (
+                            <option key={clinic.id} value={clinic.id}>
+                              {clinic.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    />
+                    {errors.vet_clinic_id && (
+                      <span className='text-xs text-red-600 mt-0.5 block'>{errors.vet_clinic_id.message}</span>
+                    )}
+                  </div>
+
+                  {/* Services */}
+                  <div>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      Services
+                    </label>
+                    <Controller
+                      name='vet_service_ids'
+                      control={control}
+                      rules={{
+                        validate: (value) =>
+                          (value && value.length > 0) || 'At least one service must be selected',
+                      }}
+                      render={({ field }) => (
+                        <ServiceMultiSelect
+                          services={services}
+                          selectedIds={field.value || []}
+                          onChange={field.onChange}
+                          disabled={isLoading}
+                          hasError={!!errors.vet_service_ids}
+                        />
+                      )}
+                    />
+                    {errors.vet_service_ids && (
+                      <span className='text-xs text-red-600 mt-0.5 block'>{errors.vet_service_ids.message}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
-          </section>
+          </div>
 
-          {/* Buttons */}
-          <div className='flex justify-end gap-3 pt-4 border-t'>
+          {/* Form Actions */}
+          <div className='flex justify-end gap-2 pt-3 border-t'>
             <button
               type='button'
               onClick={onCancel}
               disabled={isLoading}
-              className='px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium disabled:opacity-50'
+              className='px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium disabled:opacity-50'
             >
               Cancel
             </button>
             <button
               type='submit'
               disabled={isLoading}
-              className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-medium'
+              className='px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-medium'
             >
               {isLoading ? 'Saving...' : veterinarian ? 'Update' : 'Add'}
             </button>

@@ -193,18 +193,33 @@ export default function OwnerAndPetsTable() {
 
       const newStatus = owner.status === 'active' ? 'inactive' : 'active';
 
-      // Call API to update status
-      const response = await fetch(`${API_ENDPOINTS.USERS.BASE}/${id}`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      // Use dedicated activate endpoint for activation
+      if (newStatus === 'active') {
+        const response = await fetch(`${API_ENDPOINTS.USERS.BASE}/${id}/activate`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (response.ok) {
-        await fetchOwners();
+        if (response.ok) {
+          await fetchOwners();
+        }
+      } else {
+        // Use PUT for deactivation
+        const response = await fetch(`${API_ENDPOINTS.USERS.BASE}/${id}/activate`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: newStatus }),
+        });
+
+        if (response.ok) {
+          await fetchOwners();
+        }
       }
     } catch (error) {
       console.error('Error updating status:', error);
@@ -227,7 +242,7 @@ export default function OwnerAndPetsTable() {
       const response = await fetch(
         `${API_ENDPOINTS.USERS.BASE}/${editOwner?.id}`,
         {
-          method: 'PATCH',
+          method: 'PUT',
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',

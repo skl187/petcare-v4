@@ -10,7 +10,7 @@ import {
   VaccinationPayload,
   Vaccination,
 } from '../../../../services/vaccinationService';
-import { formatDate } from '../../../../utils/formatDate';
+// import { formatDate } from '../../../../utils/formatDate';
 
 interface VaccinationData {
   id?: string;

@@ -3,18 +3,14 @@ import { Link, useLocation } from 'react-router';
 import { CiCalendarDate } from 'react-icons/ci';
 import { RxDashboard } from 'react-icons/rx';
 import {
-  TbReportAnalytics,
-  TbReportMoney,
   TbUsersGroup,
-  TbAppWindow,
 } from 'react-icons/tb';
 import {
   MdOutlinePets,
   MdOutlineSettings,
-  MdOutlineLocationOn,
   MdOutlineNotificationsActive,
+  MdOutlineSecurity,
 } from 'react-icons/md';
-import { GrServices, GrDocument, GrShieldSecurity } from 'react-icons/gr';
 // Assume these icons are imported from an icon library
 import { ChevronDownIcon, HorizontaLDots } from '../icons';
 import { useSidebar } from '../context/SidebarContext';
@@ -34,14 +30,9 @@ const navItems: NavItem[] = [
   },
   {
     icon: <CiCalendarDate />,
-    name: 'Today Appointments',
-    path: '/today-appointments',
+    name: 'Today\'s Bookings',
+    path: '/todaysBookings',
   },
-  // {
-  //   icon: <TbReportAnalytics />,
-  //   name: 'Reports',
-  //   path: '/reports',
-  // },
   {
     icon: <MdOutlinePets />,
     name: 'Veterinary',
@@ -57,80 +48,13 @@ const navItems: NavItem[] = [
     icon: <TbUsersGroup />,
     name: 'Users',
     subItems: [
-      // { name: 'Employees', path: '/employees', pro: false },
-      // { name: 'Employee Request List', path: '/empRequestList', pro: false },
       { name: 'Owners and pets', path: '/ownersAndPets', pro: false },
       { name: 'Appointment Reviews', path: '/bookingReviews', pro: false },
     ],
   },
-  // {
-  //   icon: <TbReportMoney />,
-  //   name: 'Finance',
-  //   subItems: [
-  //     { name: 'Tax', path: '/tax', pro: false },
-  //     { name: 'Employee Earnings', path: '/employeeEarnings', pro: false },
-  //   ],
-  // },
-  // {
-  //   icon: <TbReportAnalytics />,
-  //   name: 'Overall Reports',
-  //   subItems: [
-  //     { name: 'Daily Bookings', path: '/dailyBookings', pro: false },
-  //     { name: 'Overall Bookings', path: '/overallBookings', pro: false },
-  //     { name: 'Employee Payouts', path: '/employeePayouts', pro: false },
-  //   ],
-  // },
-
-  // {
-  //   icon: <CalenderIcon />,
-  //   name: "Calendar",
-  //   path: "/calendar",
-  // },
-  // {
-  //   icon: <UserCircleIcon />,
-  //   name: "User Profile",
-  //   path: "/profile",
-  // },
-  // {
-  //   name: "Forms",
-  //   icon: <ListIcon />,
-  //   subItems: [{ name: "Form Elements", path: "/form-elements", pro: false }],
-  // },
-  // {
-  //   name: "Tables",
-  //   icon: <TableIcon />,
-  //   subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-  // },
-  // {
-  //   name: "Pages",
-  //   icon: <PageIcon />,
-  //   subItems: [
-  //     { name: "Blank Page", path: "/blank", pro: false },
-  //     { name: "404 Error", path: "/error-404", pro: false },
-  //   ],
-  // },
 ];
 
 const othersItems: NavItem[] = [
-  // {
-  //   icon: <MdOutlineSettings />,
-  //   name: 'Settings',
-  //   path: '/settings',
-  // },
-  // {
-  //   icon: <MdOutlineLocationOn />,
-  //   name: 'Location',
-  //   subItems: [
-  //     { name: 'City', path: '/city-locations', pro: false },
-  //     { name: 'State', path: '/state-locations', pro: false },
-  //     { name: 'Country', path: '/country-locations', pro: false },
-  //   ],
-  // },
-  // {
-  //   icon: <GrServices />,
-  //   name: 'System Services',
-  //   path: '/system-services',
-  // },
   {
     icon: <MdOutlinePets />,
     name: 'Pets',
@@ -139,11 +63,6 @@ const othersItems: NavItem[] = [
       { name: 'Breed', path: '/petBreed', pro: false },
     ],
   },
-  // {
-  //   icon: <GrDocument />,
-  //   name: 'Pages',
-  //   path: '/appPage',
-  // },
   {
     icon: <MdOutlineNotificationsActive />,
     name: 'Notifications',
@@ -152,59 +71,19 @@ const othersItems: NavItem[] = [
       { name: 'Notification Templates', path: '/TemplateNotification', pro: false },
     ],
   },
-  // {
-  //   icon: <TbAppWindow />,
-  //   name: 'App Banner',
-  //   path: '/appBanner',
-  // },
-  // {
-  //   icon: <GrShieldSecurity />,
-  //   name: 'Access-Control',
-  //   path: '/accessControl',
-  // },
   {
-    icon: <GrShieldSecurity />,
-    name: 'Manage Roles',
-    path: '/manage-roles',
-  },
-  {
-    icon: <GrShieldSecurity />,
-    name: 'Manage Permissions',
-    path: '/manage-permissions',
+    icon: <MdOutlineSecurity />,
+    name: 'Roles & Permissions',
+    subItems: [
+      { name: 'Manage Roles', path: '/manage-roles', pro: false },
+      { name: 'Manage Permissions', path: '/manage-permissions', pro: false },
+    ],
   },
   {
     icon: <MdOutlineSettings />,
     name: 'Settings',
     path: '/admin/settings/mail',
   },
-  // {
-  //   icon: <PieChartIcon />,
-  //   name: "Charts",
-  //   subItems: [
-  //     { name: "Line Chart", path: "/line-chart", pro: false },
-  //     { name: "Bar Chart", path: "/bar-chart", pro: false },
-  //   ],
-  // },
-  // {
-  //   icon: <BoxCubeIcon />,
-  //   name: "UI Elements",
-  //   subItems: [
-  //     { name: "Alerts", path: "/alerts", pro: false },
-  //     { name: "Avatar", path: "/avatars", pro: false },
-  //     { name: "Badge", path: "/badge", pro: false },
-  //     { name: "Buttons", path: "/buttons", pro: false },
-  //     { name: "Images", path: "/images", pro: false },
-  //     { name: "Videos", path: "/videos", pro: false },
-  //   ],
-  // },
-  // {
-  //   icon: <PlugInIcon />,
-  //   name: "Authentication",
-  //   subItems: [
-  //     { name: "Sign In", path: "/signin", pro: false },
-  //     { name: "Sign Up", path: "/signup", pro: false },
-  //   ],
-  // },
 ];
 
 const AppSidebar: React.FC = () => {

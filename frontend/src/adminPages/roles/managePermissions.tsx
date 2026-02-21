@@ -1,6 +1,6 @@
 import PageMeta from "../../components/common/PageMeta";
 import PageBreadCrumb from "../../components/common/PageBreadCrumb";
-import PermissionsTable from "../../components/tables/permissionTables/PermissionsTable";
+import PermissionsTable from "../../components/tables/AdminTables/PermissionsTable";
 
 export default function ManagePermissions() {
   return (

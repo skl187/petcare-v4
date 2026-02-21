@@ -1,8 +1,8 @@
-import VetBookingsTable from '../components/tables/veterinaryTables/VetBookingsTable';
+import TodaysAppointmentsTable from '../components/tables/AdminTables/TodaysAppointmensTable';
 import ComponentCard from "../components/common/ComponentCard";
 import PageMeta from "../components/common/PageMeta";
 
-const TodayAppointments = () => {
+const TodaysAppointments = () => {
   return (
     <>
       <PageMeta 
@@ -12,11 +12,11 @@ const TodayAppointments = () => {
 
       <div className="space-y-6 p-4">
         <ComponentCard title="Today's Appointments">
-          <VetBookingsTable />
+          <TodaysAppointmentsTable />
         </ComponentCard>
       </div>
     </>
   );
 };
 
-export default TodayAppointments;
+export default TodaysAppointments;

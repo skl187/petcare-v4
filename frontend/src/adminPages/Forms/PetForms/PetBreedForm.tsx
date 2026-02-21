@@ -277,113 +277,168 @@ export default function PetBreedForm({
         onClose={onCancel}
       >
         <form onSubmit={handleSubmit(handleForm)} className='space-y-4'>
-          <div className='space-y-2'>
-            <label className='text-sm font-semibold text-black dark:text-white'>
-              Breed Name <span className='text-red-500'>*</span>
-            </label>
-            <input
-              type='text'
-              {...register('name', {
-                required: 'Breed name is required',
-                minLength: {
-                  value: 2,
-                  message: 'Name must be at least 2 characters long',
-                },
-              })}
-              placeholder='Enter breed name'
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none dark:bg-gray-800 dark:text-white dark:border-gray-600'
-            />
-            {errors.name && (
-              <span className='text-sm text-red-500'>
-                {errors.name.message}
-              </span>
-            )}
+          {/* Profile Layout: Left Sidebar + Right Content */}
+          <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
+            {/* Left Sidebar - Profile Card */}
+            <div className='lg:col-span-1'>
+              <div className='bg-white border border-gray-200 rounded-lg p-4 sticky top-2'>
+                {/* Breed Name Section */}
+                <div className='text-center border-b pb-2 mb-2'>
+                  <h2 className='text-lg font-bold text-gray-800'>
+                    {nameValue || 'Breed'}
+                  </h2>
+                  <p className='text-xs text-gray-500 mt-1'>Pet Breed Category</p>
+                </div>
+
+                {/* Pet Type */}
+                <div className='text-center border-b pb-2 mb-2'>
+                  <p className='text-xs text-gray-500 uppercase tracking-wide mb-1'>Pet Type</p>
+                  <p className='text-xs font-semibold text-gray-700'>
+                    {petTypes.find((t) => t.id === petTypeIdValue)?.name || 'Select Type'}
+                  </p>
+                </div>
+
+                {/* Status */}
+                <div className='text-center'>
+                  <p className='text-xs text-gray-500 uppercase tracking-wide mb-2'>Status</p>
+                  <select
+                    className='w-full px-3 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    value={String(status)}
+                    disabled={isLoading}
+                    onChange={(e) =>
+                      setValue('status', e.target.value === '1' ? 1 : 0)
+                    }
+                  >
+                    <option value='1'>Active</option>
+                    <option value='0'>Inactive</option>
+                  </select>
+                  <div className='mt-2'>
+                    <Badge color={status === 1 ? 'success' : 'error'} size='sm'>
+                      {status === 1 ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Content - Information Grid */}
+            <div className='lg:col-span-2 space-y-4'>
+              {/* Breed Details Card */}
+              <div className='bg-white border border-gray-200 rounded-lg p-4'>
+                <div className='flex items-center mb-3'>
+                  <svg className='w-4 h-4 text-gray-700 mr-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
+                  </svg>
+                  <h3 className='text-base font-semibold text-gray-800'>Breed Information</h3>
+                </div>
+
+                <div className='space-y-3'>
+                  {/* Breed Name */}
+                  <div>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      Breed Name
+                    </label>
+                    <input
+                      type='text'
+                      {...register('name', {
+                        required: 'Breed name is required',
+                        minLength: {
+                          value: 2,
+                          message: 'Name must be at least 2 characters long',
+                        },
+                      })}
+                      placeholder='Enter breed name'
+                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                        errors.name ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      disabled={isLoading}
+                    />
+                    {errors.name && (
+                      <span className='text-xs text-red-600 mt-0.5 block'>
+                        {errors.name.message}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Pet Type */}
+                  <div>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      Pet Type
+                    </label>
+                    <select
+                      {...register('petTypeId', { required: 'Pet type is required' })}
+                      onChange={(e) => {
+                        setValue('petTypeId', e.target.value);
+                      }}
+                      className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
+                        errors.petTypeId ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                      disabled={isLoading}
+                    >
+                      <option value=''>Select Pet Type</option>
+                      {petTypes.map((type) => (
+                        <option key={type.id} value={type.id}>
+                          {type.name}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.petTypeId && (
+                      <span className='text-xs text-red-600 mt-0.5 block'>
+                        {errors.petTypeId.message}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Slug */}
+                  <div>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      Slug
+                    </label>
+                    <input
+                      type='text'
+                      readOnly
+                      disabled
+                      value={slugValue}
+                      className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600'
+                    />
+                    <input type='hidden' {...register('slug')} />
+                    <p className='text-xs text-gray-500 mt-1'>
+                      Automatically generated from name
+                    </p>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className='text-xs font-semibold text-gray-600 uppercase tracking-wide block mb-1'>
+                      Description
+                    </label>
+                    <textarea
+                      {...register('description')}
+                      placeholder='Enter breed description'
+                      rows={3}
+                      className='w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition'
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className='space-y-2'>
-            <label className='text-sm font-semibold text-black dark:text-white'>
-              Pet Type <span className='text-red-500'>*</span>
-            </label>
-            <select
-              {...register('petTypeId', { required: 'Pet type is required' })}
-              onChange={(e) => {
-                setValue('petTypeId', e.target.value);
-              }}
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none dark:bg-gray-800 dark:text-white dark:border-gray-600'
-            >
-              {petTypes.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
-            {errors.petTypeId && (
-              <span className='text-sm text-red-500'>
-                {errors.petTypeId.message}
-              </span>
-            )}
-          </div>
-
-          <div className='space-y-2'>
-            <label className='text-sm font-semibold text-black dark:text-white'>
-              Description
-            </label>
-            <textarea
-              {...register('description')}
-              placeholder='Enter breed description'
-              rows={4}
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none dark:bg-gray-800 dark:text-white dark:border-gray-600'
-            />
-          </div>
-
-          <div className='space-y-2'>
-            <label className='text-sm font-semibold text-black dark:text-white'>
-              Slug
-            </label>
-            <input
-              type='text'
-              readOnly
-              disabled
-              value={slugValue}
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 cursor-not-allowed'
-            />
-            <input type='hidden' {...register('slug')} />
-            <p className='text-xs text-gray-500 dark:text-gray-400'>
-              Automatically generated from name
-            </p>
-          </div>
-
-          <div className='space-y-2'>
-            <label className='text-sm font-semibold text-black dark:text-white'>
-              Status
-            </label>
-            <select
-              value={String(status)}
-              onChange={(e) =>
-                setValue('status', e.target.value === '1' ? 1 : 0)
-              }
-              className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none dark:bg-gray-800 dark:text-white dark:border-gray-600'
-            >
-              <option value='1'>Active</option>
-              <option value='0'>Inactive</option>
-            </select>
-            <Badge color={status === 1 ? 'success' : 'error'} size='sm'>
-              {status === 1 ? 'Active' : 'Inactive'}
-            </Badge>
-          </div>
-
-          <div className='flex justify-between pt-4'>
+          {/* Form Actions */}
+          <div className='flex justify-end gap-2 pt-3 border-t'>
             <button
               type='button'
               onClick={onCancel}
-              className='px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700'
+              disabled={isLoading}
+              className='px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium disabled:opacity-50'
             >
               Cancel
             </button>
             <button
               type='submit'
               disabled={isLoading}
-              className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50'
+              className='px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-medium'
             >
               {isLoading ? 'Saving...' : petBreed ? 'Update' : 'Add'} Breed
             </button>

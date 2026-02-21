@@ -258,187 +258,230 @@ export default function PetCareCenterForm({
         <form
           id='petcare-center-form'
           onSubmit={handleSubmit(handleForm)}
-          className='space-y-6'
+          className='grid grid-cols-1 lg:grid-cols-3 gap-6'
         >
-          {/* Clinic Details */}
-          <section className='space-y-4'>
-            <h3 className='text-lg font-semibold text-gray-800 border-b pb-2'>
-              Clinic Details
-            </h3>
-            <div className='grid grid-cols-1 gap-4'>
-              {/* Clinic Name */}
-              <div className='flex flex-col space-y-2'>
-                <label
-                  className='text-sm font-medium text-gray-700'
-                  htmlFor='name'
-                >
-                  Clinic Name <span className='text-red-500'>*</span>
-                </label>
-                <input
-                  id='name'
-                  type='text'
-                  disabled={isLoading}
-                  className={`px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                    errors.name ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder='Enter clinic name'
-                  {...register('name', {
-                    required: 'Clinic name is required',
-                    minLength: {
-                      value: 2,
-                      message: 'Clinic name must be at least 2 characters',
-                    },
-                  })}
-                />
-                {errors.name && (
-                  <span className='text-sm text-red-600'>
-                    {errors.name.message}
-                  </span>
-                )}
-              </div>
-
-              {/* Slug */}
-              <div className='flex flex-col space-y-2'>
-                <label
-                  className='text-sm font-medium text-gray-700'
-                  htmlFor='slug'
-                >
-                  Slug
-                </label>
-                <input
-                  id='slug'
-                  type='text'
-                  readOnly
-                  disabled
-                  value={slugValue}
-                  className='px-4 py-2 border rounded-md bg-gray-50'
-                />
-                <input type='hidden' {...register('slug')} />
-                <p className='text-xs text-gray-500'>
-                  Automatically generated from name
+          {/* Left Sidebar */}
+          <div className='lg:col-span-1'>
+            <div className='sticky top-2 space-y-4'>
+              {/* Clinic Name Display */}
+              <div className='bg-gray-50 p-4 rounded-lg'>
+                <p className='text-xs font-semibold text-gray-500 uppercase tracking-wide'>
+                  Clinic Name
+                </p>
+                <p className='text-lg font-bold text-gray-900 mt-2'>
+                  {slugValue ? watch('name') : 'New Clinic'}
                 </p>
               </div>
 
-              {/* Email */}
-              <div className='flex flex-col space-y-2'>
-                <label
-                  className='text-sm font-medium text-gray-700'
-                  htmlFor='contact_email'
-                >
-                  Contact Email <span className='text-red-500'>*</span>
-                </label>
-                <input
-                  id='contact_email'
-                  type='email'
+              {/* Status Badge & Selector */}
+              <div className='space-y-3'>
+                <div>
+                  <p className='text-xs font-semibold text-gray-500 uppercase tracking-wide'>
+                    Status
+                  </p>
+                  <div className='mt-2'>
+                    <Badge
+                      size='sm'
+                      color={status === 1 ? 'success' : 'error'}
+                    >
+                      {status === 1 ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </div>
+                </div>
+                <select
+                  className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  value={String(status)}
                   disabled={isLoading}
-                  className={`px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                    errors.contact_email ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder='Enter contact email'
-                  {...register('contact_email', {
-                    required: 'Contact email is required',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address',
-                    },
-                  })}
-                />
-                {errors.contact_email && (
-                  <span className='text-sm text-red-600'>
-                    {errors.contact_email.message}
-                  </span>
-                )}
-              </div>
-
-              {/* Phone Number */}
-              <div className='flex flex-col space-y-2'>
-                <label
-                  className='text-sm font-medium text-gray-700'
-                  htmlFor='contact_number'
+                  onChange={(e) =>
+                    setValue('status', e.target.value === '1' ? 1 : 0)
+                  }
                 >
-                  Contact Number <span className='text-red-500'>*</span>
-                </label>
-                <input
-                  id='contact_number'
-                  type='tel'
-                  disabled={isLoading}
-                  className={`px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                    errors.contact_number ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder='Enter contact number'
-                  {...register('contact_number', {
-                    required: 'Contact number is required',
-                    minLength: {
-                      value: 10,
-                      message: 'Contact number must be at least 10 digits',
-                    },
-                    pattern: {
-                      value: /^[0-9\s\-\+\(\)]{10,}$/,
-                      message: 'Invalid contact number format',
-                    },
-                  })}
-                />
-                {errors.contact_number && (
-                  <span className='text-sm text-red-600'>
-                    {errors.contact_number.message}
-                  </span>
-                )}
+                  <option value='1'>Active</option>
+                  <option value='0'>Inactive</option>
+                </select>
               </div>
             </div>
-          </section>
+          </div>
 
-          {/* Status */}
-          <section className='space-y-4'>
-            <h3 className='text-lg font-semibold text-gray-800 border-b pb-2'>
-              Status
-            </h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div className='flex flex-col space-y-2'>
-                <label className='text-sm font-medium text-gray-700'>
-                  Status
-                </label>
-                <div className='flex items-center gap-3'>
-                  <Badge size='sm' color={status === 1 ? 'success' : 'error'}>
-                    {status === 1 ? 'Active' : 'Inactive'}
-                  </Badge>
-                  <select
-                    className='px-4 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 border-gray-300'
-                    value={String(status)}
-                    disabled={isLoading}
-                    onChange={(e) =>
-                      setValue('status', e.target.value === '1' ? 1 : 0)
-                    }
+          {/* Right Content Cards */}
+          <div className='lg:col-span-2 space-y-4'>
+            {/* Clinic Information Card */}
+            <div className='bg-white border border-gray-200 rounded-lg p-4'>
+              <h4 className='text-sm font-semibold text-gray-800 mb-4'>Clinic Information</h4>
+              <div className='space-y-4'>
+                {/* Clinic Name */}
+                <div className='flex flex-col space-y-1'>
+                  <label
+                    className='text-xs font-semibold text-gray-600 uppercase tracking-wide'
+                    htmlFor='name'
                   >
-                    <option value='1'>Active</option>
-                    <option value='0'>Inactive</option>
-                  </select>
+                    Clinic Name <span className='text-red-500'>*</span>
+                  </label>
+                  <input
+                    id='name'
+                    type='text'
+                    disabled={isLoading}
+                    className={`px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                      errors.name ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                    placeholder='Enter clinic name'
+                    {...register('name', {
+                      required: 'Clinic name is required',
+                      minLength: {
+                        value: 2,
+                        message: 'Clinic name must be at least 2 characters',
+                      },
+                    })}
+                  />
+                  {errors.name && (
+                    <span className='text-xs text-red-600'>
+                      {errors.name.message}
+                    </span>
+                  )}
+                </div>
+
+                {/* Slug */}
+                <div className='flex flex-col space-y-1'>
+                  <label
+                    className='text-xs font-semibold text-gray-600 uppercase tracking-wide'
+                    htmlFor='slug'
+                  >
+                    Slug
+                  </label>
+                  <input
+                    id='slug'
+                    type='text'
+                    readOnly
+                    disabled
+                    value={slugValue}
+                    className='px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50'
+                  />
+                  <input type='hidden' {...register('slug')} />
+                  <p className='text-xs text-gray-500'>
+                    Auto-generated from clinic name
+                  </p>
                 </div>
               </div>
             </div>
-          </section>
+
+            {/* Contact Information Card */}
+            <div className='bg-white border border-gray-200 rounded-lg p-4'>
+              <h4 className='text-sm font-semibold text-gray-800 mb-4'>Contact Information</h4>
+              <div className='grid grid-cols-2 gap-3'>
+                {/* Email */}
+                <div className='flex flex-col space-y-1'>
+                  <label
+                    className='text-xs font-semibold text-gray-600 uppercase tracking-wide'
+                    htmlFor='contact_email'
+                  >
+                    Email <span className='text-red-500'>*</span>
+                  </label>
+                  <input
+                    id='contact_email'
+                    type='email'
+                    disabled={isLoading}
+                    className={`px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                      errors.contact_email ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                    placeholder='Enter email'
+                    {...register('contact_email', {
+                      required: 'Contact email is required',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Invalid email address',
+                      },
+                    })}
+                  />
+                  {errors.contact_email && (
+                    <span className='text-xs text-red-600'>
+                      {errors.contact_email.message}
+                    </span>
+                  )}
+                </div>
+
+                {/* Phone Number */}
+                <div className='flex flex-col space-y-1'>
+                  <label
+                    className='text-xs font-semibold text-gray-600 uppercase tracking-wide'
+                    htmlFor='contact_number'
+                  >
+                    Phone <span className='text-red-500'>*</span>
+                  </label>
+                  <input
+                    id='contact_number'
+                    type='tel'
+                    disabled={isLoading}
+                    className={`px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                      errors.contact_number ? 'border-red-500' : 'border-gray-200'
+                    }`}
+                    placeholder='Enter phone'
+                    {...register('contact_number', {
+                      required: 'Contact number is required',
+                      minLength: {
+                        value: 10,
+                        message: 'Contact number must be at least 10 digits',
+                      },
+                      pattern: {
+                        value: /^[0-9\s\-\+\(\)]{10,}$/,
+                        message: 'Invalid contact number format',
+                      },
+                    })}
+                  />
+                  {errors.contact_number && (
+                    <span className='text-xs text-red-600'>
+                      {errors.contact_number.message}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Form Actions */}
-          <section className='flex gap-3 pt-4 border-t'>
-            <button
-              type='submit'
-              disabled={isLoading}
-              className='px-6 py-2 bg-indigo-600 text-white rounded-md font-medium hover:bg-indigo-700 disabled:bg-gray-400 transition-colors'
-            >
-              {isLoading
-                ? 'Processing...'
-                : clinic
-                  ? 'Update Clinic'
-                  : 'Create Clinic'}
-            </button>
+          <div className='lg:col-span-3 flex justify-end gap-3 pt-4 border-t'>
             <button
               type='button'
               onClick={onCancel}
               disabled={isLoading}
-              className='px-6 py-2 bg-gray-200 text-gray-800 rounded-md font-medium hover:bg-gray-300 disabled:bg-gray-400 transition-colors'
+              className='px-6 py-2 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 disabled:bg-gray-400 transition-colors'
             >
               Cancel
             </button>
-          </section>
+            <button
+              type='submit'
+              disabled={isLoading}
+              className='px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-400 transition-colors'
+            >
+              {isLoading ? (
+                <span className='flex items-center gap-2'>
+                  <svg
+                    className='w-4 h-4 animate-spin'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                  >
+                    <circle
+                      className='opacity-25'
+                      cx='12'
+                      cy='12'
+                      r='10'
+                    />
+                    <path
+                      className='opacity-75'
+                      fill='none'
+                      d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                    />
+                  </svg>
+                  Processing...
+                </span>
+              ) : clinic ? (
+                'Update Clinic'
+              ) : (
+                'Create Clinic'
+              )}
+            </button>
+            
+          </div>
         </form>
       </FormCard>
     </div>
