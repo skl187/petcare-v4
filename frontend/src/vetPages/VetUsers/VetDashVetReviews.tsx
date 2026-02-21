@@ -1,6 +1,6 @@
 import PageMeta from '../../components/common/PageMeta';
 import ComponentCard from '../../components/common/ComponentCard';
-import VetBookingReviewsTable from '../../components/vetTables/Users/VetBookingReviews/VetBookingReviewsTable';
+import VetBookingReviewsTable from '../../components/vetTables/Users/VetBookingReviewsTable';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 
 const VetDashVetReviews = () => {

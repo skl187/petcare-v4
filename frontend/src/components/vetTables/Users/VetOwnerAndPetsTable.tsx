@@ -3,16 +3,16 @@ import { MdEdit } from "react-icons/md";
 import { useMemo, useState } from "react";
 import {
   Table, TableBody, TableCell, TableHeader, TableRow,
-} from "../../../ui/table"; // adjust path
-import Badge from "../../../ui/badge/Badge";
-import Checkbox from "../../../form/input/Checkbox";
-import Pagination from "../../../../components/tables/tableComponents/Pagination";
-import useSort from "../../../../hooks/useSort";
-import SortableTableHeader from "../../../../components/tables/tableComponents/SortableTableHeader";
-import { TableToolbar } from "../../../../components/tables/tableComponents/TableToolbar";
-import ImageHoverPreview from "../../../../components/tables/tableComponents/ImageHoverPreview";
-import Switch from "../../../form/switch/Switch";
-import VetOwnerAndPetsForm, {VetOwnerMinimalEditable} from "../../../../adminPages/PageForms/VetOwnerAndPetsForm";
+} from "../../ui/table"; // adjust path
+import Badge from "../../ui/badge/Badge";
+import Checkbox from "../../form/input/Checkbox";
+import Pagination from "../../tables/tableComponents/Pagination";
+import useSort from "../../../hooks/useSort";
+import SortableTableHeader from "../../tables/tableComponents/SortableTableHeader";
+import { TableToolbar } from "../../tables/tableComponents/TableToolbar";
+import ImageHoverPreview from "../../tables/tableComponents/ImageHoverPreview";
+import Switch from "../../form/switch/Switch";
+import VetOwnerAndPetsForm, {VetOwnerMinimalEditable} from "../../../adminPages/PageForms/VetOwnerAndPetsForm";
 
 export type OwnerStatus = "Active" | "Blocked";
 

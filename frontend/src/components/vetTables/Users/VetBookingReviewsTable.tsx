@@ -7,19 +7,19 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from '../../../ui/table';
-import Checkbox from '../../../form/input/Checkbox';
-import Pagination from '../../../../components/tables/tableComponents/Pagination';
-import useSort from '../../../../hooks/useSort';
-import SortableTableHeader from '../../../../components/tables/tableComponents/SortableTableHeader';
-import { OptimizedTableToolbar } from '../../../../components/tables/tableComponents/OptimizedTableToolbar';
-import Rating from '../../../../components/tables/tableComponents/Rating';
-import DeleteDialog from '../../../../components/tables/tableComponents/DeleteDailog';
+} from '../../ui/table';
+import Checkbox from '../../form/input/Checkbox';
+import Pagination from '../../tables/tableComponents/Pagination';
+import useSort from '../../../hooks/useSort';
+import SortableTableHeader from '../../tables/tableComponents/SortableTableHeader';
+import { OptimizedTableToolbar } from '../../tables/tableComponents/OptimizedTableToolbar';
+import Rating from '../../tables/tableComponents/Rating';
+import DeleteDialog from '../../tables/tableComponents/DeleteDailog';
 import {
   VeterinarianReviewFromAPI,
   VeterinarianReviewsResponse,
-} from '../../../../services/reviewsService';
-import { API_ENDPOINTS } from '../../../../constants/api';
+} from '../../../services/reviewsService';
+import { API_ENDPOINTS } from '../../../constants/api';
 
 const VetBookingReviewsTable: React.FC = () => {
   console.log('[VetBookingReviewsTable] Component rendering...');

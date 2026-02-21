@@ -1,9 +1,9 @@
 import { useForm } from 'react-hook-form';
-import FormCard from '../../../../components/form/FormCard';
-import Badge from '../../../../components/ui/badge/Badge';
-import DatePickerInput from '../../../../components/form/DatePickerInput/DatePickerInput';
+import FormCard from '../../components/form/FormCard';
+import Badge from '../../components/ui/badge/Badge';
+import DatePickerInput from '../../components/form/DatePickerInput/DatePickerInput';
 // import { useState } from "react";
-import type { VetBookingStatus } from '../../../../components/vetTables/Veterinary/VeterninaryBookingsTable/VeterinaryBookingsTable';
+import type { VetBookingStatus } from '../../components/vetTables/Veterinary/VeterinaryBookingsTable';
 
 export interface VetBookingFormData {
   petName: string;

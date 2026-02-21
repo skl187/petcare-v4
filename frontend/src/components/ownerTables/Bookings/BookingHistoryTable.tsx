@@ -5,16 +5,16 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from '../../../../components/ui/table';
-import Badge from '../../../../components/ui/badge/Badge';
+} from '../../ui/table';
+import Badge from '../../ui/badge/Badge';
 // import Checkbox from "../../../../components/form/input/Checkbox";
-import Pagination from '../../../tables/tableComponents/Pagination';
-import useSort from '../../../../hooks/useSort';
-import SortableTableHeader from '../../../tables/tableComponents/SortableTableHeader';
-import ImageHoverPreview from '../../../tables/tableComponents/ImageHoverPreview';
+import Pagination from '../../tables/tableComponents/Pagination';
+import useSort from '../../../hooks/useSort';
+import SortableTableHeader from '../../tables/tableComponents/SortableTableHeader';
+import ImageHoverPreview from '../../tables/tableComponents/ImageHoverPreview';
 import { MdEdit } from 'react-icons/md';
-import { API_ENDPOINTS } from '../../../../constants/api';
-import type { VetBooking } from '../../../vetTables/Veterinary/ServiceListTable/VeterinaryBookingsTable';
+import { API_ENDPOINTS } from '../../../constants/api';
+import type { VetBooking } from '../../vetTables/Veterinary/VeterinaryBookingsTable';
 
 export type BookingStatus = 'Completed' | 'Cancelled';
 

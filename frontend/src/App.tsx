@@ -21,7 +21,7 @@ import Blank from './adminPages/UiElements/Blank';
 import AppLayout from './layout/AppLayout';
 import { ScrollToTop } from './components/common/ScrollToTop';
 import Home from './adminPages/Dashboard/Home';
-import TodayAppointments from './adminPages/today_appointments/today_appointments';
+import TodayAppointments from './adminPages/TodayAppoinments';
 import Reports from './sidebar/reports/Reports';
 import CategoryList from './sidebar/veterinary/CategoryList';
 import Employees from './adminPages/users/Employees';

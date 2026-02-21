@@ -1,6 +1,6 @@
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
-import VetOwnerAndPetsTable from "../../components/vetTables/Users/VetOwnerAndPets/VetOwnerAndPetsTable";
+import VetOwnerAndPetsTable from "../../components/vetTables/Users/VetOwnerAndPetsTable";
 const VetDashOwenerAndPets = () => {
   return (
     <>

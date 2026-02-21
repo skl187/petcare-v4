@@ -6,16 +6,16 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from '../../../../components/ui/table';
-import Badge from '../../../../components/ui/badge/Badge';
-import Checkbox from '../../../../components/form/input/Checkbox';
-import Pagination from '../../../tables/tableComponents/Pagination';
-import useSort from '../../../../hooks/useSort';
-import DeleteDialog from '../../../tables/tableComponents/DeleteDailog';
-import UpcomingBookingsForm from '../../../../adminPages/OwnerPageForms/BookingsForms/UpcomingBookingsForm/UpcomingBookingsForm';
+} from '../../ui/table';
+import Badge from '../../ui/badge/Badge';
+import Checkbox from '../../form/input/Checkbox';
+import Pagination from '../../tables/tableComponents/Pagination';
+import useSort from '../../../hooks/useSort';
+import DeleteDialog from '../../tables/tableComponents/DeleteDailog';
+import UpcomingBookingsForm from '../../../adminPages/OwnerPageForms/BookingsForms/UpcomingBookingsForm/UpcomingBookingsForm';
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from 'react-icons/io';
-import { API_ENDPOINTS } from '../../../../constants/api';
-import type { VetBooking } from '../../../vetTables/Veterinary/ServiceListTable/VeterinaryBookingsTable';
+import { API_ENDPOINTS } from '../../../constants/api';
+import type { VetBooking } from '../../vetTables/Veterinary/VeterinaryBookingsTable';
 
 // --- API Constants ---
 const PETS_API = API_ENDPOINTS.PETS.BASE;
