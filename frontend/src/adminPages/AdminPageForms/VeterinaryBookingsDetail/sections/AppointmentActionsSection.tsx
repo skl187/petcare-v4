@@ -83,9 +83,9 @@ export default function AppointmentActionsSection({
 
       // Send only the 3 required fields
       const payload = {
-        appointment_date: rescheduleDate,
-        appointment_time: rescheduleTime,
-        notes: rescheduleReason,
+        new_date: rescheduleDate,
+        new_time: rescheduleTime,
+        reason: rescheduleReason,
       };
 
       const response = await fetch(
@@ -206,21 +206,21 @@ export default function AppointmentActionsSection({
             'Content-Type': 'application/json',
             ...(token && { Authorization: `Bearer ${token}` }),
           },
-          body: JSON.stringify({ status: 'in_progress' }),
+          body: JSON.stringify({ status: 'confirmed' }),
         },
       );
 
       if (!response.ok) {
-        throw new Error('Failed to start appointment');
+        throw new Error('Failed to confirm appointment');
       }
 
-      setSuccess('Appointment started successfully');
+      setSuccess('Appointment confirmed successfully');
       setShowConfirmScheduled(false);
       setTimeout(() => setSuccess(null), 3000);
       onStatusUpdate?.();
     } catch (err) {
       const errorMsg =
-        err instanceof Error ? err.message : 'Failed to start appointment';
+        err instanceof Error ? err.message : 'Failed to confirm appointment';
       setError(errorMsg);
       setTimeout(() => setError(null), 3000);
     } finally {

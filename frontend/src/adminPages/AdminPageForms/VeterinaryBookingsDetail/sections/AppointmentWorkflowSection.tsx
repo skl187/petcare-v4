@@ -1004,7 +1004,7 @@ export default function AppointmentWorkflowSection({
                     key={`medical-record-${editingRecordId || 'create'}`}
                     appointmentId={appointment.id}
                     petId={appointment.petId}
-                    veterinarianId={appointment.id}
+                    veterinarianId={(appointment as any).veterinarian_id || ''}
                     recordId={editingRecordId}
                     onSave={handleSaveMedicalRecord}
                     onCancel={handleCancelMedicalRecord}
@@ -1047,7 +1047,7 @@ export default function AppointmentWorkflowSection({
                     key={`prescription-${editingPrescriptionId || 'create'}`}
                     appointmentId={appointment.id}
                     petId={appointment.petId}
-                    veterinarianId={appointment.id}
+                    veterinarianId={(appointment as any).veterinarian_id || ''}
                     medicalRecordId={medicalRecords[0]?.id}
                     prescriptionId={editingPrescriptionId}
                     onSave={handleSavePrescription}
@@ -1132,7 +1132,7 @@ export default function AppointmentWorkflowSection({
                     key={`vaccination-${editingVaccinationId || 'create'}`}
                     appointmentId={appointment.id}
                     petId={appointment.petId}
-                    veterinarianId={appointment.id}
+                    veterinarianId={(appointment as any).veterinarian_id || ''}
                     medicalRecordId={medicalRecords[0]?.id}
                     vaccinationId={editingVaccinationId}
                     onSave={handleSaveVaccination}

@@ -5,6 +5,7 @@ const API_BASE_URL =
 export interface MedicalRecordPayload {
   appointment_id: string;
   pet_id: string;
+  veterinarian_id?: string;
   record_type: 'consultation' | 'checkup' | 'emergency' | 'surgery';
   diagnosis: string;
   symptoms: Record<string, string | number>;

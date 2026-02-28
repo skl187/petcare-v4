@@ -252,6 +252,7 @@ export default function MedicalRecordForm({
       const payload: MedicalRecordPayload = {
         appointment_id: appointmentId,
         pet_id: petId,
+        veterinarian_id: veterinarianId || undefined,
         record_type: formData.recordType,
         diagnosis: formData.diagnosis,
         symptoms: formData.symptoms,

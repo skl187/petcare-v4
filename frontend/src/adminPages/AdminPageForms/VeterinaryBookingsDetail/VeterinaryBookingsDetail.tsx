@@ -57,6 +57,7 @@ export interface AppointmentDetail {
   totalVisits: number;
   activeMeds: string;
   allergies: string;
+  veterinarian_id?: string;
   medical_records?: Array<{
     id: string;
     record_type: string;
@@ -180,6 +181,7 @@ export default function VeterinaryBookingsDetail({
         totalVisits: 0,
         activeMeds: '',
         allergies: '',
+        veterinarian_id: data.data?.veterinarian_id || '',
         medical_records: data.data?.medical_records || [],
         prescriptions: data.data?.prescriptions || [],
         lab_tests: data.data?.lab_tests || [],
@@ -187,6 +189,7 @@ export default function VeterinaryBookingsDetail({
       };
       console.log(
         '🔄 Refresh - medical_records:',
+
         updatedAppointment.medical_records,
       );
       console.log(
@@ -296,6 +299,7 @@ export default function VeterinaryBookingsDetail({
             totalVisits: 0,
             activeMeds: '',
             allergies: '',
+            veterinarian_id: data.data?.veterinarian_id || '',
             medical_records: data.data?.medical_records || [],
             prescriptions: data.data?.prescriptions || [],
             lab_tests: data.data?.lab_tests || [],
@@ -340,6 +344,7 @@ export default function VeterinaryBookingsDetail({
             totalVisits: 0,
             activeMeds: '',
             allergies: '',
+            veterinarian_id: (appointmentData as any).veterinarian_id || '',
           };
           setAppointment(mappedData);
           setLoading(false);
@@ -421,6 +426,7 @@ export default function VeterinaryBookingsDetail({
             totalVisits: data.data.totalVisits || data.data.total_visits || 0,
             activeMeds: data.data.activeMeds || data.data.active_meds || '',
             allergies: data.data.allergies || '',
+            veterinarian_id: data.data.veterinarian_id || '',
           };
           console.log('Mapped appointment:', apiAppointment);
           setAppointment(apiAppointment);
