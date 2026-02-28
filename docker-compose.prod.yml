@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3001:80"
+    restart: unless-stopped
+
+---
+
+# frontend/Dockerfile
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build
+
+
+FROM nginx:alpine
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+---
