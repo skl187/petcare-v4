@@ -3,10 +3,10 @@ const { query, transaction } = require('../../core/db/pool');
 const { generateToken } = require('../../core/auth/jwt.service');
 const { hashPassword, comparePassword } = require('../../core/auth/password.service');
 const { successResponse } = require('../../core/utils/response');
-//for reset password and email verification
 const crypto = require('crypto');
 const { sendVerificationEmail } = require('../../core/email/email.service');
 const { NODE_ENV } = require('../../config/env');
+const logger = require('../../core/utils/logger');
 
 const register = async (req, res) => {
   try {
@@ -15,9 +15,9 @@ const register = async (req, res) => {
     // Check if user exists
     const existingUser = await query('SELECT id FROM users WHERE email = $1', [email]);
     if (existingUser.rows.length > 0) {
-      return res.status(409).json({ 
+      return res.status(409).json({
         status: 'error',
-        message: 'Email already registered' 
+        message: 'Email already registered'
       });
     }
 
@@ -38,13 +38,13 @@ const register = async (req, res) => {
       const user = userResult.rows[0];
 
      const roleSlug = (typeof user_type === 'string' && user_type.trim()) ? user_type.trim() : 'owner';
- 
+
      // Find role and assign it to the created user
      const roleResult = await client.query(
        'SELECT id FROM roles WHERE slug = $1',
        [roleSlug]
      );
- 
+
      // Fallback to 'owner' if requested role doesn't exist
      let roleId = null;
      if (roleResult.rows.length === 0 && roleSlug !== 'owner') {
@@ -53,7 +53,7 @@ const register = async (req, res) => {
      } else if (roleResult.rows.length > 0) {
        roleId = roleResult.rows[0].id;
      }
- 
+
      if (roleId) {
        await client.query(
          'INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)',
@@ -78,19 +78,16 @@ const register = async (req, res) => {
       return { user, verificationToken };
     });
 
-    // Log audit
-    //req.auditLog('register', 'user', { email });
-
     // Send verification email unless we auto-verified in development
     if (NODE_ENV !== 'development') {
       try {
         await sendVerificationEmail(result.user.email, result.verificationToken, result.user.first_name);
       } catch (emailErr) {
-        console.error('Failed to send verification email:', emailErr);
+        logger.error('Failed to send verification email:', emailErr);
         // Don't fail registration if email fails
       }
     } else {
-      console.log('Development mode - skipping verification email');
+      logger.info('Development mode - skipping verification email');
     }
 
     // Generate token
@@ -111,10 +108,10 @@ const register = async (req, res) => {
     });
 
   } catch (err) {
-    console.error('Register error:', err);
-    res.status(500).json({ 
+    logger.error('Register error:', err);
+    res.status(500).json({
       status: 'error',
-      message: 'Registration failed' 
+      message: 'Registration failed'
     });
   }
 };
@@ -136,9 +133,9 @@ const login = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         status: 'error',
-        message: 'Invalid credentials' 
+        message: 'Invalid credentials'
       });
     }
 
@@ -164,9 +161,9 @@ const login = async (req, res) => {
     // Verify password
     const isValidPassword = await comparePassword(password, user.password_hash);
     if (!isValidPassword) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         status: 'error',
-        message: 'Invalid credentials' 
+        message: 'Invalid credentials'
       });
     }
 
@@ -183,9 +180,6 @@ const login = async (req, res) => {
       roles: user.roles.filter(r => r !== null)
     });
 
-    // Log audit
-    //req.auditLog('login', 'user', { email });
-
     res.json(successResponse({
       user: {
         id: user.id,
@@ -198,10 +192,10 @@ const login = async (req, res) => {
     }, 'Login successful'));
 
   } catch (err) {
-    console.error('Login error:', err);
-    res.status(500).json({ 
+    logger.error('Login error:', err);
+    res.status(500).json({
       status: 'error',
-      message: 'Login failed' 
+      message: 'Login failed'
     });
   }
 };
@@ -220,18 +214,18 @@ const getCurrentUser = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         status: 'error',
-        message: 'User not found' 
+        message: 'User not found'
       });
     }
 
     res.json(successResponse(result.rows[0]));
 
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: 'Failed to fetch user' 
+      message: 'Failed to fetch user'
     });
   }
 };
@@ -240,9 +234,9 @@ const refreshToken = (req, res) => {
   try {
     const { token } = req.body;
     if (!token) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         status: 'error',
-        message: 'Token required' 
+        message: 'Token required'
       });
     }
 
@@ -258,9 +252,9 @@ const refreshToken = (req, res) => {
     res.json(successResponse({ token: newToken }, 'Token refreshed'));
 
   } catch (err) {
-    res.status(401).json({ 
+    res.status(401).json({
       status: 'error',
-      message: 'Invalid token' 
+      message: 'Invalid token'
     });
   }
 };
@@ -270,9 +264,9 @@ const logout = async (req, res) => {
     req.auditLog('logout', 'user', {});
     res.json(successResponse(null, 'Logged out successfully'));
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: 'Logout failed' 
+      message: 'Logout failed'
     });
   }
 };
@@ -280,7 +274,6 @@ const logout = async (req, res) => {
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    //console.log('[auth] forgot-password request for:', email);
 
     const userResult = await query(
       'SELECT id, email, first_name FROM users WHERE email = $1 AND deleted_at IS NULL',
@@ -303,11 +296,7 @@ const forgotPassword = async (req, res) => {
       [user.id, resetToken, tokenHash, expiresAt, req.ip || null]
     );
 
-    //console.log('[auth] password_resets inserted for user', user.id);
-
     // TODO: send email with resetUrl
-    // const resetUrl = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
-    // await sendResetEmail(user.email, resetUrl, user.first_name);
 
     // For testing in non-prod return token
     if (process.env.NODE_ENV !== 'production') {
@@ -316,7 +305,7 @@ const forgotPassword = async (req, res) => {
 
     return res.json(successResponse(null, 'If email exists, reset link will be sent'));
   } catch (err) {
-    console.error('Forgot password error:', err);
+    logger.error('Forgot password error:', err);
     res.status(500).json({ status: 'error', message: 'Forgot password failed' });
   }
 };
@@ -328,14 +317,10 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Token and new_password required' });
     }
 
-    // Debug: log incoming token (server only)
-    //console.log('[auth] resetPassword received token:', token);
-
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    //console.log('[auth] computed tokenHash:', tokenHash);
 
     const resetResult = await query(
-      `SELECT id, user_id FROM password_resets 
+      `SELECT id, user_id FROM password_resets
        WHERE token_hash = $1 AND expires_at > NOW() AND used = FALSE`,
       [tokenHash]
     );
@@ -351,7 +336,7 @@ const resetPassword = async (req, res) => {
         [token, tokenHash]
       )).rows;
 
-      console.log('[auth] resetPassword debug rows:', debugRows);
+      logger.debug('[auth] resetPassword debug rows:', debugRows);
 
       // In non-prod return debug details to client for faster debugging
       if (process.env.NODE_ENV !== 'production') {
@@ -365,7 +350,6 @@ const resetPassword = async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'Invalid or expired reset token' });
     }
 
-    // ...existing code continues unchanged...
     const resetRow = resetResult.rows[0];
     const passwordHash = await hashPassword(new_password);
 
@@ -382,7 +366,7 @@ const resetPassword = async (req, res) => {
 
     return res.json(successResponse(null, 'Password reset successful. You can now login.'));
   } catch (err) {
-    console.error('Reset password error:', err);
+    logger.error('Reset password error:', err);
     res.status(500).json({ status: 'error', message: 'Reset password failed' });
   }
 };
@@ -436,7 +420,7 @@ const verifyEmail = async (req, res) => {
     return res.json(successResponse(null, 'Email verified successfully. You can now sign in.'));
 
   } catch (err) {
-    console.error('Email verification error:', err);
+    logger.error('Email verification error:', err);
     res.status(500).json({
       status: 'error',
       message: 'Email verification failed'
@@ -486,7 +470,7 @@ const resendVerification = async (req, res) => {
     try {
       await sendVerificationEmail(user.email, verificationToken, user.first_name);
     } catch (emailErr) {
-      console.error('Failed to send verification email:', emailErr);
+      logger.error('Failed to send verification email:', emailErr);
     }
 
     // For testing in non-prod
@@ -500,7 +484,7 @@ const resendVerification = async (req, res) => {
     return res.json(successResponse(null, 'If the email exists, a verification link will be sent'));
 
   } catch (err) {
-    console.error('Resend verification error:', err);
+    logger.error('Resend verification error:', err);
     res.status(500).json({
       status: 'error',
       message: 'Failed to resend verification email'

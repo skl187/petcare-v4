@@ -2,7 +2,7 @@
 
 const { query, getConnection, transaction } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
-//const logger = require('../../core/utils/logger');
+const logger = require('../../core/utils/logger');
 
 // ==================ADMIN - APPOINTMENT LISTING & RETRIEVAL==========================
 // Admin-specific: list appointments with filter (today, past, upcoming, all), status, user_id, veterinarian_id, clinic_id
@@ -68,8 +68,8 @@ const listAppointments = async (req, res) => {
     const offsetIndex = paramIndex + 1;
 
     const result = await query(
-      `SELECT 
-        a.id, a.appointment_number, a.appointment_date, a.appointment_time, 
+      `SELECT
+        a.id, a.appointment_number, a.appointment_date, a.appointment_time,
         a.status, a.priority, a.appointment_type, a.chief_complaint, a.notes, a.symptoms,
         a.consultation_fee, a.service_fee, a.total_amount, a.payment_status,
         a.vet_service_ids,
@@ -120,7 +120,7 @@ const listAppointments = async (req, res) => {
       total: parseInt(countResult.rows[0].total)
     }));
   } catch (err) {
-    console.error('List appointments error:', err.message);
+    logger.error('List appointments error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch appointments' });
   }
 };
@@ -178,8 +178,8 @@ const getVetAppointmentsByFilter = async (req, res) => {
     const offsetIndex = paramIndex + 1;
 
     const result = await query(
-      `SELECT 
-        a.id, a.appointment_number, a.appointment_date, a.appointment_time, 
+      `SELECT
+        a.id, a.appointment_number, a.appointment_date, a.appointment_time,
         a.status, a.priority, a.appointment_type, a.chief_complaint, a.notes, a.symptoms,
         a.consultation_fee, a.service_fee, a.total_amount, a.payment_status,
         a.vet_service_ids,
@@ -218,7 +218,7 @@ const getVetAppointmentsByFilter = async (req, res) => {
     // Count query
     const countParams = [vetId];
     let countWhere = 'a.deleted_at IS NULL AND a.veterinarian_id = $1';
-    
+
     if (filter === 'today') {
       countWhere += ` AND a.appointment_date = CURRENT_DATE`;
     } else if (filter === 'past') {
@@ -246,7 +246,7 @@ const getVetAppointmentsByFilter = async (req, res) => {
       total: parseInt(countResult.rows[0].total)
     }));
   } catch (err) {
-    console.error('Get vet appointments by filter error:', err.message);
+    logger.error('Get vet appointments by filter error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch appointments' });
   }
 };
@@ -298,8 +298,8 @@ const getOwnerAppointmentsByFilter = async (req, res) => {
     const offsetIndex = paramIndex + 1;
 
     const result = await query(
-      `SELECT 
-        a.id, a.appointment_number, a.appointment_date, a.appointment_time, 
+      `SELECT
+        a.id, a.appointment_number, a.appointment_date, a.appointment_time,
         a.status, a.priority, a.appointment_type, a.chief_complaint, a.notes, a.symptoms,
         a.consultation_fee, a.service_fee, a.total_amount, a.payment_status,
         a.vet_service_ids,
@@ -339,7 +339,7 @@ const getOwnerAppointmentsByFilter = async (req, res) => {
     // Count query
     const countParams = [userId];
     let countWhere = 'a.deleted_at IS NULL AND a.user_id = $1';
-    
+
     if (filter === 'today') {
       countWhere += ` AND a.appointment_date = CURRENT_DATE`;
     } else if (filter === 'past') {
@@ -367,7 +367,7 @@ const getOwnerAppointmentsByFilter = async (req, res) => {
       total: parseInt(countResult.rows[0].total)
     }));
   } catch (err) {
-    console.error('Get owner appointments by filter error:', err.message);
+    logger.error('Get owner appointments by filter error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch appointments' });
   }
 };
@@ -376,7 +376,7 @@ const getOwnerAppointmentsByFilter = async (req, res) => {
 const getAppointmentById = async (req, res) => {
   try {
     const result = await query(
-      `SELECT a.*, 
+      `SELECT a.*,
               u.email as user_email, u.phone as user_phone, u.first_name, u.last_name,
               p.name as pet_name, p.age as pet_age,
               pt.name as pet_type_name, pt.icon_url as pet_type_icon,
@@ -419,7 +419,7 @@ const getAppointmentById = async (req, res) => {
     // Fetch medical records for this appointment
     const medicalRecordsResult = await query(
       `SELECT id, record_type, record_date, diagnosis, followup_required, followup_date
-       FROM vet_medical_records 
+       FROM vet_medical_records
        WHERE appointment_id = $1 AND deleted_at IS NULL
        ORDER BY record_date DESC`,
       [req.params.id]
@@ -428,7 +428,7 @@ const getAppointmentById = async (req, res) => {
     // Fetch prescriptions for this appointment
     const prescriptionsResult = await query(
       `SELECT id, prescription_number, prescription_date, valid_until, status
-       FROM vet_prescriptions 
+       FROM vet_prescriptions
        WHERE appointment_id = $1 AND deleted_at IS NULL
        ORDER BY prescription_date DESC`,
       [req.params.id]
@@ -474,7 +474,7 @@ const getAppointmentById = async (req, res) => {
       }
     }));
   } catch (err) {
-    //logger.error('Get appointment failed', { error: err.message });
+    logger.error('Get appointment failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to fetch appointment' });
   }
 };
@@ -482,7 +482,6 @@ const getAppointmentById = async (req, res) => {
 
 // ======= APPOINTMENT CREATION & UPDATE========================================
 const createAppointment = async (req, res) => {
-  //const client = await query._pool.connect();
   const client = await getConnection();
   try {
     await client.query('BEGIN');
@@ -522,24 +521,16 @@ const createAppointment = async (req, res) => {
 
     // Check veterinarian availability
     const scheduleCheck = await client.query(
-      `SELECT id FROM vet_schedules 
-       WHERE veterinarian_id = $1 AND clinic_id = $2 
+      `SELECT id FROM vet_schedules
+       WHERE veterinarian_id = $1 AND clinic_id = $2
        AND day_of_week = EXTRACT(DOW FROM $3::date)::smallint
        AND is_available = true`,
       [veterinarian_id, clinic_id, appointment_date]
     );
-    /*
-    if (scheduleCheck.rows.length === 0) {
-      await client.query('ROLLBACK');
-      return res.status(400).json({
-        status: 'error',
-        message: 'Veterinarian not available on this date'
-      });
-    }
-    */
+
     // Check for schedule exceptions (leaves, holidays)
     const exceptionCheck = await client.query(
-      `SELECT id FROM vet_schedule_exceptions 
+      `SELECT id FROM vet_schedule_exceptions
        WHERE veterinarian_id = $1 AND exception_date = $2`,
       [veterinarian_id, appointment_date]
     );
@@ -575,7 +566,7 @@ const createAppointment = async (req, res) => {
     // Insert appointment - appointment_number generated by DB trigger
     const appointmentResult = await client.query(
       `INSERT INTO vet_appointments (
-        user_id, pet_id, veterinarian_id, clinic_id, 
+        user_id, pet_id, veterinarian_id, clinic_id,
         appointment_date, appointment_time,
         appointment_type, priority, chief_complaint, symptoms, notes,
         consultation_fee, service_fee, total_amount,
@@ -632,7 +623,7 @@ const createAppointment = async (req, res) => {
       // Create payment record
       const paymentResult = await client.query(
         `INSERT INTO vet_appointment_payments (
-          appointment_id, user_id, payment_method, 
+          appointment_id, user_id, payment_method,
           consultation_fee, other_charges, subtotal,
           discount_amount, tax_amount, total_amount, paid_amount, payment_status
         )
@@ -672,7 +663,7 @@ const createAppointment = async (req, res) => {
 
     await client.query('COMMIT');
 
-    //logger.info('Appointment created', { appointmentId, userId: user_id, appointmentNumber });
+    logger.info('Appointment created', { appointmentId, userId: user_id, appointmentNumber });
 
     res.status(201).json(successResponse({
       id: appointmentId,
@@ -684,10 +675,9 @@ const createAppointment = async (req, res) => {
     }, 'Appointment created', 201));
 
   } catch (err) {
-    
+
     await client.query('ROLLBACK');
-    //logger.error('Create appointment failed', { error: err.message, stack: err.stack });
-console.log(err.message);
+    logger.error('Create appointment failed', err);
     const isProd = process.env.NODE_ENV === 'production';
     res.status(500).json({
       status: 'error',
@@ -768,18 +758,17 @@ const updateAppointmentStatus = async (req, res) => {
       params
     );
 
-    //logger.info('Appointment status updated', { appointmentId: id, oldStatus: currentStatus, newStatus: status, userId: req.user?.id });
+    logger.info('Appointment status updated', { appointmentId: id, oldStatus: currentStatus, newStatus: status, userId: req.user?.id });
 
     res.json(successResponse(result.rows[0], 'Appointment status updated'));
   } catch (err) {
-    //logger.error('Update appointment status failed', { error: err.message });
+    logger.error('Update appointment status failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to update appointment status' });
   }
 };
 
 // ==== APPOINTMENT RESCHEDULING==========================================
 const rescheduleAppointment = async (req, res) => {
-  //const client = await query._pool.connect();
   const client = await getConnection();
   try {
     await client.query('BEGIN');
@@ -811,8 +800,8 @@ const rescheduleAppointment = async (req, res) => {
 
     // Verify new slot availability
     const scheduleCheck = await client.query(
-      `SELECT id FROM vet_schedules 
-       WHERE veterinarian_id = $1 AND clinic_id = $2 
+      `SELECT id FROM vet_schedules
+       WHERE veterinarian_id = $1 AND clinic_id = $2
        AND day_of_week = EXTRACT(DOW FROM $3::date)::smallint
        AND is_available = true`,
       [current.veterinarian_id, current.clinic_id, new_date]
@@ -846,13 +835,13 @@ const rescheduleAppointment = async (req, res) => {
 
     await client.query('COMMIT');
 
-    //logger.info('Appointment rescheduled', { appointmentId: id, oldDate: current.appointment_date, newDate: new_date });
+    logger.info('Appointment rescheduled', { appointmentId: id, oldDate: current.appointment_date, newDate: new_date });
 
     res.json(successResponse(updateResult.rows[0], 'Appointment rescheduled successfully'));
 
   } catch (err) {
     await client.query('ROLLBACK');
-    //logger.error('Reschedule appointment failed', { error: err.message });
+    logger.error('Reschedule appointment failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to reschedule appointment' });
   } finally {
     client.release();
@@ -861,7 +850,6 @@ const rescheduleAppointment = async (req, res) => {
 
 // ================PAYMENT HANDLING=========================================
 const processPayment = async (req, res) => {
-  //const client = await query._pool.connect();
   const client = await getConnection();
   try {
     await client.query('BEGIN');
@@ -941,7 +929,7 @@ const processPayment = async (req, res) => {
 
     await client.query('COMMIT');
 
-    //logger.info('Payment processed', { appointmentId, paymentType: payment_type, status: newPaymentStatus });
+    logger.info('Payment processed', { appointmentId, paymentType: payment_type, status: newPaymentStatus });
 
     res.json(successResponse({
       appointment_id: appointmentId,
@@ -953,7 +941,7 @@ const processPayment = async (req, res) => {
 
   } catch (err) {
     await client.query('ROLLBACK');
-    //logger.error('Process payment failed', { error: err.message });
+    logger.error('Process payment failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to process payment' });
   } finally {
     client.release();
@@ -986,7 +974,7 @@ const getPaymentInfo = async (req, res) => {
       transactions: transactionsResult.rows
     }));
   } catch (err) {
-    //logger.error('Get payment info failed', { error: err.message });
+    logger.error('Get payment info failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to fetch payment info' });
   }
 };
@@ -999,13 +987,13 @@ const getPetWithAppointments = async (req, res) => {
 
     // Fetch pet information with owner details
     const petResult = await query(
-      `SELECT 
-        p.id, p.name, p.slug, p.gender, p.size, p.date_of_birth, p.age, 
+      `SELECT
+        p.id, p.name, p.slug, p.gender, p.size, p.date_of_birth, p.age,
         p.weight, p.height, p.weight_unit, p.height_unit, p.additional_info,
         p.created_at, p.updated_at,
         pt.id as pet_type_id, pt.name as pet_type_name,
         b.id as breed_id, b.name as breed_name,
-        u.id as owner_id, u.first_name as owner_first_name, u.last_name as owner_last_name, 
+        u.id as owner_id, u.first_name as owner_first_name, u.last_name as owner_last_name,
         u.email as owner_email, u.phone as owner_phone, u.avatar_url as owner_avatar
        FROM pets p
        LEFT JOIN pet_types pt ON p.pet_type_id = pt.id
@@ -1023,8 +1011,8 @@ const getPetWithAppointments = async (req, res) => {
 
     // Fetch all appointments for this pet with complete details
     const appointmentsResult = await query(
-      `SELECT 
-        a.id, a.appointment_number, a.appointment_date, a.appointment_time, 
+      `SELECT
+        a.id, a.appointment_number, a.appointment_date, a.appointment_time,
         a.status, a.priority, a.appointment_type, a.chief_complaint, a.notes, a.symptoms,
         a.consultation_fee, a.service_fee, a.total_amount, a.payment_status,
         a.vet_service_ids, a.created_at, a.updated_at,
@@ -1057,10 +1045,10 @@ const getPetWithAppointments = async (req, res) => {
 
     // Fetch medical records for this pet
     const medicalRecordsResult = await query(
-      `SELECT id, record_type, record_date, diagnosis, symptoms, vital_signs, 
-              physical_examination, treatment_plan, recommendations, 
+      `SELECT id, record_type, record_date, diagnosis, symptoms, vital_signs,
+              physical_examination, treatment_plan, recommendations,
               followup_required, followup_date, notes
-       FROM vet_medical_records 
+       FROM vet_medical_records
        WHERE pet_id = $1 AND deleted_at IS NULL
        ORDER BY record_date DESC`,
       [pet_id]
@@ -1069,7 +1057,7 @@ const getPetWithAppointments = async (req, res) => {
     // Fetch vaccinations for this pet
     const vaccinationsResult = await query(
       `SELECT id, vaccine_name, vaccine_type, vaccination_date, next_due_date,
-              manufacturer, batch_number, site_of_injection, certificate_issued, 
+              manufacturer, batch_number, site_of_injection, certificate_issued,
               certificate_number, cost, notes
        FROM vet_vaccinations
        WHERE pet_id = $1 AND deleted_at IS NULL
@@ -1097,7 +1085,7 @@ const getPetWithAppointments = async (req, res) => {
       }
     }));
   } catch (err) {
-    console.error('Get pet with appointments error:', err.message);
+    logger.error('Get pet with appointments error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch pet information' });
   }
 };
@@ -1135,8 +1123,8 @@ const getPetAppointments = async (req, res) => {
     const offsetIndex = paramIndex + 1;
 
     const result = await query(
-      `SELECT 
-        a.id, a.appointment_number, a.appointment_date, a.appointment_time, 
+      `SELECT
+        a.id, a.appointment_number, a.appointment_date, a.appointment_time,
         a.status, a.priority, a.appointment_type, a.chief_complaint, a.notes,
         a.consultation_fee, a.total_amount, a.payment_status,
         u.first_name as user_first_name, u.last_name as user_last_name, u.email as user_email,
@@ -1166,7 +1154,7 @@ const getPetAppointments = async (req, res) => {
       total: parseInt(countResult.rows[0].total)
     }));
   } catch (err) {
-    console.error('Get pet appointments error:', err.message);
+    logger.error('Get pet appointments error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch pet appointments' });
   }
 };
@@ -1190,10 +1178,10 @@ const getAppointmentMedicalData = async (req, res) => {
 
     // Fetch medical records for this appointment
     const medicalRecordsResult = await query(
-      `SELECT id, record_type, record_date, diagnosis, symptoms, vital_signs, 
-              physical_examination, treatment_plan, recommendations, 
+      `SELECT id, record_type, record_date, diagnosis, symptoms, vital_signs,
+              physical_examination, treatment_plan, recommendations,
               followup_required, followup_date, notes
-       FROM vet_medical_records 
+       FROM vet_medical_records
        WHERE appointment_id = $1 AND deleted_at IS NULL`,
       [appointmentId]
     );
@@ -1244,7 +1232,7 @@ const getAppointmentMedicalData = async (req, res) => {
       vaccinations: vaccinationsResult.rows
     }));
   } catch (err) {
-    console.error('Get appointment medical data error:', err.message);
+    logger.error('Get appointment medical data error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch appointment medical data' });
   }
 };
@@ -1415,7 +1403,7 @@ const sendNotification = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error('sendNotification error:', err.message);
+    logger.error('sendNotification error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to send notification' });
   }
 };

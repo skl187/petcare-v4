@@ -3,7 +3,7 @@
 
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
-//const logger = require('../../core/utils/logger');
+const logger = require('../../core/utils/logger');
 
 const list = async (req, res) => {
   try {
@@ -19,11 +19,9 @@ const list = async (req, res) => {
       [limit, offset]
     );
 
-    //logger.info('Pet types listed', { userId: req.user.id, count: result.rows.length });
-
     res.json(successResponse({ data: result.rows, page: parseInt(page), limit: parseInt(limit) }));
   } catch (err) {
-    //logger.error('List pet types failed', { error: err.message });
+    logger.error('List pet types failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to fetch' });
   }
 };
@@ -41,7 +39,7 @@ const getById = async (req, res) => {
 
     res.json(successResponse(result.rows[0]));
   } catch (err) {
-    //logger.error('Get pet type failed', { error: err.message });
+    logger.error('Get pet type failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to fetch' });
   }
 };
@@ -59,8 +57,6 @@ const create = async (req, res) => {
       });
     }
 
-    //logger.info('Creating pet type', { userId: req.user && req.user.id, body: { name, slug, icon_url } });
-
     const result = await query(
       `INSERT INTO pet_types (name, slug, icon_url, status, created_by)
        VALUES ($1, $2, $3, $4, $5)
@@ -68,12 +64,9 @@ const create = async (req, res) => {
       [name, slug || null, icon_url || null, status || 1, (req.user && req.user.id) || null]
     );
 
-    //logger.info('Pet type created', { userId: req.user && req.user.id, petTypeId: result.rows[0].id });
-
     res.status(201).json(successResponse(result.rows[0], 'Created', 201));
   } catch (err) {
-    // Log details for debugging
-    //logger.error('Create pet type failed', { error: err.message, stack: err.stack });
+    logger.error('Create pet type failed', { error: err.message });
 
     const isProd = process.env.NODE_ENV === 'production';
     res.status(500).json({ status: 'error', message: isProd ? 'Failed to create' : `Failed to create: ${err.message}` });
@@ -127,11 +120,11 @@ const delete_pet_type = async (req, res) => {
       return res.status(404).json({ status: 'error', message: 'Not found' });
     }
 
-    //logger.info('Pet type deleted', { userId: req.user.id, petTypeId: req.params.id });
+    logger.info('Pet type deleted', { userId: req.user.id, petTypeId: req.params.id });
 
     res.json(successResponse(null, 'Deleted'));
   } catch (err) {
-    //logger.error('Delete pet type failed', { error: err.message });
+    logger.error('Delete pet type failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to delete' });
   }
 };

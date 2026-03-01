@@ -93,8 +93,8 @@ export default function OwnerAndPetsTable() {
       const apiData = result.data || result;
       setOwners(apiData.data || []);
       setTotalItems(apiData.pagination?.total || 0);
-    } catch (error) {
-      console.error('Error fetching owners:', error);
+    } catch {
+      // silently ignore
     } finally {
       setLoading(false);
     }
@@ -176,8 +176,8 @@ export default function OwnerAndPetsTable() {
       // Refresh data after update
       await fetchOwners();
       setSelectedRows([]);
-    } catch (error) {
-      console.error('Error updating status:', error);
+    } catch {
+      // silently ignore
     }
   };
 
@@ -221,8 +221,8 @@ export default function OwnerAndPetsTable() {
           await fetchOwners();
         }
       }
-    } catch (error) {
-      console.error('Error updating status:', error);
+    } catch {
+      // silently ignore
     }
   };
 
@@ -255,8 +255,8 @@ export default function OwnerAndPetsTable() {
         await fetchOwners();
         setEditOwner(null);
       }
-    } catch (error) {
-      console.error('Error updating owner:', error);
+    } catch {
+      // silently ignore
     }
   };
 

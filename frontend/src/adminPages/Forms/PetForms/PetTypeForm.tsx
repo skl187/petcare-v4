@@ -181,7 +181,6 @@ export default function PetTypeForm({
       closeTimerRef.current = window.setTimeout(() => onCancel(), 5000);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
-      console.error('PetTypeForm error:', err);
       // Show detailed error message
       setBanner({
         message: `${petType ? 'Update' : 'Create'} failed: ${message}. Please try again.`,

@@ -12,7 +12,6 @@ const VeterinaryBookings = () => {
 
   // Handler for when edit button is clicked in table
   const handleSelectAppointment = (booking: any) => {
-    console.log('Selected appointment:', booking.id, 'petId:', booking.pet_id);
     setSelectedAppointmentId(booking.id);
     setSelectedPetId(booking.pet_id);
   };

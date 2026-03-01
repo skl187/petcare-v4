@@ -167,7 +167,6 @@ const PaymentList = () => {
       setPayments(data);
     } catch (err) {
       setError('Failed to load payments. Please try again.');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -201,7 +200,6 @@ const PaymentList = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError('Failed to update payment status');
-      console.error(err);
     }
   };
 

@@ -109,33 +109,16 @@ export default function MedicalRecordForm({
 
   // Load medical record data if recordId is provided
   useEffect(() => {
-    console.log('recordId changed:', recordId);
     if (recordId && recordId.trim()) {
-      console.log('Loading medical record with ID:', recordId);
       loadMedicalRecord();
     }
   }, [recordId]);
 
-  // Log props when component mounts or props change
-  useEffect(() => {
-    console.log('=== MedicalRecordForm Mounted/Updated ===');
-    console.log('MedicalRecordForm props:', {
-      appointmentId,
-      petId,
-      veterinarianId,
-      recordId,
-    });
-    console.log('===================================');
-  }, [appointmentId, petId, veterinarianId, recordId]);
-
   const loadMedicalRecord = async () => {
     setLoading(true);
     setError(null);
-    console.log('Starting loadMedicalRecord for ID:', recordId);
     try {
-      console.log('Calling getMedicalRecordById with recordId:', recordId);
       const record = await getMedicalRecordById(recordId);
-      console.log('Medical record loaded successfully:', record);
 
       // Format followup_date for datetime-local input (YYYY-MM-DDTHH:MM)
       let formattedFollowupDate = '';
@@ -143,8 +126,6 @@ export default function MedicalRecordForm({
         // API returns: "2026-02-05T18:30:00.000Z"
         // Input needs: "2026-02-05T18:30"
         formattedFollowupDate = record.followup_date.slice(0, 16);
-        console.log('Followup date from API:', record.followup_date);
-        console.log('Followup date formatted:', formattedFollowupDate);
       }
 
       setFormData({
@@ -171,14 +152,10 @@ export default function MedicalRecordForm({
         respiratoryRate: (record.vital_signs as any)?.respiratoryRate || '',
         weight: (record.vital_signs as any)?.weight || '',
       });
-      console.log('✅ Form data updated successfully');
-      console.log('✅ Followup required:', record.followup_required);
-      console.log('✅ Followup date set to:', formattedFollowupDate);
     } catch (err) {
       const errorMsg =
         err instanceof Error ? err.message : 'Failed to load medical record';
       setError(errorMsg);
-      console.error('Error loading medical record:', err);
     } finally {
       setLoading(false);
     }
@@ -266,17 +243,13 @@ export default function MedicalRecordForm({
         is_confidential: false,
       };
 
-      console.log('Sending payload:', payload);
-
       if (formData.id) {
         // Update existing record
-        const response = await updateMedicalRecord(formData.id, payload);
-        console.log('Medical record updated:', response);
+        await updateMedicalRecord(formData.id, payload);
         setSuccess('Medical record updated successfully!');
       } else {
         // Create new record
-        const response = await saveMedicalRecord(payload);
-        console.log('Medical record saved:', response);
+        await saveMedicalRecord(payload);
         setSuccess('Medical record created successfully!');
       }
 
@@ -288,7 +261,6 @@ export default function MedicalRecordForm({
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to save medical record';
       setError(errorMessage);
-      console.error('Error saving medical record:', err);
     } finally {
       setLoading(false);
     }

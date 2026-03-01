@@ -82,8 +82,8 @@ export default function PermissionsTable() {
       if (data.status === 'success') {
         setResources(data.data.resources);
       }
-    } catch (err) {
-      console.error('Error fetching resources:', err);
+    } catch {
+      // silently ignore
     }
   };
 
@@ -111,7 +111,6 @@ export default function PermissionsTable() {
         setError(data.message || 'Failed to fetch permissions');
       }
     } catch (err) {
-      console.error('Error fetching permissions:', err);
       setError('Failed to fetch permissions');
     } finally {
       setLoading(false);
@@ -178,8 +177,8 @@ export default function PermissionsTable() {
         setIsDeleteDialogOpen(false);
         setPermissionToDelete(null);
       }
-    } catch (err) {
-      console.error('Error deleting permission:', err);
+    } catch {
+      // silently ignore
     }
   };
 
@@ -199,8 +198,8 @@ export default function PermissionsTable() {
       fetchResources();
       setSelectedRows([]);
       setIsDeleteDialogOpen(false);
-    } catch (err) {
-      console.error('Error deleting permissions:', err);
+    } catch {
+      // silently ignore
     }
   };
 

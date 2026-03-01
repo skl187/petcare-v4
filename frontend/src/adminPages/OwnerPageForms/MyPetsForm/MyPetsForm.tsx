@@ -149,15 +149,6 @@ export default function MyPetForm({
   // Reset form when pet changes (for editing)
   useEffect(() => {
     if (pet) {
-      console.log('🔧 EDIT MODE - Pet data received:', {
-        id: pet.id,
-        name: pet.name,
-        petTypeId: pet.petTypeId,
-        breedId: pet.breedId,
-        dateOfBirth: pet.dateOfBirth,
-        gender: pet.gender,
-      });
-
       const formData: MyPetFormData = {
         name: pet.name || '',
         slug: pet.slug || '',
@@ -174,9 +165,7 @@ export default function MyPetForm({
         status: (pet.status === 1 ? 1 : 0) as 1 | 0,
       };
 
-      console.log('📝 Resetting form with:', formData);
       reset(formData, { keepDefaultValues: false });
-      console.log('✅ Form reset with pet data');
     }
   }, [pet, reset]);
 
@@ -286,7 +275,6 @@ export default function MyPetForm({
       closeTimerRef.current = window.setTimeout(() => onCancel(), 2000);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
-      console.error('MyPetForm error:', err);
       setBanner({
         message: `${pet ? 'Update' : 'Create'} failed: ${message}. Please try again.`,
         type: 'error',
@@ -310,13 +298,6 @@ export default function MyPetForm({
   const displayBreeds =
     filteredBreeds.length === 0 && petTypeId ? breeds : filteredBreeds;
 
-  if (filteredBreeds.length === 0 && petTypeId && breeds.length > 0) {
-    console.warn('⚠️ NO BREEDS MATCHED for petTypeId:', petTypeId);
-    console.warn(
-      'Using all breeds as fallback. Available breed petTypeIds:',
-      breeds.map((b) => b.petTypeId),
-    );
-  }
 
   return (
     <div className='p-4 mx-auto max-w-4xl md:p-6'>

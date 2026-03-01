@@ -153,7 +153,7 @@ export default function ServiceListForm({
           setValue('clinic_id', clinicsList[0].id);
         }
       } catch (error) {
-        console.error('Failed to fetch clinics:', error);
+        // silently ignore
       } finally {
         setClinicsLoading(false);
       }
@@ -260,7 +260,6 @@ export default function ServiceListForm({
       closeTimerRef.current = window.setTimeout(() => onCancel(), 2000);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
-      console.error('ServiceListForm error:', err);
       setBanner({
         message: `${service ? 'Update' : 'Create'} failed: ${message}. Please try again.`,
         type: 'error',

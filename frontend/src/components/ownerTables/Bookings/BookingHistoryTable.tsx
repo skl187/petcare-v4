@@ -125,8 +125,8 @@ export default function BookingHistoryTable({
       });
 
       setRows(items);
-    } catch (error: any) {
-      console.error('Error fetching history:', error);
+    } catch {
+      // silently ignore
     } finally {
       setIsLoadingData(false);
     }

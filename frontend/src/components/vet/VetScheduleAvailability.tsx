@@ -90,7 +90,6 @@ const VetScheduleAvailability = ({}: VetScheduleAvailabilityProps) => {
         setSelectedClinic(clinicsList[0].id);
       }
     } catch (err) {
-      console.error('Error loading clinics:', err);
       setError('Failed to load clinics');
     }
   };
@@ -126,7 +125,6 @@ const VetScheduleAvailability = ({}: VetScheduleAvailabilityProps) => {
       setEditedSchedules(edits);
     } catch (err) {
       setError('Failed to load schedules. Please try again.');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -233,7 +231,6 @@ const VetScheduleAvailability = ({}: VetScheduleAvailabilityProps) => {
     } catch (err: any) {
       const msg = err?.message || 'Failed to save schedule. Please try again.';
       setError(msg);
-      console.error('Schedule save error:', err);
     } finally {
       setSaving(false);
     }

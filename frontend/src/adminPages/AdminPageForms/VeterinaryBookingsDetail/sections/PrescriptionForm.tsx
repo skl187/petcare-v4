@@ -32,7 +32,7 @@ interface PrescriptionFormProps {
 export default function PrescriptionForm({
   appointmentId = '',
   petId = '',
-  veterinarianId = '',
+  veterinarianId: _veterinarianId = '',
   medicalRecordId = '',
   prescriptionId = '',
   onSave,
@@ -73,15 +73,6 @@ export default function PrescriptionForm({
 
   // Load prescription if prescriptionId is provided
   useEffect(() => {
-    console.log('===================================');
-    console.log('PrescriptionForm useEffect triggered');
-    console.log('appointmentId:', appointmentId);
-    console.log('petId:', petId);
-    console.log('veterinarianId:', veterinarianId);
-    console.log('medicalRecordId:', medicalRecordId);
-    console.log('prescriptionId:', prescriptionId);
-    console.log('===================================');
-
     if (prescriptionId && prescriptionId.trim() !== '') {
       loadPrescription();
     }
@@ -90,21 +81,13 @@ export default function PrescriptionForm({
   const loadPrescription = async () => {
     setLoading(true);
     setError(null);
-    console.log('Starting loadPrescription for ID:', prescriptionId);
     try {
-      console.log(
-        'Calling getPrescriptionById with prescriptionId:',
-        prescriptionId,
-      );
       const prescription = await getPrescriptionById(prescriptionId);
-      console.log('Prescription loaded successfully:', prescription);
 
       // Format valid_until for datetime-local input
       let formattedValidUntil = '';
       if (prescription.valid_until) {
         formattedValidUntil = prescription.valid_until.slice(0, 16);
-        console.log('Valid until from API:', prescription.valid_until);
-        console.log('Valid until formatted:', formattedValidUntil);
       }
 
       setFormData({
@@ -115,16 +98,10 @@ export default function PrescriptionForm({
         medications: prescription.medications || [],
       });
 
-      console.log('✅ Form data updated successfully');
-      console.log(
-        '✅ Medications count:',
-        prescription.medications?.length || 0,
-      );
     } catch (err) {
       const errorMsg =
         err instanceof Error ? err.message : 'Failed to load prescription';
       setError(errorMsg);
-      console.error('Error loading prescription:', err);
     } finally {
       setLoading(false);
     }
@@ -208,9 +185,6 @@ export default function PrescriptionForm({
     try {
       if (prescriptionId && prescriptionId.trim() !== '') {
         // Update existing prescription using PATCH
-        console.log('Updating prescription:', prescriptionId);
-        console.log('Medications:', formData.medications);
-
         await updatePrescription(prescriptionId, formData.medications);
 
         setSuccess('Prescription updated successfully!');
@@ -225,8 +199,6 @@ export default function PrescriptionForm({
           medications: formData.medications,
         };
 
-        console.log('Creating new prescription:', payload);
-
         await savePrescription(appointmentId, payload);
 
         setSuccess('Prescription saved successfully!');
@@ -239,7 +211,6 @@ export default function PrescriptionForm({
       const errorMsg =
         err instanceof Error ? err.message : 'Failed to save prescription';
       setError(errorMsg);
-      console.error('Error saving prescription:', err);
     } finally {
       setLoading(false);
     }

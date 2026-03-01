@@ -22,8 +22,6 @@ import {
 import { API_ENDPOINTS } from '../../../constants/api';
 
 const VetBookingReviewsTable: React.FC = () => {
-  console.log('[VetBookingReviewsTable] Component rendering...');
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reviewsData, setReviewsData] =
@@ -39,7 +37,6 @@ const VetBookingReviewsTable: React.FC = () => {
   useEffect(() => {
     const loadReviews = async () => {
       try {
-        console.log('[VetBookingReviewsTable] Fetching my reviews...');
         setLoading(true);
 
         const token = sessionStorage.getItem('token');
@@ -48,7 +45,6 @@ const VetBookingReviewsTable: React.FC = () => {
         queryParams.set('limit', itemsPerPage.toString());
 
         const url = `${API_ENDPOINTS.REVIEWS.MY_REVIEWS}?${queryParams.toString()}`;
-        console.log('[VetBookingReviewsTable] Calling:', url);
 
         const response = await fetch(url, {
           method: 'GET',
@@ -63,11 +59,9 @@ const VetBookingReviewsTable: React.FC = () => {
         }
 
         const result = await response.json();
-        console.log('[VetBookingReviewsTable] API Response:', result);
         setReviewsData(result.data);
         setError(null);
       } catch (err) {
-        console.error('[VetBookingReviewsTable] Failed to load reviews:', err);
         setError(err instanceof Error ? err.message : 'Failed to load reviews');
       } finally {
         setLoading(false);
@@ -136,7 +130,6 @@ const VetBookingReviewsTable: React.FC = () => {
   };
   const confirmDelete = () => {
     // Implement delete API call here
-    console.log('Delete review:', reviewToDelete || selectedRows);
     setSelectedRows([]);
     setReviewToDelete(null);
     setIsDeleteDialogOpen(false);

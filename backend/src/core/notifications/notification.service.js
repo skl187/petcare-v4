@@ -1,10 +1,10 @@
+const logger = require('../utils/logger');
 const { query } = require('../db/pool');
 const emailService = require('../email/email.service');
 const twilioService = require('./twilio.service');
 const fcmService = require('./fcm.service');
 
 const renderTemplate = (template, payload) => {
-  // Very simple mustache-like replacement: {{key}}
   if (!template || !payload) return template;
   return String(template).replace(/{{\s*([^}\s]+)\s*}}/g, (m, key) => (payload[key] !== undefined ? payload[key] : m));
 };
@@ -14,28 +14,28 @@ const sendEmailNotification = async (notification, template) => {
   const body = renderTemplate(template.body, notification.payload || {});
   const body_html = renderTemplate(template.body_html, notification.payload || {});
 
-  const to = notification.target && notification.target.email ? notification.target.email : null;
+  const to = notification.target?.email || null;
 
   if (!to) throw new Error('No email target');
 
   const result = await emailService.sendEmail({ to, subject, html: body_html, text: body });
-  return { provider: 'sendgrid/smtp', provider_message_id: result && result.messageId ? result.messageId : null };
+  return { provider: 'sendgrid/smtp', provider_message_id: result?.messageId || null };
 };
 
 const sendSmsNotification = async (notification, template) => {
   const body = renderTemplate(template.body, notification.payload || {});
-  const to = notification.target && notification.target.phone ? notification.target.phone : null;
+  const to = notification.target?.phone || null;
   if (!to) throw new Error('No phone target');
   const result = await twilioService.sendSms({ to, body });
-  return { provider: 'twilio', provider_message_id: result && result.sid ? result.sid : null };
+  return { provider: 'twilio', provider_message_id: result?.sid || null };
 };
 
 const sendPushNotification = async (notification, template) => {
   const body = renderTemplate(template.body, notification.payload || {});
-  const token = notification.target && notification.target.push_token ? notification.target.push_token : null;
+  const token = notification.target?.push_token || null;
   if (!token) throw new Error('No push token');
   const result = await fcmService.sendPush({ token, body, title: template.subject || '' });
-  return { provider: 'fcm', provider_message_id: result && result.name ? result.name : null };
+  return { provider: 'fcm', provider_message_id: result?.name || null };
 };
 
 const getTemplate = async (template_key, locale) => {
@@ -44,7 +44,7 @@ const getTemplate = async (template_key, locale) => {
     const r = await query(`SELECT * FROM get_notification_template($1, $2)`, [template_key, locale || 'en']);
     if (r.rows && r.rows.length > 0) return r.rows[0];
   } catch (err) {
-    console.warn('getTemplate failed:', err.message);
+    logger.warn('getTemplate failed:', err.message);
   }
   return null;
 };

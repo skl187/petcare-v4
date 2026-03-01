@@ -48,7 +48,6 @@ const VetScheduleExceptions = ({}: VetScheduleExceptionsProps) => {
       setExceptions(data);
     } catch (err) {
       setError('Failed to load exceptions. Please try again.');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -82,7 +81,6 @@ const VetScheduleExceptions = ({}: VetScheduleExceptionsProps) => {
       await loadExceptions();
     } catch (err) {
       setError('Failed to add exception. Please try again.');
-      console.error(err);
     } finally {
       setSaving(false);
     }
@@ -100,7 +98,6 @@ const VetScheduleExceptions = ({}: VetScheduleExceptionsProps) => {
       await loadExceptions();
     } catch (err) {
       setError('Failed to delete exception. Please try again.');
-      console.error(err);
     } finally {
       setDeleting(null);
     }

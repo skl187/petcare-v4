@@ -1,5 +1,6 @@
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 /**
  * List roles with permission counts and assigned users
@@ -88,7 +89,7 @@ const listRoles = async (req, res) => {
       meta: { total, page, limit }
     }));
   } catch (err) {
-    console.error('List roles error:', err);
+    logger.error('List roles error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to list roles' });
   }
 };
@@ -171,7 +172,7 @@ const getRole = async (req, res) => {
       permissions_by_resource: permissionsByResource
     }));
   } catch (err) {
-    console.error('Get role error:', err);
+    logger.error('Get role error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to fetch role' });
   }
 };
@@ -196,7 +197,7 @@ const createRole = async (req, res) => {
 
     res.status(201).json(successResponse({ role: result.rows[0] }, 'Role created'));
   } catch (err) {
-    console.error('Create role error:', err);
+    logger.error('Create role error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to create role' });
   }
 };
@@ -230,7 +231,7 @@ const updateRole = async (req, res) => {
 
     res.json(successResponse({ role: result.rows[0] }, 'Role updated'));
   } catch (err) {
-    console.error('Update role error:', err);
+    logger.error('Update role error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to update role' });
   }
 };
@@ -248,7 +249,7 @@ const deleteRole = async (req, res) => {
 
     res.json(successResponse(null, 'Role deleted'));
   } catch (err) {
-    console.error('Delete role error:', err);
+    logger.error('Delete role error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to delete role' });
   }
 };

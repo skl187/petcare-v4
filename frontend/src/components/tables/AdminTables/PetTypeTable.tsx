@@ -165,7 +165,6 @@ export default function PetTypeTable() {
         );
         setTimeout(() => setSuccessBanner(null), 4000);
       } catch (err) {
-        console.error('Failed to update status for selected rows', err);
         setFetchError('Failed to update status for selected rows');
         // refresh server state
         await fetchPetTypes();
@@ -238,7 +237,6 @@ export default function PetTypeTable() {
       setSuccessBanner('Pet type(s) deleted successfully!');
       setTimeout(() => setSuccessBanner(null), 4000);
     } catch (err) {
-      console.error('Delete failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Delete failed';
       setFetchError(`Could not delete pet type(s): ${errorMessage}`);
     } finally {
@@ -290,7 +288,6 @@ export default function PetTypeTable() {
       setEditPetType(editData);
       setIsAddDialogOpen(false);
     } catch (err) {
-      console.error('Failed to fetch pet type:', err);
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to fetch pet type details';
       setFetchError(`Could not load pet type details: ${errorMessage}`);
@@ -344,7 +341,6 @@ export default function PetTypeTable() {
       );
       setTimeout(() => setSuccessBanner(null), 4000);
     } catch (err) {
-      console.error('Failed to toggle status:', err);
       // revert on error
       setPetTypes((prev) =>
         prev.map((p) => (p.id === id ? { ...p, status: current.status } : p)),
@@ -409,7 +405,6 @@ export default function PetTypeTable() {
       }
     } catch (err: any) {
       if (err?.name === 'AbortError') return;
-      console.error('Failed to fetch pet types', err);
       setFetchError(
         err instanceof Error ? err.message : 'Failed to fetch pet types',
       );

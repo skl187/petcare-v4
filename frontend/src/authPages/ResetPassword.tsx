@@ -92,7 +92,6 @@ export default function ResetPassword() {
         setConfirmPassword('');
       }
     } catch (err) {
-      console.error(err);
       setApiError('Network error. Please try again.');
     } finally {
       setLoading(false);

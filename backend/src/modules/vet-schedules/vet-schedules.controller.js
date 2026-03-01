@@ -1,9 +1,8 @@
 const { query, transaction } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
-// ─────────────────────────────────────────────
 // Helper: resolve veterinarian id from user id
-// ─────────────────────────────────────────────
 const getVetId = async (userId) => {
   const { rows } = await query(
     `SELECT id FROM veterinarians WHERE user_id = $1 AND deleted_at IS NULL LIMIT 1`,
@@ -12,9 +11,9 @@ const getVetId = async (userId) => {
   return rows[0]?.id || null;
 };
 
-// ═══════════════════════════════════════════════════════════
+// ===================================================================
 // WEEKLY SCHEDULES
-// ═══════════════════════════════════════════════════════════
+// ===================================================================
 
 /**
  * GET /api/vet-schedules/my?clinic_id=
@@ -49,7 +48,7 @@ const getMySchedules = async (req, res) => {
 
     res.json(successResponse(rows));
   } catch (err) {
-    console.error('getMySchedules error:', err.message);
+    logger.error('getMySchedules error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch schedules' });
   }
 };
@@ -96,14 +95,14 @@ const listSchedules = async (req, res) => {
 
     res.json(successResponse(rows));
   } catch (err) {
-    console.error('listSchedules error:', err.message);
+    logger.error('listSchedules error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch schedules' });
   }
 };
 
 /**
  * PUT /api/vet-schedules/bulk
- * Save Schedule button — replaces entire weekly schedule for vet+clinic in one transaction.
+ * Save Schedule button -- replaces entire weekly schedule for vet+clinic in one transaction.
  * Body: { clinic_id, schedules: [{ day_of_week, start_time, end_time, slot_duration, max_appointments_per_slot, is_available }] }
  */
 const bulkUpsertSchedules = async (req, res) => {
@@ -192,7 +191,7 @@ const bulkUpsertSchedules = async (req, res) => {
 
     res.json(successResponse(rows, 'Schedule saved'));
   } catch (err) {
-    console.error('bulkUpsertSchedules error:', err.message);
+    logger.error('bulkUpsertSchedules error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to save schedule' });
   }
 };
@@ -263,7 +262,7 @@ const upsertSchedule = async (req, res) => {
       successResponse(result, isUpdate ? 'Schedule updated' : 'Schedule created')
     );
   } catch (err) {
-    console.error('upsertSchedule error:', err.message);
+    logger.error('upsertSchedule error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to save schedule' });
   }
 };
@@ -306,7 +305,7 @@ const updateSchedule = async (req, res) => {
 
     res.json(successResponse(rows[0], 'Schedule updated'));
   } catch (err) {
-    console.error('updateSchedule error:', err.message);
+    logger.error('updateSchedule error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to update schedule' });
   }
 };
@@ -333,14 +332,14 @@ const deleteSchedule = async (req, res) => {
 
     res.json(successResponse(null, 'Schedule deleted'));
   } catch (err) {
-    console.error('deleteSchedule error:', err.message);
+    logger.error('deleteSchedule error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to delete schedule' });
   }
 };
 
-// ═══════════════════════════════════════════════════════════
+// ===================================================================
 // SCHEDULE EXCEPTIONS
-// ═══════════════════════════════════════════════════════════
+// ===================================================================
 
 /**
  * GET /api/vet-schedules/exceptions/my?clinic_id=&from_date=&to_date=
@@ -384,7 +383,7 @@ const getMyExceptions = async (req, res) => {
 
     res.json(successResponse(rows));
   } catch (err) {
-    console.error('getMyExceptions error:', err.message);
+    logger.error('getMyExceptions error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch exceptions' });
   }
 };
@@ -439,7 +438,7 @@ const listExceptions = async (req, res) => {
 
     res.json(successResponse(rows));
   } catch (err) {
-    console.error('listExceptions error:', err.message);
+    logger.error('listExceptions error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch exceptions' });
   }
 };
@@ -503,7 +502,7 @@ const createException = async (req, res) => {
 
     res.status(201).json(successResponse(rows[0], 'Exception created'));
   } catch (err) {
-    console.error('createException error:', err.message);
+    logger.error('createException error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to create exception' });
   }
 };
@@ -559,7 +558,7 @@ const updateException = async (req, res) => {
 
     res.json(successResponse(rows[0], 'Exception updated'));
   } catch (err) {
-    console.error('updateException error:', err.message);
+    logger.error('updateException error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to update exception' });
   }
 };
@@ -584,7 +583,7 @@ const deleteException = async (req, res) => {
 
     res.json(successResponse(null, 'Exception deleted'));
   } catch (err) {
-    console.error('deleteException error:', err.message);
+    logger.error('deleteException error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to delete exception' });
   }
 };

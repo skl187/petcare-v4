@@ -5,6 +5,7 @@
 
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 // ============================================================================
 // LIST ALL REVIEWS (Admin)
@@ -91,7 +92,7 @@ const listReviews = async (req, res) => {
     }, 'Reviews retrieved successfully'));
 
   } catch (err) {
-    console.error('List reviews error:', err.message);
+    logger.error('List reviews error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to retrieve reviews' });
   }
 };
@@ -133,7 +134,7 @@ const getReview = async (req, res) => {
     res.json(successResponse(result.rows[0], 'Review retrieved successfully'));
 
   } catch (err) {
-    console.error('Get review error:', err.message);
+    logger.error('Get review error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to retrieve review' });
   }
 };
@@ -168,7 +169,7 @@ const getReviewByAppointment = async (req, res) => {
     res.json(successResponse(result.rows[0], 'Review retrieved successfully'));
 
   } catch (err) {
-    console.error('Get review by appointment error:', err.message);
+    logger.error('Get review by appointment error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to retrieve review' });
   }
 };
@@ -254,7 +255,7 @@ const getVeterinarianReviews = async (req, res) => {
     }, 'Veterinarian reviews retrieved successfully'));
 
   } catch (err) {
-    console.error('Get veterinarian reviews error:', err.message);
+    logger.error('Get veterinarian reviews error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to retrieve veterinarian reviews' });
   }
 };
@@ -382,7 +383,7 @@ const getMyReviews = async (req, res) => {
     }
 
   } catch (err) {
-    console.error('Get my reviews error:', err.message);
+    logger.error('Get my reviews error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to retrieve your reviews' });
   }
 };
@@ -451,7 +452,7 @@ const canReviewAppointment = async (req, res) => {
     }, 'You can review this appointment'));
 
   } catch (err) {
-    console.error('Can review appointment error:', err.message);
+    logger.error('Can review appointment error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to check review eligibility' });
   }
 };
@@ -555,7 +556,7 @@ const createReview = async (req, res) => {
     res.status(201).json(successResponse(result.rows[0], 'Review submitted successfully'));
 
   } catch (err) {
-    console.error('Create review error:', err.message);
+    logger.error('Create review error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to create review' });
   }
 };
@@ -670,7 +671,7 @@ const updateReview = async (req, res) => {
     res.json(successResponse(result.rows[0], 'Review updated successfully'));
 
   } catch (err) {
-    console.error('Update review error:', err.message);
+    logger.error('Update review error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to update review' });
   }
 };
@@ -717,7 +718,7 @@ const deleteReview = async (req, res) => {
     res.json(successResponse(null, 'Review deleted successfully'));
 
   } catch (err) {
-    console.error('Delete review error:', err.message);
+    logger.error('Delete review error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to delete review' });
   }
 };
@@ -762,7 +763,7 @@ const getPendingReviewAppointments = async (req, res) => {
     }, 'Pending review appointments retrieved successfully'));
 
   } catch (err) {
-    console.error('Get pending review appointments error:', err.message);
+    logger.error('Get pending review appointments error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to retrieve pending review appointments' });
   }
 };
@@ -789,7 +790,7 @@ const updateVeterinarianRating = async (veterinarianId) => {
     );
 
   } catch (err) {
-    console.error('Update veterinarian rating error:', err.message);
+    logger.error('Update veterinarian rating error:', err.message);
   }
 };
 

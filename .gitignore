@@ -12,4 +12,10 @@ frontend/dist/
 
 backend/node_modules/
 
+.docs
+.sql
+deployment.md
+full_backup.sql
+nginx.conf
+nginx.dev.conf
 readme.md

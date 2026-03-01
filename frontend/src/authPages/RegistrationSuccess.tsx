@@ -32,7 +32,6 @@ export default function RegistrationSuccess() {
         setResendMessage(data.message || 'Verification email sent!');
       }
     } catch (err) {
-      console.error(err);
       setResendError('Network error. Please try again.');
     } finally {
       setResending(false);

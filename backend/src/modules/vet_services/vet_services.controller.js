@@ -1,8 +1,7 @@
 const { query, transaction } = require('../../core/db/pool');
+const logger = require('../../core/utils/logger');
 
-// ─────────────────────────────────────────────
 // Helper: resolve veterinarian id from user id
-// ─────────────────────────────────────────────
 const getVetId = async (userId) => {
   const { rows } = await query(
     `SELECT id FROM veterinarians WHERE user_id = $1 AND deleted_at IS NULL LIMIT 1`,
@@ -11,9 +10,7 @@ const getVetId = async (userId) => {
   return rows[0]?.id || null;
 };
 
-// ─────────────────────────────────────────────
 // ADMIN: list all services with clinic & vet info
-// ─────────────────────────────────────────────
 const adminListServices = async (req, res) => {
   try {
     const { page = 1, limit = 20, status, search } = req.query;
@@ -84,14 +81,12 @@ const adminListServices = async (req, res) => {
       pagination: { page: Number(page), limit: Number(limit), total: Number(total) }
     });
   } catch (err) {
-    console.error('adminListServices error:', err);
+    logger.error('adminListServices error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
-// ─────────────────────────────────────────────
 // ADMIN: get single service detail
-// ─────────────────────────────────────────────
 const adminGetService = async (req, res) => {
   try {
     const { id } = req.params;
@@ -131,14 +126,12 @@ const adminGetService = async (req, res) => {
 
     res.json({ success: true, data: rows[0] });
   } catch (err) {
-    console.error('adminGetService error:', err);
+    logger.error('adminGetService error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
-// ─────────────────────────────────────────────
 // ADMIN: update any service
-// ─────────────────────────────────────────────
 const adminUpdateService = async (req, res) => {
   try {
     const { id } = req.params;
@@ -167,14 +160,12 @@ const adminUpdateService = async (req, res) => {
 
     res.json({ success: true, data: rows[0] });
   } catch (err) {
-    console.error('adminUpdateService error:', err);
+    logger.error('adminUpdateService error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
-// ─────────────────────────────────────────────
 // ADMIN: soft-delete service + remove from all mappings
-// ─────────────────────────────────────────────
 const adminDeleteService = async (req, res) => {
   try {
     const { id } = req.params;
@@ -209,14 +200,12 @@ const adminDeleteService = async (req, res) => {
 
     res.json({ success: true, message: 'Service deleted' });
   } catch (err) {
-    console.error('adminDeleteService error:', err);
+    logger.error('adminDeleteService error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
-// ─────────────────────────────────────────────
 // VET: get mapped clinics (dropdown for create)
-// ─────────────────────────────────────────────
 const vetGetMappedClinics = async (req, res) => {
   try {
     const vetId = await getVetId(req.user.id);
@@ -235,14 +224,12 @@ const vetGetMappedClinics = async (req, res) => {
 
     res.json({ success: true, data: rows });
   } catch (err) {
-    console.error('vetGetMappedClinics error:', err);
+    logger.error('vetGetMappedClinics error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
-// ─────────────────────────────────────────────
 // VET: list own services
-// ─────────────────────────────────────────────
 const vetListServices = async (req, res) => {
   try {
     const vetId = await getVetId(req.user.id);
@@ -306,14 +293,12 @@ const vetListServices = async (req, res) => {
       pagination: { page: Number(page), limit: Number(limit), total: Number(total) }
     });
   } catch (err) {
-    console.error('vetListServices error:', err);
+    logger.error('vetListServices error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
-// ─────────────────────────────────────────────
 // VET: create service + attach to clinic mapping
-// ─────────────────────────────────────────────
 const vetCreateService = async (req, res) => {
   try {
     const vetId = await getVetId(req.user.id);
@@ -371,14 +356,12 @@ const vetCreateService = async (req, res) => {
     if (err.code === '23505') {
       return res.status(409).json({ success: false, message: 'Service code already exists' });
     }
-    console.error('vetCreateService error:', err);
+    logger.error('vetCreateService error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
-// ─────────────────────────────────────────────
 // VET: update own service
-// ─────────────────────────────────────────────
 const vetUpdateService = async (req, res) => {
   try {
     const vetId = await getVetId(req.user.id);
@@ -432,14 +415,12 @@ const vetUpdateService = async (req, res) => {
     if (err.statusCode === 403) {
       return res.status(403).json({ success: false, message: err.message });
     }
-    console.error('vetUpdateService error:', err);
+    logger.error('vetUpdateService error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
-// ─────────────────────────────────────────────
 // VET: soft-delete own service + remove from mapping
-// ─────────────────────────────────────────────
 const vetDeleteService = async (req, res) => {
   try {
     const vetId = await getVetId(req.user.id);
@@ -488,14 +469,12 @@ const vetDeleteService = async (req, res) => {
     if (err.statusCode === 403) {
       return res.status(403).json({ success: false, message: err.message });
     }
-    console.error('vetDeleteService error:', err);
+    logger.error('vetDeleteService error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
-// ─────────────────────────────────────────────
 // PUBLIC / BOOKING: active services only (status=1)
-// ─────────────────────────────────────────────
 const getActiveServicesForBooking = async (req, res) => {
   try {
     const { vet_id, clinic_id } = req.query;
@@ -528,7 +507,7 @@ const getActiveServicesForBooking = async (req, res) => {
 
     res.json({ success: true, data: rows });
   } catch (err) {
-    console.error('getActiveServicesForBooking error:', err);
+    logger.error('getActiveServicesForBooking error:', err);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };

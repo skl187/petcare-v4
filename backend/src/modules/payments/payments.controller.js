@@ -3,6 +3,7 @@
 
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 /**
  * GET /api/payments/vet?from_date=YYYY-MM-DD&to_date=YYYY-MM-DD
@@ -54,7 +55,7 @@ const listVetPayments = async (req, res) => {
     const result = await query(sql, params);
     res.json(successResponse(result.rows));
   } catch (err) {
-    console.error('List vet payments failed', err.message);
+    logger.error('List vet payments failed', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch payments' });
   }
 };
@@ -109,7 +110,7 @@ const listAllPayments = async (req, res) => {
     const result = await query(sql, params);
     res.json(successResponse(result.rows));
   } catch (err) {
-    console.error('List all payments failed', err.message);
+    logger.error('List all payments failed', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch payments' });
   }
 };
@@ -161,7 +162,7 @@ const listUserPayments = async (req, res) => {
     const result = await query(sql, params);
     res.json(successResponse(result.rows));
   } catch (err) {
-    console.error('List user payments failed', err.message);
+    logger.error('List user payments failed', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch payments' });
   }
 };
@@ -187,7 +188,7 @@ const updatePaymentStatus = async (req, res) => {
     }
     res.json(successResponse(result.rows[0]));
   } catch (err) {
-    console.error('Update payment status failed', err.message);
+    logger.error('Update payment status failed', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to update payment' });
   }
 };

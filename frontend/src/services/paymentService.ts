@@ -81,7 +81,6 @@ export const getVetPayments = async (): Promise<Payment[]> => {
     const result: PaymentResponse = await response.json();
     return result.data || [];
   } catch (error) {
-    console.error('Error fetching payments:', error);
     throw error;
   }
 };
@@ -130,7 +129,6 @@ export const updatePaymentStatus = async (
     const result = await response.json();
     return result.data;
   } catch (error) {
-    console.error('Error updating payment:', error);
     throw error;
   }
 };

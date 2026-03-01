@@ -88,7 +88,7 @@ export default function RoleForm({ role, onSuccess, onCancel }: RoleFormProps) {
           }
         }
       } catch (err) {
-        console.error("Error fetching permissions:", err);
+        // silently ignore
       } finally {
         setPermissionsLoading(false);
       }
@@ -114,7 +114,7 @@ export default function RoleForm({ role, onSuccess, onCancel }: RoleFormProps) {
             setSelectedPermissions(new Set(data.data.role.assigned_permission_ids));
           }
         } catch (err) {
-          console.error("Error fetching role permissions:", err);
+          // silently ignore
         }
       };
 
@@ -132,29 +132,6 @@ export default function RoleForm({ role, onSuccess, onCancel }: RoleFormProps) {
       }
       return newSet;
     });
-  };
-
-  const _toggleResourcePermissions = (resource: PermissionResource, checked: boolean) => {
-    setSelectedPermissions((prev) => {
-      const newSet = new Set(prev);
-      resource.permissions.forEach((perm) => {
-        if (checked) {
-          newSet.add(perm.id);
-        } else {
-          newSet.delete(perm.id);
-        }
-      });
-      return newSet;
-    });
-  };
-
-  const isResourceFullySelected = (resource: PermissionResource) => {
-    return resource.permissions.every((perm) => selectedPermissions.has(perm.id));
-  };
-
-  const isResourcePartiallySelected = (resource: PermissionResource) => {
-    const selected = resource.permissions.filter((perm) => selectedPermissions.has(perm.id));
-    return selected.length > 0 && selected.length < resource.permissions.length;
   };
 
   const onSubmit = async (data: RoleFormData) => {
@@ -208,7 +185,6 @@ export default function RoleForm({ role, onSuccess, onCancel }: RoleFormProps) {
 
       onSuccess();
     } catch (err) {
-      console.error("Error saving role:", err);
       setError("Failed to save role");
     } finally {
       setLoading(false);

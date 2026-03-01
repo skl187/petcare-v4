@@ -10,10 +10,10 @@ const router = express.Router();
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ 
+    return res.status(400).json({
       status: 'error',
       message: 'Validation failed',
-      errors: errors.array() 
+      errors: errors.array()
     });
   }
   next();
@@ -26,14 +26,12 @@ router.post('/register', [
   body('first_name').trim().notEmpty(),
   body('last_name').trim().notEmpty(),
 ], handleValidationErrors, authController.register);
-//router.post('/register', handleValidationErrors, authController.register);
 
 // Login
 router.post('/login', [
   body('email').isEmail().normalizeEmail(),
   body('password').notEmpty(),
 ], handleValidationErrors, authController.login);
-//router.post('/login', handleValidationErrors, authController.login);
 
 
 // Refresh token

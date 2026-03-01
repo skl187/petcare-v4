@@ -97,7 +97,6 @@ export default function RolesTable() {
         setError(data.message || 'Failed to fetch roles');
       }
     } catch (err) {
-      console.error('Error fetching roles:', err);
       setError('Failed to fetch roles');
     } finally {
       setLoading(false);
@@ -155,8 +154,8 @@ export default function RolesTable() {
         setIsDeleteDialogOpen(false);
         setRoleToDelete(null);
       }
-    } catch (err) {
-      console.error('Error deleting role:', err);
+    } catch {
+      // silently ignore
     }
   };
 
@@ -175,8 +174,8 @@ export default function RolesTable() {
       fetchRoles();
       setSelectedRows([]);
       setIsDeleteDialogOpen(false);
-    } catch (err) {
-      console.error('Error deleting roles:', err);
+    } catch {
+      // silently ignore
     }
   };
 

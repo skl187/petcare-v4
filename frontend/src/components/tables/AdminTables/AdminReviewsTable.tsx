@@ -19,8 +19,6 @@ import { Review, listReviews, deleteReview } from '../../../services/reviewsServ
 import Badge from '../../ui/badge/Badge';
 
 const AdminReviewsTable: React.FC = () => {
-  console.log('[AdminReviewsTable] Component rendering...');
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reviewsData, setReviewsData] = useState<{
@@ -39,7 +37,6 @@ const AdminReviewsTable: React.FC = () => {
   useEffect(() => {
     const loadReviews = async () => {
       try {
-        console.log('[AdminReviewsTable] Fetching all reviews...');
         setLoading(true);
 
         const data = await listReviews({
@@ -48,11 +45,9 @@ const AdminReviewsTable: React.FC = () => {
           status: statusFilter || undefined,
         });
 
-        console.log('[AdminReviewsTable] API Response:', data);
         setReviewsData(data);
         setError(null);
       } catch (err) {
-        console.error('[AdminReviewsTable] Failed to load reviews:', err);
         setError(err instanceof Error ? err.message : 'Failed to load reviews');
       } finally {
         setLoading(false);
@@ -144,7 +139,6 @@ const AdminReviewsTable: React.FC = () => {
       setReviewToDelete(null);
       setIsDeleteDialogOpen(false);
     } catch (err) {
-      console.error('Failed to delete review:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete review');
     }
   };

@@ -1,6 +1,7 @@
 // src/modules/users/user_roles.controller.js
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 /**
  * Get all roles for a user
@@ -32,7 +33,7 @@ const getUserRoles = async (req, res) => {
       roles: result.rows
     }));
   } catch (err) {
-    console.error('Get user roles error:', err);
+    logger.error('Get user roles error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to get user roles' });
   }
 };
@@ -90,7 +91,7 @@ const assignRoleToUser = async (req, res) => {
       role: roleResult.rows[0]
     }, 'Role assigned to user'));
   } catch (err) {
-    console.error('Assign role to user error:', err);
+    logger.error('Assign role to user error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to assign role' });
   }
 };
@@ -113,7 +114,7 @@ const removeRoleFromUser = async (req, res) => {
 
     res.json(successResponse(null, 'Role removed from user'));
   } catch (err) {
-    console.error('Remove role from user error:', err);
+    logger.error('Remove role from user error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to remove role' });
   }
 };
@@ -140,7 +141,7 @@ const setPrimaryRole = async (req, res) => {
 
     res.json(successResponse(null, 'Primary role updated'));
   } catch (err) {
-    console.error('Set primary role error:', err);
+    logger.error('Set primary role error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to set primary role' });
   }
 };
@@ -202,7 +203,7 @@ const setUserRoles = async (req, res) => {
       roles: result.rows
     }, 'User roles updated'));
   } catch (err) {
-    console.error('Set user roles error:', err);
+    logger.error('Set user roles error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to set user roles' });
   }
 };
@@ -262,7 +263,7 @@ const getUserPermissions = async (req, res) => {
       effective_permissions: permissions.filter(p => p.effective)
     }));
   } catch (err) {
-    console.error('Get user permissions error:', err);
+    logger.error('Get user permissions error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to get user permissions' });
   }
 };
@@ -308,7 +309,7 @@ const grantPermissionToUser = async (req, res) => {
       granted: granted !== false
     }, granted !== false ? 'Permission granted to user' : 'Permission denied for user'));
   } catch (err) {
-    console.error('Grant permission to user error:', err);
+    logger.error('Grant permission to user error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to update user permission' });
   }
 };
@@ -331,7 +332,7 @@ const removePermissionFromUser = async (req, res) => {
 
     res.json(successResponse(null, 'Direct permission removed from user'));
   } catch (err) {
-    console.error('Remove permission from user error:', err);
+    logger.error('Remove permission from user error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to remove permission' });
   }
 };

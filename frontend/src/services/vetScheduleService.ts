@@ -55,7 +55,6 @@ export const getVetSchedules = async () => {
     const result: ApiResponse<Schedule[]> = await response.json();
     return result.data || [];
   } catch (error) {
-    console.error('Error fetching vet schedules:', error);
     throw error;
   }
 };
@@ -63,7 +62,7 @@ export const getVetSchedules = async () => {
 // Create or update a single schedule
 export const upsertSchedule = async (schedule: Schedule) => {
   try {
-    const url = `${API_ENDPOINTS.VET_SCHEDULES || 'http://localhost:3000/api/vet-schedules'}`;
+    const url = `${API_ENDPOINTS.VET_SCHEDULES.BASE}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: getAuthHeaders(),
@@ -77,7 +76,6 @@ export const upsertSchedule = async (schedule: Schedule) => {
     const result: ApiResponse<Schedule> = await response.json();
     return result.data;
   } catch (error) {
-    console.error('Error upserting schedule:', error);
     throw error;
   }
 };
@@ -106,7 +104,6 @@ export const bulkUpsertSchedules = async (schedules: Schedule[]) => {
     const result: ApiResponse<Schedule[]> = await response.json();
     return result.data || [];
   } catch (error) {
-    console.error('Error bulk upserting schedules:', error);
     throw error;
   }
 };
@@ -114,7 +111,7 @@ export const bulkUpsertSchedules = async (schedules: Schedule[]) => {
 // Delete a schedule
 export const deleteSchedule = async (scheduleId: string) => {
   try {
-    const url = `${API_ENDPOINTS.VET_SCHEDULES || 'http://localhost:3000/api/vet-schedules'}/${scheduleId}`;
+    const url = `${API_ENDPOINTS.VET_SCHEDULES.BASE}/${scheduleId}`;
     const response = await fetch(url, {
       method: 'DELETE',
       headers: getAuthHeaders(),
@@ -126,7 +123,6 @@ export const deleteSchedule = async (scheduleId: string) => {
 
     return response.json();
   } catch (error) {
-    console.error('Error deleting schedule:', error);
     throw error;
   }
 };
@@ -157,7 +153,6 @@ export const getScheduleExceptions = async (
     const result: ApiResponse<ScheduleException[]> = await response.json();
     return result.data || [];
   } catch (error) {
-    console.error('Error fetching schedule exceptions:', error);
     throw error;
   }
 };
@@ -181,7 +176,6 @@ export const createScheduleException = async (exception: ScheduleException) => {
     const result: ApiResponse<ScheduleException> = await response.json();
     return result.data;
   } catch (error) {
-    console.error('Error creating schedule exception:', error);
     throw error;
   }
 };
@@ -203,7 +197,6 @@ export const deleteScheduleException = async (exceptionId: string) => {
 
     return response.json();
   } catch (error) {
-    console.error('Error deleting schedule exception:', error);
     throw error;
   }
 };

@@ -31,7 +31,7 @@ interface VaccinationFormProps {
 export default function VaccinationForm({
   appointmentId = '',
   petId = '',
-  veterinarianId = '',
+  veterinarianId: _veterinarianId = '',
   medicalRecordId = '',
   vaccinationId = '',
   onSave,
@@ -70,15 +70,6 @@ export default function VaccinationForm({
 
   // Load vaccination if vaccinationId is provided
   useEffect(() => {
-    console.log('===================================');
-    console.log('VaccinationForm useEffect triggered');
-    console.log('appointmentId:', appointmentId);
-    console.log('petId:', petId);
-    console.log('veterinarianId:', veterinarianId);
-    console.log('medicalRecordId:', medicalRecordId);
-    console.log('vaccinationId:', vaccinationId);
-    console.log('===================================');
-
     if (vaccinationId && vaccinationId.trim() !== '') {
       loadVaccination();
     }
@@ -87,14 +78,8 @@ export default function VaccinationForm({
   const loadVaccination = async () => {
     setLoading(true);
     setError(null);
-    console.log('Starting loadVaccination for ID:', vaccinationId);
     try {
-      console.log(
-        'Calling getVaccinationById with vaccinationId:',
-        vaccinationId,
-      );
       const vaccination = await getVaccinationById(vaccinationId);
-      console.log('Vaccination loaded successfully:', vaccination);
 
       // API returns flat structure - map directly to currentVaccination
       setCurrentVaccination({
@@ -115,13 +100,10 @@ export default function VaccinationForm({
         medical_record_id: vaccination.medical_record_id,
         vaccinations: [],
       });
-
-      console.log('✅ Form data updated successfully');
     } catch (err) {
       const errorMsg =
         err instanceof Error ? err.message : 'Failed to load vaccination';
       setError(errorMsg);
-      console.error('Error loading vaccination:', err);
     } finally {
       setLoading(false);
     }
@@ -209,9 +191,6 @@ export default function VaccinationForm({
     try {
       if (vaccinationId && vaccinationId.trim() !== '') {
         // Update existing vaccination using PATCH - send single object
-        console.log('Updating vaccination:', vaccinationId);
-        console.log('Current vaccination:', currentVaccination);
-
         await updateVaccination(vaccinationId, currentVaccination);
 
         setSuccess('Vaccination updated successfully!');
@@ -223,8 +202,6 @@ export default function VaccinationForm({
           medical_record_id: formData.medical_record_id,
           vaccinations: formData.vaccinations,
         };
-
-        console.log('Creating new vaccination:', payload);
 
         await saveVaccination(appointmentId, payload);
 
@@ -238,7 +215,6 @@ export default function VaccinationForm({
       const errorMsg =
         err instanceof Error ? err.message : 'Failed to save vaccination';
       setError(errorMsg);
-      console.error('Error saving vaccination:', err);
     } finally {
       setLoading(false);
     }

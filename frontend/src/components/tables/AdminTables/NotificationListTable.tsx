@@ -58,7 +58,6 @@ export default function NotificationListTable() {
       const data = await listPendingNotifications();
       setNotifications(Array.isArray(data) ? data : []);
     } catch (err: any) {
-      console.error('Error fetching notifications:', err);
       setFetchError(err.message || 'Failed to load notifications');
     } finally {
       setIsLoadingData(false);

@@ -65,7 +65,6 @@ export default function ForgotPassword() {
         );
       }
     } catch (err) {
-      console.error('Error:', err);
       setApiError('Network error. Please try again.');
     } finally {
       setLoading(false);

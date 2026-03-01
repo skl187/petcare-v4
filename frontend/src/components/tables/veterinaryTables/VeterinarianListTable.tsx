@@ -103,7 +103,6 @@ export default function VeterinarianListTable() {
         })),
       );
     } catch (error) {
-      console.error('Error fetching clinics:', error);
       setFetchError('Failed to load clinics');
     }
   }, []);
@@ -134,7 +133,6 @@ export default function VeterinarianListTable() {
         })),
       );
     } catch (error) {
-      console.error('Error fetching services:', error);
       setFetchError('Failed to load services');
     }
   }, []);
@@ -209,7 +207,6 @@ export default function VeterinarianListTable() {
 
       setVeterinarians(items);
     } catch (error: any) {
-      console.error('Error fetching veterinarians:', error);
       setFetchError(error.message || 'Failed to load veterinarians');
     }
   }, [clinics, vetServices]);

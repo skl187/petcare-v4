@@ -1,9 +1,9 @@
-
 // ============================================================================
 // VACCINATIONS Controller
 // ============================================================================
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 const listVaccinations = async (req, res) => {
   try {
@@ -136,7 +136,7 @@ const getVaccinationsByMedicalRecordId = async (req, res) => {
       total: parseInt(countResult.rows[0].total)
     }));
   } catch (err) {
-    console.error('Get vaccinations by medical record error:', err);
+    logger.error('Get vaccinations by medical record error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to fetch vaccinations' });
   }
 };
@@ -231,72 +231,10 @@ const createVaccination = async (req, res) => {
     }, `${createdVaccinations.length} vaccination(s) created`, 201));
 
   } catch (err) {
-    console.error('Create vaccinations error:', err);
+    logger.error('Create vaccinations error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to create vaccination records' });
   }
 };
-
-/*
-const updateVaccination = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { adverse_reactions, notes, certificate_issued, certificate_number, next_due_date } = req.body;
-
-    let setFields = [];
-    const params = [id];
-    let paramIndex = 2;
-
-    if (adverse_reactions !== undefined) {
-      setFields.push(`adverse_reactions = $${paramIndex}`);
-      params.push(adverse_reactions);
-      paramIndex++;
-    }
-    if (notes !== undefined) {
-      setFields.push(`notes = $${paramIndex}`);
-      params.push(notes);
-      paramIndex++;
-    }
-    if (certificate_issued !== undefined) {
-      setFields.push(`certificate_issued = $${paramIndex}`);
-      params.push(certificate_issued);
-      paramIndex++;
-    }
-    if (certificate_number !== undefined) {
-      setFields.push(`certificate_number = $${paramIndex}`);
-      params.push(certificate_number);
-      paramIndex++;
-    }
-    if (next_due_date !== undefined) {
-      setFields.push(`next_due_date = $${paramIndex}`);
-      params.push(next_due_date);
-      paramIndex++;
-    }
-
-    if (setFields.length === 0) {
-      return res.status(400).json({ status: 'error', message: 'No fields to update' });
-    }
-
-    setFields.push(`updated_by = $${paramIndex}`);
-    params.push(req.user?.id || null);
-
-    const result = await query(
-      `UPDATE vet_vaccinations
-       SET ${setFields.join(', ')}
-       WHERE id = $1 AND deleted_at IS NULL
-       RETURNING id, updated_at`,
-      params
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ status: 'error', message: 'Vaccination record not found' });
-    }
-
-    res.json(successResponse(result.rows[0], 'Vaccination updated'));
-  } catch (err) {
-    res.status(500).json({ status: 'error', message: 'Failed to update vaccination' });
-  }
-};
-*/
 
 // Add vaccinations to existing medical record
 const updateVaccinations = async (req, res) => {
@@ -395,8 +333,8 @@ const updateVaccinations = async (req, res) => {
 
     // Fetch all vaccinations for this medical record
     const allVaccines = await query(
-      `SELECT id, vaccine_name, vaccination_date FROM vet_vaccinations 
-       WHERE pet_id = $1 AND appointment_id = $2 AND deleted_at IS NULL 
+      `SELECT id, vaccine_name, vaccination_date FROM vet_vaccinations
+       WHERE pet_id = $1 AND appointment_id = $2 AND deleted_at IS NULL
        ORDER BY vaccination_date DESC`,
       [finalPetId, finalAppointmentId]
     );
@@ -409,7 +347,7 @@ const updateVaccinations = async (req, res) => {
     }, `${createdVaccinations.length} vaccination(s) added`));
 
   } catch (err) {
-    console.error('Update vaccinations error:', err);
+    logger.error('Update vaccinations error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to update vaccinations' });
   }
 };
@@ -433,12 +371,11 @@ const deleteVaccination = async (req, res) => {
   }
 };
 
-module.exports= {
+module.exports = {
   listVaccinations,
   getVaccinationById,
   getVaccinationsByMedicalRecordId,
   createVaccination,
-  // updateVaccination,
   updateVaccinations,
   deleteVaccination,
-}
+};

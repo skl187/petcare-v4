@@ -117,7 +117,6 @@ export default function TodaysAppointmentsTable() {
         setBookings(appointmentsArray);
         setError(null);
       } catch (err) {
-        console.error('Error fetching appointments:', err);
         setError(
           err instanceof Error ? err.message : 'Failed to load appointments',
         );

@@ -110,7 +110,6 @@ const VetAvailabilitySettings = () => {
         (err as Error).message ||
           'Failed to load vet information. Please try again.',
       );
-      console.error(err);
     } finally {
       setLoading(false);
     }

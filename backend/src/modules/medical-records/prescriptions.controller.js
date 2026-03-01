@@ -1,4 +1,3 @@
-
 // ============================================================================
 // PRESCRIPTIONS
 // ============================================================================
@@ -7,6 +6,7 @@
 
 const { query, getConnection } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 
 const createPrescription = async (req, res) => {
@@ -285,7 +285,7 @@ const updatePrescriptionMedications = async (req, res) => {
 
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('Update prescription medications error:', err);
+    logger.error('Update prescription medications error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to update prescription medications' });
   } finally {
     client.release();
@@ -387,7 +387,7 @@ const deletePrescription = async (req, res) => {
     res.json(successResponse(null, 'Prescription and associated medications deleted'));
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('Delete prescription error:', err);
+    logger.error('Delete prescription error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to delete prescription' });
   } finally {
     client.release();

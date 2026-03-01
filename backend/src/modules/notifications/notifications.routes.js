@@ -1,8 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const { requireAuth } = require('../../core/auth/auth.middleware');
 const controller = require('./notifications.controller');
 
-// Notification templates (CRUD stored in app_settings.namespace = 'notification_templates')
+// All notification routes require authentication
+router.use(requireAuth);
+
+// Notification templates
 router.get('/templates', controller.listTemplates);
 router.post('/templates', controller.createTemplate);
 router.get('/templates/:key', controller.getTemplateByKey);

@@ -51,10 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   ''
                 ).toLowerCase();
         }
-        console.log('AuthContext loaded user:', parsedUser);
         setUser(parsedUser);
       } catch (e) {
-        console.error('Failed to parse stored user:', e);
         sessionStorage.removeItem('user');
       }
     }
@@ -90,9 +88,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...userData,
         role: roleString as any,
       };
-
-      console.log('AuthContext setUser - Original userData:', userData);
-      console.log('AuthContext setUser - Mapped user:', mappedUser);
 
       setUser(mappedUser);
       sessionStorage.setItem('user', JSON.stringify(mappedUser));

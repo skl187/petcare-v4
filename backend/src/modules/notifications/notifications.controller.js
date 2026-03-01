@@ -1,6 +1,7 @@
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
 const notificationService = require('../../core/notifications/notification.service');
+const logger = require('../../core/utils/logger');
 
 const listPending = async (req, res) => {
   try {
@@ -127,10 +128,10 @@ const create = async (req, res) => {
       }
     }
 
-    // Scheduled for future — return created
+    // Scheduled for future -- return created
     res.status(201).json(successResponse(notification, 'Notification scheduled', 201));
   } catch (err) {
-    console.error('Create notification failed:', err.message);
+    logger.error('Create notification failed:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to create notification' });
   }
 };
@@ -181,7 +182,7 @@ const listTemplates = async (req, res) => {
 
     res.json(successResponse({ data: result.rows, page: Number(page), limit: Number(limit) }));
   } catch (err) {
-    console.error('listTemplates failed:', err.message);
+    logger.error('listTemplates failed:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to list templates' });
   }
 };
@@ -197,7 +198,7 @@ const getTemplateByKey = async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ status: 'error', message: 'Not found' });
     res.json(successResponse(result.rows[0]));
   } catch (err) {
-    console.error('getTemplateByKey failed:', err.message);
+    logger.error('getTemplateByKey failed:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch template' });
   }
 };
@@ -229,7 +230,7 @@ const createTemplate = async (req, res) => {
 
     res.status(201).json(successResponse(template, 'Created', 201));
   } catch (err) {
-    console.error('createTemplate failed:', err.message);
+    logger.error('createTemplate failed:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to create template' });
   }
 };
@@ -289,7 +290,7 @@ const updateTemplate = async (req, res) => {
     const updated = await query(`SELECT * FROM get_notification_template($1, $2)`, [key, locale]);
     res.json(successResponse(updated.rows[0], 'Updated'));
   } catch (err) {
-    console.error('updateTemplate failed:', err.message);
+    logger.error('updateTemplate failed:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to update template' });
   }
 };
@@ -301,7 +302,7 @@ const deleteTemplate = async (req, res) => {
     if (del.rows.length === 0) return res.status(404).json({ status: 'error', message: 'Not found' });
     res.json(successResponse(null, 'Deleted'));
   } catch (err) {
-    console.error('deleteTemplate failed:', err.message);
+    logger.error('deleteTemplate failed:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to delete template' });
   }
 };

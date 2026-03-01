@@ -4,7 +4,7 @@
 const { query, transaction } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
 const { hashPassword } = require('../../core/auth/password.service');
-// const logger = require('../../core/utils/logger');
+const logger = require('../../core/utils/logger');
 
 const list = async (req, res) => {
   try {
@@ -27,7 +27,7 @@ const list = async (req, res) => {
     }
 
     const result = await query(
-      `SELECT v.id, v.user_id, v.employee_id, v.license_number, v.specialization, v.experience_years, 
+      `SELECT v.id, v.user_id, v.employee_id, v.license_number, v.specialization, v.experience_years,
               v.consultation_fee, v.emergency_fee, v.bio, v.avatar_url, v.status, v.is_available_for_emergency,
               v.rating, v.total_appointments, v.created_at,
               u.first_name, u.last_name, u.email, u.phone,
@@ -91,7 +91,7 @@ const getById = async (req, res) => {
 
     res.json(successResponse(result.rows[0]));
   } catch (err) {
-    // logger.error('Get veterinarian failed', { error: err.message });
+    logger.error('Get veterinarian failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to fetch' });
   }
 };
@@ -261,7 +261,7 @@ const create = async (req, res) => {
       // Map of clinic_id => Set(service_id) for collecting services per clinic
       const servicesPerClinic = new Map();
 
-      // Accept `clinic_ids` only as context for `service_ids` — do NOT create separate clinic mapping rows.
+      // Accept `clinic_ids` only as context for `service_ids` -- do NOT create separate clinic mapping rows.
       if (Array.isArray(clinic_ids) && clinic_ids.length > 0) {
         for (const clinic_id of clinic_ids) {
           if (!clinic_id) continue;
@@ -333,7 +333,7 @@ const create = async (req, res) => {
 
     res.status(201).json(successResponse(vet, 'Created', 201));
   } catch (err) {
-    // logger.error('Create veterinarian failed', { error: err.message });
+    logger.error('Create veterinarian failed', { error: err.message });
     if (err.message === 'email_already_exists') {
       return res.status(409).json({ status: 'error', message: 'Email already registered' });
     }
@@ -396,7 +396,7 @@ const update = async (req, res) => {
       // Get veterinarian to find associated user
       const vetResult = await client.query('SELECT user_id FROM veterinarians WHERE id = $1 AND deleted_at IS NULL', [req.params.id]);
       if (vetResult.rows.length === 0) throw new Error('not_found');
-      
+
       const userId = vetResult.rows[0].user_id;
 
       // Update user profile if personal info provided
@@ -574,7 +574,7 @@ const update = async (req, res) => {
     if (!updated) return res.status(404).json({ status: 'error', message: 'Not found' });
     res.json(successResponse(updated, 'Updated'));
   } catch (err) {
-    // logger.error('Update veterinarian failed', { error: err.message });
+    logger.error('Update veterinarian failed', { error: err.message });
     if (err.message === 'email_already_exists') {
       return res.status(409).json({ status: 'error', message: 'Email already registered' });
     }
@@ -614,7 +614,7 @@ const delete_veterinarian = async (req, res) => {
 
     res.json(successResponse(null, 'Deleted'));
   } catch (err) {
-    // logger.error('Delete veterinarian failed', { error: err.message });
+    logger.error('Delete veterinarian failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to delete' });
   }
 };

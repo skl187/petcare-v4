@@ -91,11 +91,9 @@ export default function SignUpForm() {
       }
 
       // Success - redirect to registration success page
-      console.log('Registration successful:', data);
       navigate('/registration-success', { state: { email: formData.email } });
     } catch (err) {
       setError('Network error. Please try again.');
-      console.error('Error:', err);
     } finally {
       setLoading(false);
     }

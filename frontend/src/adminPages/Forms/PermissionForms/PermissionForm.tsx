@@ -84,7 +84,6 @@ export default function PermissionForm({
 
       onSuccess();
     } catch (err) {
-      console.error("Error saving permission:", err);
       setError("Failed to save permission");
     } finally {
       setLoading(false);

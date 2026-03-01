@@ -3,7 +3,7 @@
 
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
-// const logger = require('../../core/utils/logger');
+const logger = require('../../core/utils/logger');
 
 const list = async (req, res) => {
   try {
@@ -21,7 +21,7 @@ const list = async (req, res) => {
 
     res.json(successResponse({ data: result.rows, page: parseInt(page), limit: parseInt(limit) }));
   } catch (err) {
-    // logger.error('List clinics failed', { error: err.message });
+    logger.error('List clinics failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to fetch' });
   }
 };
@@ -39,7 +39,7 @@ const getById = async (req, res) => {
 
     res.json(successResponse(result.rows[0]));
   } catch (err) {
-    // logger.error('Get clinic failed', { error: err.message });
+    logger.error('Get clinic failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to fetch' });
   }
 };
@@ -108,7 +108,7 @@ const create = async (req, res) => {
 
     res.status(201).json(successResponse(result.rows[0], 'Created', 201));
   } catch (err) {
-    // logger.error('Create clinic failed', { error: err.message });
+    logger.error('Create clinic failed', { error: err.message });
     const isProd = process.env.NODE_ENV === 'production';
     res.status(500).json({ status: 'error', message: isProd ? 'Failed to create' : `Failed to create: ${err.message}` });
   }
@@ -174,7 +174,7 @@ const update = async (req, res) => {
 
     res.json(successResponse(result.rows[0], 'Updated'));
   } catch (err) {
-    // logger.error('Update clinic failed', { error: err.message });
+    logger.error('Update clinic failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to update' });
   }
 };
@@ -192,7 +192,7 @@ const delete_clinic = async (req, res) => {
 
     res.json(successResponse(null, 'Deleted'));
   } catch (err) {
-    // logger.error('Delete clinic failed', { error: err.message });
+    logger.error('Delete clinic failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to delete' });
   }
 };

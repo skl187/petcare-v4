@@ -61,7 +61,6 @@ export default function NotificationTemplateTable() {
       const list = Array.isArray((data as any).data) ? (data as any).data : [];
       setTemplates(list);
     } catch (err: any) {
-      console.error('Error fetching templates:', err);
       setFetchError(err.message || 'Failed to load templates');
     } finally {
       setIsLoadingData(false);

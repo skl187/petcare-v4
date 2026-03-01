@@ -336,7 +336,6 @@ export default function VetListForm({
       closeTimerRef.current = window.setTimeout(() => onCancel(), 2000);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
-      console.error('VetListForm error:', err);
       setBanner({
         message: `${veterinarian ? 'Update' : 'Create'} failed: ${message}. Please try again.`,
         type: 'error',

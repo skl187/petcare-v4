@@ -234,13 +234,11 @@ export default function EmployeeTable() {
     setIsChangePasswordDialogOpen(true);
   };
 
-  const handlePushNotificationSubmit = (data: PushNotificationFormData) => {
-    console.log('Push Notification Sent:', data);
+  const handlePushNotificationSubmit = (_data: PushNotificationFormData) => {
     setIsPushNotificationDialogOpen(false);
   };
 
-  const handleChangePasswordSubmit = (data: ChangePasswordFormData) => {
-    console.log('Password Changed:', data);
+  const handleChangePasswordSubmit = (_data: ChangePasswordFormData) => {
     setIsChangePasswordDialogOpen(false);
   };
 

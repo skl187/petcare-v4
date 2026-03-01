@@ -50,15 +50,10 @@ export interface PrescriptionDetail {
  * Create a new prescription with medications
  */
 export const savePrescription = async (
-  appointmentId: string,
+  _appointmentId: string,
   payload: PrescriptionPayload,
 ): Promise<any> => {
-  console.log('🔵 savePrescription called');
-  console.log('📦 Appointment ID:', appointmentId);
-  console.log('📦 Payload:', JSON.stringify(payload, null, 2));
-
   const endpoint = `${API_BASE_URL}/api/medical-records/prescriptions`;
-  console.log('📡 POST Endpoint:', endpoint);
 
   try {
     const response = await fetch(endpoint, {
@@ -69,17 +64,14 @@ export const savePrescription = async (
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('❌ Error response:', errorData);
       throw new Error(
         errorData.message || `HTTP error! status: ${response.status}`,
       );
     }
 
     const data = await response.json();
-    console.log('✅ Prescription saved successfully:', data);
     return data;
   } catch (error: any) {
-    console.error('❌ Error saving prescription:', error);
     throw error;
   }
 };
@@ -91,12 +83,7 @@ export const updatePrescription = async (
   prescriptionId: string,
   medications: Medication[],
 ): Promise<any> => {
-  console.log('🔵 updatePrescription called');
-  console.log('📦 Prescription ID:', prescriptionId);
-  console.log('📦 Medications:', JSON.stringify(medications, null, 2));
-
   const endpoint = `${API_BASE_URL}/api/medical-records/prescriptions/${prescriptionId}/medications`;
-  console.log('📡 PATCH Endpoint:', endpoint);
 
   try {
     const response = await fetch(endpoint, {
@@ -107,17 +94,14 @@ export const updatePrescription = async (
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('❌ Error response:', errorData);
       throw new Error(
         errorData.message || `HTTP error! status: ${response.status}`,
       );
     }
 
     const data = await response.json();
-    console.log('✅ Prescription updated successfully:', data);
     return data;
   } catch (error: any) {
-    console.error('❌ Error updating prescription:', error);
     throw error;
   }
 };
@@ -129,14 +113,10 @@ export const getPrescriptionById = async (
   prescriptionId: string,
 ): Promise<PrescriptionDetail> => {
   if (!prescriptionId || prescriptionId.trim() === '') {
-    console.error('❌ getPrescriptionById: Invalid prescription ID');
     throw new Error('Prescription ID is required');
   }
 
-  console.log('🔵 getPrescriptionById called with ID:', prescriptionId);
-
   const endpoint = `${API_BASE_URL}/api/medical-records/prescriptions/${prescriptionId}`;
-  console.log('📡 GET Endpoint:', endpoint);
 
   try {
     const response = await fetch(endpoint, {
@@ -146,17 +126,14 @@ export const getPrescriptionById = async (
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      console.error('❌ Error response:', errorData);
       throw new Error(
         errorData.message || `HTTP error! status: ${response.status}`,
       );
     }
 
     const data = await response.json();
-    console.log('✅ Prescription fetched successfully:', data);
     return data.data || data;
   } catch (error: any) {
-    console.error('❌ Error fetching prescription:', error);
     throw error;
   }
 };

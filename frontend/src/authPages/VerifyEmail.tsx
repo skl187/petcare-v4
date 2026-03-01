@@ -37,7 +37,6 @@ export default function VerifyEmail() {
           setTimeout(() => navigate('/signin', { replace: true }), 3000);
         }
       } catch (err) {
-        console.error(err);
         setError('Network error. Please try again.');
       } finally {
         setLoading(false);

@@ -1,6 +1,7 @@
 // src/modules/roles/roles_permissions.controller.js
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 /**
  * Get all permissions for a role
@@ -32,7 +33,7 @@ const getRolePermissions = async (req, res) => {
       permissions: result.rows
     }));
   } catch (err) {
-    console.error('Get role permissions error:', err);
+    logger.error('Get role permissions error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to get role permissions' });
   }
 };
@@ -82,7 +83,7 @@ const grantPermissionToRole = async (req, res) => {
       permission: permResult.rows[0]
     }, 'Permission granted to role'));
   } catch (err) {
-    console.error('Grant permission to role error:', err);
+    logger.error('Grant permission to role error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to grant permission' });
   }
 };
@@ -105,7 +106,7 @@ const revokePermissionFromRole = async (req, res) => {
 
     res.json(successResponse(null, 'Permission revoked from role'));
   } catch (err) {
-    console.error('Revoke permission from role error:', err);
+    logger.error('Revoke permission from role error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to revoke permission' });
   }
 };
@@ -165,7 +166,7 @@ const setRolePermissions = async (req, res) => {
       permissions: result.rows
     }, 'Role permissions updated'));
   } catch (err) {
-    console.error('Set role permissions error:', err);
+    logger.error('Set role permissions error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to set role permissions' });
   }
 };

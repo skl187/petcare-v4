@@ -13,7 +13,7 @@ const checkPermission = async (userId, action, resource) => {
   
   if (userPerm.rows.length > 0) return userPerm.rows[0].granted;
 
-  // // Fall back to role-based permissions, Check role_permissions table
+  // Fall back to role-based permissions
   const rolePerm = await query(
     `SELECT COUNT(*) as count FROM user_roles ur
      JOIN role_permissions rp ON ur.role_id = rp.role_id
@@ -28,16 +28,25 @@ const checkPermission = async (userId, action, resource) => {
 // Middleware for routes
 const authorize = (action, resource) => {
   return async (req, res, next) => {
-    const hasPermission = await checkPermission(req.user.id, action, resource);
-    
-    if (!hasPermission) {
-      return res.status(403).json({
+    try {
+      const hasPermission = await checkPermission(req.user.id, action, resource);
+
+      if (!hasPermission) {
+        return res.status(403).json({
+          status: 'error',
+          message: `You need ${action} ${resource} permission`,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      next();
+    } catch (err) {
+      return res.status(500).json({
         status: 'error',
-        message: `You need ${action} ${resource} permission`
+        message: 'Permission check failed',
+        timestamp: new Date().toISOString()
       });
     }
-    
-    next();
   };
 };
 

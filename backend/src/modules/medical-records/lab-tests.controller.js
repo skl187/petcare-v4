@@ -5,6 +5,7 @@
 
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 const listLabTests = async (req, res) => {
   try {
@@ -172,7 +173,7 @@ const getLabTestsByMedicalRecordId = async (req, res) => {
     // Fetch lab tests for this medical record
     const result = await query(
       `SELECT vlt.id, vlt.test_name, vlt.test_type, vlt.ordered_date, vlt.result_date,
-              vlt.status, vlt.urgency, vlt.cost, vlt.results, vlt.normal_range, 
+              vlt.status, vlt.urgency, vlt.cost, vlt.results, vlt.normal_range,
               vlt.interpretation, vlt.lab_name,
               p.name as pet_name
        FROM vet_lab_tests vlt
@@ -195,7 +196,7 @@ const getLabTestsByMedicalRecordId = async (req, res) => {
       total: parseInt(countResult.rows[0].total)
     }));
   } catch (err) {
-    console.error('Get lab tests error:', err);
+    logger.error('Get lab tests error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to fetch lab tests' });
   }
 };
@@ -226,7 +227,7 @@ const createLabTest = async (req, res) => {
 
     // Batch insert all tests
     const createdTests = [];
-    
+
     for (const test of lab_tests) {
       const result = await query(
         `INSERT INTO vet_lab_tests (
@@ -259,7 +260,7 @@ const createLabTest = async (req, res) => {
     }, `${createdTests.length} lab test(s) created`, 201));
 
   } catch (err) {
-    console.error('Create lab tests error:', err);
+    logger.error('Create lab tests error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to create lab tests' });
   }
 };
@@ -380,7 +381,7 @@ const updateLabTestById = async (req, res) => {
 
     res.json(successResponse(result.rows[0], 'Lab test details updated'));
   } catch (err) {
-    console.error('Update lab test error:', err);
+    logger.error('Update lab test error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to update lab test' });
   }
 };
@@ -401,7 +402,7 @@ const deleteLabTestById = async (req, res) => {
 
     res.json(successResponse(null, 'Lab test deleted'));
   } catch (err) {
-    console.error('Delete lab test error:', err);
+    logger.error('Delete lab test error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to delete lab test' });
   }
 };

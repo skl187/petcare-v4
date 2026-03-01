@@ -145,7 +145,6 @@ export default function VeterinaryBookingsDetail({
       }
 
       const data = await response.json();
-      console.log('Appointment data refreshed:', data);
 
       // Map API response to AppointmentDetail interface
       const updatedAppointment: AppointmentDetail = {
@@ -187,23 +186,9 @@ export default function VeterinaryBookingsDetail({
         lab_tests: data.data?.lab_tests || [],
         vaccinations: data.data?.vaccinations || [],
       };
-      console.log(
-        '🔄 Refresh - medical_records:',
-
-        updatedAppointment.medical_records,
-      );
-      console.log(
-        '🔄 Refresh - prescriptions:',
-        updatedAppointment.prescriptions,
-      );
-      console.log('🔄 Refresh - lab_tests:', updatedAppointment.lab_tests);
-      console.log(
-        '🔄 Refresh - vaccinations:',
-        updatedAppointment.vaccinations,
-      );
       setAppointment(updatedAppointment);
     } catch (err) {
-      console.error('Error refreshing appointment:', err);
+      // silently ignore
     } finally {
       setLoading(false);
     }
@@ -259,7 +244,6 @@ export default function VeterinaryBookingsDetail({
           }
 
           const data = await response.json();
-          console.log('Full appointment data received:', data);
 
           // Map API response to AppointmentDetail interface
           const apiAppointment: AppointmentDetail = {
@@ -306,19 +290,9 @@ export default function VeterinaryBookingsDetail({
             vaccinations: data.data?.vaccinations || [],
           };
 
-          console.log(
-            '📋 Mapped medical_records:',
-            apiAppointment.medical_records,
-          );
-          console.log('📋 Mapped prescriptions:', apiAppointment.prescriptions);
-          console.log('📋 Mapped lab_tests:', apiAppointment.lab_tests);
-          console.log('📋 Mapped vaccinations:', apiAppointment.vaccinations);
-
-          console.log('Mapped full appointment:', apiAppointment);
           setAppointment(apiAppointment);
           setLoading(false);
         } catch (err) {
-          console.error('Error fetching full appointment details:', err);
           // Fall back to mapped basic data
           const mappedData: AppointmentDetail = {
             id: appointmentData.id,
@@ -359,13 +333,6 @@ export default function VeterinaryBookingsDetail({
       setLoading(true);
       setError(null);
       try {
-        console.log(
-          'Fetching appointment with ID:',
-          passedAppointmentId,
-          'petId:',
-          passedPetId,
-        );
-
         // TODO: Replace with actual API call
         const token = sessionStorage.getItem('token');
         const appointmentIdToFetch = passedAppointmentId || 'default';
@@ -382,7 +349,6 @@ export default function VeterinaryBookingsDetail({
         );
 
         const data = await response.json();
-        console.log('Appointment data received:', data);
 
         if (response.ok && data.data) {
           // Map API response to AppointmentDetail interface
@@ -428,14 +394,11 @@ export default function VeterinaryBookingsDetail({
             allergies: data.data.allergies || '',
             veterinarian_id: data.data.veterinarian_id || '',
           };
-          console.log('Mapped appointment:', apiAppointment);
           setAppointment(apiAppointment);
         } else {
-          console.log('API error or no data, using default appointment');
           setAppointment(defaultAppointment);
         }
       } catch (err) {
-        console.error('Fetch error:', err);
         setError(
           err instanceof Error ? err.message : 'Failed to fetch appointment',
         );

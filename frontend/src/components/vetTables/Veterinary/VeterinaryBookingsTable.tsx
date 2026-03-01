@@ -111,8 +111,6 @@ export default function VeterinaryBookingsTable({
       try {
         const token = sessionStorage.getItem('token');
         const url = API_ENDPOINTS.VETERINARY_BOOKINGS.BASE(filter);
-        console.log('Fetching from URL:', url);
-        console.log('Token exists:', !!token);
 
         const response = await fetch(url, {
           method: 'GET',
@@ -130,8 +128,6 @@ export default function VeterinaryBookingsTable({
           },
         });
 
-        console.log('Response status:', response.status);
-
         if (!response.ok) {
           throw new Error(
             `Failed to fetch bookings: ${response.status} ${response.statusText}`,
@@ -139,7 +135,6 @@ export default function VeterinaryBookingsTable({
         }
 
         const data = await response.json();
-        console.log('Fetched bookings:', data);
 
         let petTypeIconMap: Record<string, string> = {};
         if (petTypesResponse.ok) {
@@ -177,8 +172,6 @@ export default function VeterinaryBookingsTable({
         // Map API response to VetBooking format
         // Handle nested data structure: response.data.data is the array
         const bookingsArray = data?.data?.data || data?.data || [];
-        console.log('Bookings array:', bookingsArray);
-        console.log('Bookings array length:', bookingsArray.length);
 
         if (Array.isArray(bookingsArray) && bookingsArray.length > 0) {
           const mappedBookings: VetBooking[] = bookingsArray.map(
@@ -227,21 +220,16 @@ export default function VeterinaryBookingsTable({
                 status: (booking.status || 'Pending') as VetBookingStatus,
                 notes: booking.notes || '',
               };
-              console.log('Mapped booking:', mapped);
               return mapped;
             },
           );
-          console.log('Final mapped bookings:', mappedBookings);
           setRows(mappedBookings);
         } else {
-          console.log('No bookings array found or empty');
           setRows([]);
         }
       } catch (err) {
-        console.error('Error fetching bookings:', err);
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to load bookings';
-        console.error('Full error:', err);
         setError(errorMessage);
         setRows([]); // Empty array instead of mock data
       } finally {

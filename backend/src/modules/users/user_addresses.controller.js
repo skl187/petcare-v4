@@ -1,6 +1,7 @@
 // src/modules/users/user_addresses.controller.js
 const { query, transaction } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 // List addresses for a user
 const listAddresses = async (req, res) => {
@@ -16,7 +17,7 @@ const listAddresses = async (req, res) => {
 
     res.json(successResponse(result.rows));
   } catch (err) {
-    console.error('List addresses error:', err.message);
+    logger.error('List addresses error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch addresses' });
   }
 };
@@ -48,7 +49,7 @@ const createAddress = async (req, res) => {
 
     res.status(201).json(successResponse(result, 'Address created', 201));
   } catch (err) {
-    console.error('Create address error:', err.message);
+    logger.error('Create address error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to create address' });
   }
 };
@@ -91,7 +92,7 @@ const updateAddress = async (req, res) => {
 
     res.json(successResponse(result, 'Address updated successfully'));
   } catch (err) {
-    console.error('Update address error:', err.message);
+    logger.error('Update address error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to update address' });
   }
 };
@@ -109,7 +110,7 @@ const deleteAddress = async (req, res) => {
 
     res.json(successResponse(null, 'Address deleted successfully'));
   } catch (err) {
-    console.error('Delete address error:', err.message);
+    logger.error('Delete address error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to delete address' });
   }
 };

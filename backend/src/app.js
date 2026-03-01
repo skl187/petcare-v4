@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
+const logger = require('./core/utils/logger');
 const { initializeDatabase } = require('./core/db/pool');
 const { errorHandler } = require('./core/utils/response');
 const { authMiddleware } = require('./core/auth/auth.middleware');
@@ -25,10 +26,10 @@ async function initApp() {
     await initializeDatabase();
     await loadSettings();
     dbReady = true;
-    console.log('✓ Database & settings initialized');
+    logger.info('Database & settings initialized');
   } catch (err) {
     dbReady = false;
-    console.warn('⚠️ Initialization warning:', err.message);
+    logger.warn('Initialization warning', err);
   }
 }
 
@@ -40,9 +41,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Request logger (simple)
+// Request logger
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} → ${req.method} ${req.originalUrl}`);
+  logger.debug(`${req.method} ${req.originalUrl}`);
   next();
 });
 
@@ -50,7 +51,9 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   if (!dbReady) {
     return res.status(503).json({
-      error: 'Database not ready. Please try again shortly.'
+      status: 'error',
+      message: 'Database not ready. Please try again shortly.',
+      timestamp: new Date().toISOString()
     });
   }
   next();
@@ -91,7 +94,11 @@ app.get('/', (req, res) => {
 
 // ==================== 404 ====================
 app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+  res.status(404).json({
+    status: 'error',
+    message: 'Route not found',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // ==================== GLOBAL ERROR ====================

@@ -104,7 +104,6 @@ const ServiceListTable = () => {
 
       setServices(items);
     } catch (error: any) {
-      console.error('Error fetching services:', error);
       setFetchError(error.message || 'Failed to load services');
     } finally {
       setIsLoadingData(false);

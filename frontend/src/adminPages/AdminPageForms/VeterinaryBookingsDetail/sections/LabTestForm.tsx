@@ -66,14 +66,6 @@ export default function LabTestForm({
 
   // Load lab test if labTestId is provided
   useEffect(() => {
-    console.log('===================================');
-    console.log('LabTestForm useEffect triggered');
-    console.log('appointmentId:', appointmentId);
-    console.log('petId:', petId);
-    console.log('medicalRecordId:', medicalRecordId);
-    console.log('labTestId:', labTestId);
-    console.log('===================================');
-
     if (labTestId && labTestId.trim() !== '') {
       loadLabTest();
     }
@@ -82,11 +74,8 @@ export default function LabTestForm({
   const loadLabTest = async () => {
     setLoading(true);
     setError(null);
-    console.log('Starting loadLabTest for ID:', labTestId);
     try {
-      console.log('Calling getLabTestById with labTestId:', labTestId);
       const labTest = await getLabTestById(labTestId);
-      console.log('Lab test loaded successfully:', labTest);
 
       // Load lab test data into current form for editing
       setCurrentLabTest({
@@ -103,13 +92,10 @@ export default function LabTestForm({
         medical_record_id: labTest.medical_record_id,
         lab_tests: [],
       });
-
-      console.log('✅ Form data updated successfully');
     } catch (err) {
       const errorMsg =
         err instanceof Error ? err.message : 'Failed to load lab test';
       setError(errorMsg);
-      console.error('Error loading lab test:', err);
     } finally {
       setLoading(false);
     }
@@ -195,9 +181,6 @@ export default function LabTestForm({
     try {
       if (labTestId && labTestId.trim() !== '') {
         // Update existing lab test using PATCH
-        console.log('Updating lab test:', labTestId);
-        console.log('Lab Test Data:', currentLabTest);
-
         await updateLabTest(labTestId, currentLabTest);
 
         setSuccess('Lab test updated successfully!');
@@ -209,8 +192,6 @@ export default function LabTestForm({
           medical_record_id: formData.medical_record_id,
           lab_tests: formData.lab_tests,
         };
-
-        console.log('Creating new lab test:', payload);
 
         await saveLabTest(appointmentId, payload);
 
@@ -224,7 +205,6 @@ export default function LabTestForm({
       const errorMsg =
         err instanceof Error ? err.message : 'Failed to save lab test';
       setError(errorMsg);
-      console.error('Error saving lab test:', err);
     } finally {
       setLoading(false);
     }

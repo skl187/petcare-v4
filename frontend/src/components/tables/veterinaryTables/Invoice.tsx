@@ -142,7 +142,6 @@ const Invoice: React.FC = () => {
 
       pdf.save(`invoice_${booking.id}.pdf`);
     } catch (error) {
-      console.error('PDF generation error:', error);
       alert('Failed to generate PDF. Please try again.');
     }
   };

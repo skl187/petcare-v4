@@ -171,7 +171,6 @@ export default function PetBreedTable() {
         );
         setTimeout(() => setSuccessBanner(null), 4000);
       } catch (err) {
-        console.error('Failed to update status for selected rows', err);
         setFetchError('Failed to update status for selected rows');
         await fetchPetBreeds();
       }
@@ -242,7 +241,6 @@ export default function PetBreedTable() {
       setSuccessBanner('Breed(s) deleted successfully!');
       setTimeout(() => setSuccessBanner(null), 4000);
     } catch (err) {
-      console.error('Delete failed:', err);
       const errorMessage = err instanceof Error ? err.message : 'Delete failed';
       setFetchError(`Could not delete breed(s): ${errorMessage}`);
     } finally {
@@ -291,7 +289,6 @@ export default function PetBreedTable() {
       setEditPetBreed(editData);
       setIsAddDialogOpen(false);
     } catch (err) {
-      console.error('Failed to fetch breed:', err);
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to fetch breed details';
       setFetchError(`Could not load breed details: ${errorMessage}`);
@@ -344,7 +341,6 @@ export default function PetBreedTable() {
       );
       setTimeout(() => setSuccessBanner(null), 4000);
     } catch (err) {
-      console.error('Failed to toggle status:', err);
       setPetBreeds((prev) =>
         prev.map((p) => (p.id === id ? { ...p, status: current.status } : p)),
       );
@@ -399,7 +395,6 @@ export default function PetBreedTable() {
       setSelectedRows([]);
     } catch (err: any) {
       if (err?.name === 'AbortError') return;
-      console.error('Failed to fetch breeds', err);
       setFetchError(
         err instanceof Error ? err.message : 'Failed to fetch breeds',
       );
@@ -436,8 +431,8 @@ export default function PetBreedTable() {
       }));
 
       setPetTypes(types);
-    } catch (err) {
-      console.error('Failed to fetch pet types', err);
+    } catch {
+      // silently ignore
     }
   }, []);
 

@@ -268,7 +268,6 @@ export const getVeterinarianReviewsNew = async (
   if (params?.limit) queryParams.set('limit', params.limit.toString());
 
   const url = `${API_ENDPOINTS.REVIEWS.BY_VETERINARIAN(veterinarianId)}?${queryParams.toString()}`;
-  console.log('[reviewsService] Fetching from:', url);
 
   const response = await fetch(url, {
     method: 'GET',
@@ -283,7 +282,6 @@ export const getVeterinarianReviewsNew = async (
 
   const result: ApiResponse<VeterinarianReviewsResponse> =
     await response.json();
-  console.log('[reviewsService] API Response:', result);
   return result.data;
 };
 

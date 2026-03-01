@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { MdAdd, MdEdit, MdClose } from 'react-icons/md';
 import { AppointmentDetail } from '../VeterinaryBookingsDetail';
 import MedicalRecordForm from './MedicalRecordForm';
-import { formatDate, formatTime, formatDateTime } from '../../../../utils/formatDate';
+import { formatDate, formatDateTime } from '../../../../utils/formatDate';
 import PrescriptionForm from './PrescriptionForm';
 import LabTestForm from './LabTestForm';
 import VaccinationForm from './VaccinationForm';
@@ -64,81 +64,44 @@ export default function AppointmentWorkflowSection({
 
   // Load medical records from appointment data
   useEffect(() => {
-    console.log('🚀 === AppointmentWorkflowSection useEffect START ===');
-    console.log('🚀 appointment.id:', appointment.id);
-    console.log('🚀 appointment object:', appointment);
-    console.log(
-      '🚀 appointment.vaccinations exists?:',
-      !!appointment.vaccinations,
-    );
-    console.log('🚀 appointment.vaccinations value:', appointment.vaccinations);
-    console.log('=== AppointmentWorkflowSection useEffect triggered ===');
-    console.log('appointment:', appointment);
-    console.log('appointment.medical_records:', appointment.medical_records);
-
     // Load medical records
     if (
       appointment.medical_records &&
       Array.isArray(appointment.medical_records) &&
       appointment.medical_records.length > 0
     ) {
-      console.log(
-        '✅ Found medical records:',
-        appointment.medical_records.length,
-      );
-
       const loadMedicalRecords = async () => {
         const recordsData: MedicalRecordDetail[] = [];
 
         for (const record of appointment.medical_records!) {
-          console.log('🔄 Processing record:', record.id);
           try {
-            console.log(
-              '📡 About to call getMedicalRecordById with ID:',
-              record.id,
-            );
             const fullRecord = await getMedicalRecordById(record.id);
-            console.log('✅ Got full record:', fullRecord.id);
             recordsData.push(fullRecord);
           } catch (error) {
-            console.error('❌ Failed to fetch record', record.id, ':', error);
+            // silently ignore
           }
         }
 
-        console.log('🎉 Loaded all records. Count:', recordsData.length);
         setMedicalRecords(recordsData);
       };
 
       loadMedicalRecords();
     } else {
-      console.log('❌ medical_records is not available or empty');
       setMedicalRecords([]);
     }
 
     // Load prescriptions
     if (appointment.prescriptions && Array.isArray(appointment.prescriptions)) {
-      console.log('✅ Found prescriptions:', appointment.prescriptions.length);
       const loadPrescriptions = async () => {
         const prescriptionsData: PrescriptionDetail[] = [];
         for (const prescription of appointment.prescriptions!) {
-          console.log('🔄 Processing prescription:', prescription.id);
           try {
             const fullPrescription = await getPrescriptionById(prescription.id);
-            console.log('✅ Got full prescription:', fullPrescription.id);
             prescriptionsData.push(fullPrescription);
           } catch (error) {
-            console.error(
-              '❌ Failed to fetch prescription',
-              prescription.id,
-              ':',
-              error,
-            );
+            // silently ignore
           }
         }
-        console.log(
-          '🎉 Loaded all prescriptions. Count:',
-          prescriptionsData.length,
-        );
         setPrescriptions(prescriptionsData);
       };
       loadPrescriptions();
@@ -146,14 +109,11 @@ export default function AppointmentWorkflowSection({
 
     // Load lab tests
     if (appointment.lab_tests && Array.isArray(appointment.lab_tests)) {
-      console.log('✅ Found lab tests:', appointment.lab_tests.length);
       const loadLabTests = async () => {
         const labTestsData: LabTestDetail[] = [];
         for (const labTest of appointment.lab_tests!) {
-          console.log('🔄 Processing lab test:', labTest.id);
           try {
             const singleLabTest = await getLabTestById(labTest.id);
-            console.log('✅ Got full lab test:', singleLabTest.id);
             // Convert SingleLabTestResponse to LabTestDetail format
             const labTestDetail: LabTestDetail = {
               id: singleLabTest.id,
@@ -176,15 +136,9 @@ export default function AppointmentWorkflowSection({
             };
             labTestsData.push(labTestDetail);
           } catch (error) {
-            console.error(
-              '❌ Failed to fetch lab test',
-              labTest.id,
-              ':',
-              error,
-            );
+            // silently ignore
           }
         }
-        console.log('🎉 Loaded all lab tests. Count:', labTestsData.length);
         setLabTests(labTestsData);
       };
       loadLabTests();
@@ -193,41 +147,19 @@ export default function AppointmentWorkflowSection({
 
   // Load vaccinations independently - runs in separate useEffect
   useEffect(() => {
-    console.log('🔵 === VACCINATION useEffect START (INDEPENDENT) ===');
-    console.log('🔍 appointment.vaccinations:', appointment.vaccinations);
-    console.log('� === REACHED VACCINATION LOADING CODE ===');
-    console.log(
-      '🔍 Checking vaccinations in appointment:',
-      appointment.vaccinations,
-    );
-    console.log('🔍 Is array?:', Array.isArray(appointment.vaccinations));
-    console.log('🔍 Length:', appointment.vaccinations?.length);
     if (
       appointment.vaccinations &&
       Array.isArray(appointment.vaccinations) &&
       appointment.vaccinations.length > 0
     ) {
-      console.log('✅ Found vaccinations:', appointment.vaccinations.length);
-      console.log(
-        '📦 Vaccination data from appointment:',
-        JSON.stringify(appointment.vaccinations, null, 2),
-      );
-
       // Transform flat vaccination data to VaccinationDetail format
       const vaccinationsData: VaccinationDetail[] =
         appointment.vaccinations.map((vaccination) => {
-          console.log('🔄 Processing vaccination ID:', vaccination.id);
-          console.log(
-            '📦 Full vaccination object:',
-            JSON.stringify(vaccination, null, 2),
-          );
-
           // Check if already in nested format
           if (
             'vaccinations' in vaccination &&
             Array.isArray((vaccination as any).vaccinations)
           ) {
-            console.log('✅ Vaccination already in nested format');
             return vaccination as any as VaccinationDetail;
           }
 
@@ -263,24 +195,11 @@ export default function AppointmentWorkflowSection({
             ],
           };
 
-          console.log(
-            '✅ Transformed vaccination:',
-            JSON.stringify(vaccinationDetail, null, 2),
-          );
           return vaccinationDetail;
         });
 
-      console.log(
-        '🎉 ALL vaccinations transformed. Count:',
-        vaccinationsData.length,
-      );
-      console.log(
-        '📦 Final vaccinations data:',
-        JSON.stringify(vaccinationsData, null, 2),
-      );
       setVaccinations(vaccinationsData);
     } else {
-      console.log('❌ No vaccinations found in appointment');
       setVaccinations([]);
     }
   }, [appointment.id, appointment.vaccinations]);
@@ -291,7 +210,6 @@ export default function AppointmentWorkflowSection({
   };
 
   const handleEditMedicalRecord = (recordId: string) => {
-    console.log('Edit medical record clicked with ID:', recordId);
     setEditingRecordId(recordId);
     setShowMedicalRecordModal(true);
   };
@@ -316,7 +234,6 @@ export default function AppointmentWorkflowSection({
   };
 
   const handleEditPrescription = (prescriptionId: string) => {
-    console.log('Edit prescription clicked with ID:', prescriptionId);
     setEditingPrescriptionId(prescriptionId);
     setShowPrescriptionModal(true);
   };
@@ -340,7 +257,6 @@ export default function AppointmentWorkflowSection({
   };
 
   const handleEditLabTest = (labTestId: string) => {
-    console.log('Edit lab test clicked with ID:', labTestId);
     setEditingLabTestId(labTestId);
     setShowLabTestModal(true);
   };
@@ -464,7 +380,6 @@ export default function AppointmentWorkflowSection({
             {medicalRecords.length > 0 && (
               <div className='space-y-4'>
                 {medicalRecords.map((record, index) => {
-                  console.log('Displaying medical record:', record);
                   return (
                     <div
                       key={record.id || index}
@@ -826,14 +741,6 @@ export default function AppointmentWorkflowSection({
 
         {activeTab === 'vaccinations' && (
           <div>
-            {(() => {
-              console.log(
-                '🔍 VACCINATION TAB - Rendering with vaccinations:',
-                vaccinations,
-              );
-              console.log('🔍 VACCINATION TAB - Count:', vaccinations.length);
-              return null;
-            })()}
             {!readOnly && (
               <div className='mb-6'>
                 <button
@@ -976,10 +883,6 @@ export default function AppointmentWorkflowSection({
       {/* Medical Record Modal */}
       {showMedicalRecordModal && !readOnly && (
         <>
-          {console.log('===== MODAL OPENED =====')}
-          {console.log('showMedicalRecordModal:', showMedicalRecordModal)}
-          {console.log('editingRecordId:', editingRecordId)}
-          {console.log('=======================')}
           <div className='fixed inset-0 z-50 flex items-center justify-center pointer-events-none'>
             <div className='pointer-events-auto w-full max-w-3xl max-h-[90vh] bg-white rounded-lg shadow-2xl overflow-hidden'>
               {/* Modal Header */}
@@ -1019,10 +922,6 @@ export default function AppointmentWorkflowSection({
       {/* Prescription Modal */}
       {showPrescriptionModal && !readOnly && (
         <>
-          {console.log('===== PRESCRIPTION MODAL OPENED =====')}
-          {console.log('showPrescriptionModal:', showPrescriptionModal)}
-          {console.log('editingPrescriptionId:', editingPrescriptionId)}
-          {console.log('====================================')}
           <div className='fixed inset-0 z-50 flex items-center justify-center pointer-events-none'>
             <div className='pointer-events-auto w-full max-w-4xl max-h-[90vh] bg-white rounded-lg shadow-2xl overflow-hidden'>
               {/* Modal Header */}
@@ -1063,10 +962,6 @@ export default function AppointmentWorkflowSection({
       {/* Lab Test Modal */}
       {showLabTestModal && !readOnly && (
         <>
-          {console.log('===== LAB TEST MODAL OPENED =====')}
-          {console.log('showLabTestModal:', showLabTestModal)}
-          {console.log('editingLabTestId:', editingLabTestId)}
-          {console.log('====================================')}{' '}
           <div className='fixed inset-0 z-50 flex items-center justify-center pointer-events-none'>
             <div className='pointer-events-auto w-full max-w-3xl max-h-[90vh] bg-white rounded-lg shadow-2xl overflow-hidden'>
               {/* Modal Header */}
@@ -1104,10 +999,6 @@ export default function AppointmentWorkflowSection({
       {/* Vaccination Modal */}
       {showVaccinationModal && !readOnly && (
         <>
-          {console.log('===== VACCINATION MODAL OPENED =====')}
-          {console.log('showVaccinationModal:', showVaccinationModal)}
-          {console.log('editingVaccinationId:', editingVaccinationId)}
-          {console.log('====================================')}{' '}
           <div className='fixed inset-0 z-50 flex items-center justify-center pointer-events-none'>
             <div className='pointer-events-auto w-full max-w-3xl max-h-[90vh] bg-white rounded-lg shadow-2xl overflow-hidden'>
               {/* Modal Header */}

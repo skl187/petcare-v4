@@ -159,8 +159,8 @@ export default function UpcomingBookingsTable({
           image: p.image ?? '',
         })),
       );
-    } catch (error) {
-      console.error('Error fetching pets:', error);
+    } catch {
+      // silently ignore
     }
   }, []);
 
@@ -255,7 +255,6 @@ export default function UpcomingBookingsTable({
 
       setAppointments(items);
     } catch (error: any) {
-      console.error('Error fetching appointments:', error);
       setFetchError(error.message || 'Failed to load appointments');
     } finally {
       setIsLoadingData(false);

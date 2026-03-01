@@ -205,7 +205,6 @@ export default function PetBreedForm({
       closeTimerRef.current = window.setTimeout(() => onCancel(), 5000);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An error occurred';
-      console.error('PetBreedForm error:', err);
       setBanner({
         message: `${petBreed ? 'Update' : 'Create'} failed: ${message}. Please try again.`,
         type: 'error',
