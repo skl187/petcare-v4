@@ -122,6 +122,7 @@ export default function ForgotPassword() {
                     <Button
                       className='w-full'
                       size='sm'
+                      type='submit'
                       disabled={!isValid || loading}
                     >
                       {loading ? 'Sending...' : 'Send reset link'}
