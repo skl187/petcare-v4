@@ -12,6 +12,7 @@ frontend/dist/
 
 backend/node_modules/
 
+.gitignore
 .docs
 .sql
 deployment.md
@@ -19,3 +20,4 @@ full_backup.sql
 nginx.conf
 nginx.dev.conf
 readme.md
+deploy.sh
