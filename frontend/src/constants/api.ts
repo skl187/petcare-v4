@@ -1,6 +1,7 @@
 // API Base URL from environment variables
+// Fallback: Use current origin if VITE_API_BASE_URL is not set
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+  import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '');
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -13,6 +14,7 @@ export const API_ENDPOINTS = {
     RESET_PASSWORD: `${API_BASE_URL}/api/auth/reset-password`,
     VERIFY_EMAIL: `${API_BASE_URL}/api/auth/verify-email`,
     RESEND_VERIFICATION: `${API_BASE_URL}/api/auth/resend-verification`,
+    ME: `${API_BASE_URL}/api/auth/me`,
   },
 
   // Pets
@@ -46,6 +48,7 @@ export const API_ENDPOINTS = {
   APPOINTMENTS: {
     BASE: `${API_BASE_URL}/api/appointments`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/appointments/${id}`,
+    SEND_NOTIFICATION: (id: string) => `${API_BASE_URL}/api/appointments/${id}/send-notification`,
   },
 
   // Owner Bookings
@@ -57,8 +60,12 @@ export const API_ENDPOINTS = {
 
   // Vet Services
   VET_SERVICES: {
-    BASE: `${API_BASE_URL}/api/vet-services`,
-    DETAIL: (id: string) => `${API_BASE_URL}/api/vet-services/${id}`,
+    BASE: `${API_BASE_URL}/api/vet-services/my`,
+    ADMIN_BASE: `${API_BASE_URL}/api/vet-services`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/vet-services/my/${id}`,
+    CLINICS: `${API_BASE_URL}/api/vet-services/my/clinics`,
+    ACTIVE_FOR_BOOKING: (vetId: string, clinicId: string) =>
+      `${API_BASE_URL}/api/vet-services/active?vet_id=${vetId}&clinic_id=${clinicId}`,
   },
 
   // Clinics
@@ -70,6 +77,7 @@ export const API_ENDPOINTS = {
   VETERINARIANS: {
     BASE: `${API_BASE_URL}/api/veterinarians`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/veterinarians/${id}`,
+    BY_CLINIC: (clinicId: string) => `${API_BASE_URL}/api/veterinarians?clinic_id=${clinicId}&limit=100`,
   },
 
   // Roles
@@ -135,7 +143,41 @@ export const API_ENDPOINTS = {
     RESEND: (id: string) => `${API_BASE_URL}/api/notifications/${id}/resend`,
     TEMPLATES: {
       BASE: `${API_BASE_URL}/api/notifications/templates`,
-      DETAIL: (key: string) => `${API_BASE_URL}/api/notifications/templates/${key}`,
+      DETAIL: (key: string) =>
+        `${API_BASE_URL}/api/notifications/templates/${key}`,
     },
+  },
+
+  // Vet Schedules
+  VET_SCHEDULES: {
+    BASE: `${API_BASE_URL}/api/vet-schedules/my`,
+    EXCEPTIONS: `${API_BASE_URL}/api/vet-schedules/exceptions/my`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/vet-schedules/${id}`,
+    FOR_BOOKING: (vetId: string, clinicId: string) =>
+      `${API_BASE_URL}/api/vet-schedules?veterinarian_id=${vetId}&clinic_id=${clinicId}`,
+    EXCEPTIONS_FOR_BOOKING: (vetId: string, clinicId: string) =>
+      `${API_BASE_URL}/api/vet-schedules/exceptions?veterinarian_id=${vetId}&clinic_id=${clinicId}`,
+  },
+
+  // Vet Clinic Mappings
+  VET_CLINIC_MAPPINGS: `${API_BASE_URL}/api/vet-clinic-mappings`,
+
+  // Split Payments
+  SPLIT_PAYMENTS: {
+    BASE: (appointmentId: string) =>
+      `${API_BASE_URL}/api/vet-appointments/${appointmentId}/payments`,
+    DETAIL: (appointmentId: string, paymentId: string) =>
+      `${API_BASE_URL}/api/vet-appointments/${appointmentId}/payments/${paymentId}`,
+    SUMMARY: (appointmentId: string) =>
+      `${API_BASE_URL}/api/vet-appointments/${appointmentId}/payment-summary`,
+  },
+
+  // Payments
+  PAYMENTS: {
+    BASE: `${API_BASE_URL}/api/payments`,
+    ALL: `${API_BASE_URL}/api/payments/all`,
+    VET: `${API_BASE_URL}/api/payments/vet`,
+    USER: `${API_BASE_URL}/api/payments/user`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/payments/${id}`,
   },
 } as const;

@@ -3,6 +3,7 @@
 
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 const list = async (req, res) => {
   try {
@@ -27,7 +28,7 @@ const list = async (req, res) => {
 
     res.json(successResponse({ data: result.rows, page: parseInt(page), limit: parseInt(limit) }));
   } catch (err) {
-    console.error('List breeds failed', err);
+    logger.error('List breeds failed', err);
     res.status(500).json({ status: 'error', message: 'Failed to fetch' });
   }
 };
@@ -48,7 +49,7 @@ const getById = async (req, res) => {
 
     res.json(successResponse(result.rows[0]));
   } catch (err) {
-    console.error('Get breed failed', err);
+    logger.error('Get breed failed', err);
     res.status(500).json({ status: 'error', message: 'Failed to fetch' });
   }
 };
@@ -78,21 +79,10 @@ const create = async (req, res) => {
        RETURNING id, name, created_at`,
       [name, slug || null, petTypeId, description || null, status || 1, (req.user && req.user.id) || null]
     );
-/*
-    try {
-      await query(
-        `INSERT INTO audit_logs (user_id, action, resource, changes, metadata)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [(req.user && req.user.id) || null, 'create', 'breed', JSON.stringify({ name, petTypeId }), JSON.stringify({ ip: req.ip })]
-      );
-    } catch (auditErr) {
-      console.error('Failed to write audit log', auditErr);
-      // Non-fatal - continue
-    }
-*/
+
     res.status(201).json(successResponse(result.rows[0], 'Created', 201));
   } catch (err) {
-    //console.error('Create breed failed', err);
+    logger.error('Create breed failed', err);
     res.status(500).json({ status: 'error', message: 'Failed to create' });
   }
 };
@@ -136,7 +126,7 @@ const update = async (req, res) => {
 
     res.json(successResponse(result.rows[0], 'Updated'));
   } catch (err) {
-    //console.error('Update breed failed', err);
+    logger.error('Update breed failed', err);
     res.status(500).json({ status: 'error', message: 'Failed to update' });
   }
 };
@@ -152,11 +142,11 @@ const delete_breed = async (req, res) => {
       return res.status(404).json({ status: 'error', message: 'Not found' });
     }
 
-    //logger.info('Breed deleted', { userId: req.user.id, breedId: req.params.id });
+    logger.info('Breed deleted', { userId: req.user.id, breedId: req.params.id });
 
     res.json(successResponse(null, 'Deleted'));
   } catch (err) {
-    //logger.error('Delete breed failed', { error: err.message });
+    logger.error('Delete breed failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to delete' });
   }
 };

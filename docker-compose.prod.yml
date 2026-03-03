@@ -1,0 +1,28 @@
+# version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - db_default
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dist
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+    - "5173:5173"
+    networks:
+      - db_default
+
+networks:
+  db_default:
+    external: true

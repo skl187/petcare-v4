@@ -5,6 +5,7 @@
 
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 // ============================================================================
 // ADMIN DASHBOARD SUMMARY
@@ -199,7 +200,7 @@ const getAdminDashboardSummary = async (req, res) => {
     }, 'Admin dashboard summary retrieved successfully'));
 
   } catch (err) {
-    console.error('Admin dashboard summary error:', err.message);
+    logger.error('Admin dashboard summary error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch admin dashboard summary' });
   }
 };
@@ -353,7 +354,7 @@ const getOwnerDashboardSummary = async (req, res) => {
     }, 'Owner dashboard summary retrieved successfully'));
 
   } catch (err) {
-    console.error('Owner dashboard summary error:', err.message);
+    logger.error('Owner dashboard summary error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch owner dashboard summary' });
   }
 };
@@ -613,7 +614,7 @@ const getVeterinarianDashboardSummary = async (req, res) => {
     }, 'Veterinarian dashboard summary retrieved successfully'));
 
   } catch (err) {
-    console.error('Veterinarian dashboard summary error:', err.message);
+    logger.error('Veterinarian dashboard summary error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch veterinarian dashboard summary' });
   }
 };
@@ -665,7 +666,7 @@ const getUserProfile = async (req, res) => {
     }, 'User profile retrieved successfully'));
 
   } catch (err) {
-    console.error('Get user profile error:', err.message);
+    logger.error('Get user profile error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch user profile' });
   }
 };
@@ -712,7 +713,7 @@ const updateUserProfile = async (req, res) => {
 
     res.json(successResponse(result.rows[0], 'Profile updated successfully'));
   } catch (err) {
-    console.error('Update user profile error:', err.message);
+    logger.error('Update user profile error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to update profile' });
   }
 };

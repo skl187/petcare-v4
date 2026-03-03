@@ -8,8 +8,15 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 });
 
+// Lazy-load logger to avoid circular dependency during startup
+let _logger = null;
+const getLogger = () => {
+  if (!_logger) _logger = require('../utils/logger');
+  return _logger;
+};
+
 pool.on('error', (err) => {
-  console.error('Unexpected error on idle client:', err);
+  getLogger().error('Unexpected error on idle client', err);
 });
 
 /**
@@ -20,9 +27,9 @@ const initializeDatabase = async () => {
     const client = await pool.connect();
     await client.query('SELECT 1');
     client.release();
-    console.log('✓ Database connected');
+    getLogger().info('Database connected');
   } catch (err) {
-    console.error('✗ Database connection failed:', err);
+    getLogger().error('Database connection failed', err);
     throw err;
   }
 };

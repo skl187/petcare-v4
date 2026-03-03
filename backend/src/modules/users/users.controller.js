@@ -1,10 +1,9 @@
-
-
 // src/modules/users/users.controller.js
 const { query, transaction } = require('../../core/db/pool');
 const { getPaginationParams, paginate } = require('../../core/utils/pagination');
 const { successResponse } = require('../../core/utils/response');
 const { hashPassword } = require('../../core/auth/password.service');
+const logger = require('../../core/utils/logger');
 
 const getAllUsers = async (req, res) => {
   try {
@@ -13,9 +12,9 @@ const getAllUsers = async (req, res) => {
     // Check permission
     const hasPermission = await req.checkPermission('read', 'user');
     if (!hasPermission) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         status: 'error',
-        message: 'Forbidden' 
+        message: 'Forbidden'
       });
     }
 
@@ -43,10 +42,10 @@ const getAllUsers = async (req, res) => {
     res.json(successResponse(data));
 
   } catch (err) {
-    console.error('Fetch users error:', err.message);
-    res.status(500).json({ 
+    logger.error('Fetch users error:', err.message);
+    res.status(500).json({
       status: 'error',
-      message: 'Failed to fetch users' 
+      message: 'Failed to fetch users'
     });
   }
 };
@@ -77,7 +76,7 @@ const getUserPets = async (req, res) => {
     res.json(successResponse(data));
 
   } catch (err) {
-    console.error('Get user pets error:', err.message);
+    logger.error('Get user pets error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to fetch user pets' });
   }
 };
@@ -93,18 +92,18 @@ const getUserById = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         status: 'error',
-        message: 'User not found' 
+        message: 'User not found'
       });
     }
 
     res.json(successResponse(result.rows[0]));
 
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: 'Failed to fetch user' 
+      message: 'Failed to fetch user'
     });
   }
 };
@@ -113,9 +112,9 @@ const createUser = async (req, res) => {
   try {
     const hasPermission = await req.checkPermission('create', 'user');
     if (!hasPermission) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         status: 'error',
-        message: 'Forbidden' 
+        message: 'Forbidden'
       });
     }
 
@@ -123,9 +122,9 @@ const createUser = async (req, res) => {
 
     const existingUser = await query('SELECT id FROM users WHERE email = $1', [email]);
     if (existingUser.rows.length > 0) {
-      return res.status(409).json({ 
+      return res.status(409).json({
         status: 'error',
-        message: 'Email already exists' 
+        message: 'Email already exists'
       });
     }
 
@@ -157,15 +156,13 @@ const createUser = async (req, res) => {
       return user;
     });
 
-    //req.auditLog('create', 'user', { email, role: role_slug });
-
     res.status(201).json(successResponse(result, 'User created successfully', 201));
 
   } catch (err) {
-    console.error('Create user error:', err);
-    res.status(500).json({ 
+    logger.error('Create user error:', err);
+    res.status(500).json({
       status: 'error',
-      message: 'Failed to create user' 
+      message: 'Failed to create user'
     });
   }
 };
@@ -174,9 +171,9 @@ const updateUser = async (req, res) => {
   try {
     const hasPermission = await req.checkPermission('update', 'user');
     if (!hasPermission) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         status: 'error',
-        message: 'Forbidden' 
+        message: 'Forbidden'
       });
     }
 
@@ -196,9 +193,9 @@ const updateUser = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         status: 'error',
-        message: 'User not found' 
+        message: 'User not found'
       });
     }
 
@@ -207,9 +204,45 @@ const updateUser = async (req, res) => {
     res.json(successResponse(result.rows[0], 'User updated successfully'));
 
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: 'Failed to update user' 
+      message: 'Failed to update user'
+    });
+  }
+};
+
+const activateUser = async (req, res) => {
+  try {
+    const hasPermission = await req.checkPermission('activate', 'user');
+    if (!hasPermission) {
+      return res.status(403).json({
+        status: 'error',
+        message: '403 Forbidden: Does not have permission to activate this user.'
+      });
+    }
+
+    const { id } = req.params;
+    const {status} = req.body;
+
+    const result = await query(
+      `UPDATE users SET status = $2 WHERE id = $1 AND deleted_at IS NULL RETURNING id`,
+      [id, status]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'User not found'
+      });
+    }
+
+    req.auditLog('activate', 'user', { userId: id });
+
+    res.json(successResponse(null, 'User Activated successfully'));
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to activate user'
     });
   }
 };
@@ -218,9 +251,9 @@ const deleteUser = async (req, res) => {
   try {
     const hasPermission = await req.checkPermission('delete', 'user');
     if (!hasPermission) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         status: 'error',
-        message: 'Forbidden' 
+        message: 'Forbidden'
       });
     }
 
@@ -232,9 +265,9 @@ const deleteUser = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         status: 'error',
-        message: 'User not found' 
+        message: 'User not found'
       });
     }
 
@@ -243,9 +276,9 @@ const deleteUser = async (req, res) => {
     res.json(successResponse(null, 'User deleted successfully'));
 
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       status: 'error',
-      message: 'Failed to delete user' 
+      message: 'Failed to delete user'
     });
   }
 };
@@ -255,6 +288,7 @@ module.exports = {
   getUserById,
   createUser,
   updateUser,
+  activateUser,
   deleteUser,
   getUserPets
 };

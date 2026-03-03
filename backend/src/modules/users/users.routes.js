@@ -22,6 +22,7 @@ router.get('/', requireAuth, usersController.getAllUsers);
 router.get('/:id', requireAuth, usersController.getUserById);
 router.post('/', requireAuth, usersController.createUser);
 router.put('/:id', requireAuth, usersController.updateUser);
+router.patch('/:id/activate', requireAuth, usersController.activateUser);
 router.delete('/:id', requireAuth, usersController.deleteUser);
 
 // Get full list of pets for a user (admin only)

@@ -93,8 +93,8 @@ export default function OwnerAndPetsTable() {
       const apiData = result.data || result;
       setOwners(apiData.data || []);
       setTotalItems(apiData.pagination?.total || 0);
-    } catch (error) {
-      console.error('Error fetching owners:', error);
+    } catch {
+      // silently ignore
     } finally {
       setLoading(false);
     }
@@ -176,8 +176,8 @@ export default function OwnerAndPetsTable() {
       // Refresh data after update
       await fetchOwners();
       setSelectedRows([]);
-    } catch (error) {
-      console.error('Error updating status:', error);
+    } catch {
+      // silently ignore
     }
   };
 
@@ -193,21 +193,36 @@ export default function OwnerAndPetsTable() {
 
       const newStatus = owner.status === 'active' ? 'inactive' : 'active';
 
-      // Call API to update status
-      const response = await fetch(`${API_ENDPOINTS.USERS.BASE}/${id}`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
+      // Use dedicated activate endpoint for activation
+      if (newStatus === 'active') {
+        const response = await fetch(`${API_ENDPOINTS.USERS.BASE}/${id}/activate`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-      if (response.ok) {
-        await fetchOwners();
+        if (response.ok) {
+          await fetchOwners();
+        }
+      } else {
+        // Use PUT for deactivation
+        const response = await fetch(`${API_ENDPOINTS.USERS.BASE}/${id}/activate`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: newStatus }),
+        });
+
+        if (response.ok) {
+          await fetchOwners();
+        }
       }
-    } catch (error) {
-      console.error('Error updating status:', error);
+    } catch {
+      // silently ignore
     }
   };
 
@@ -227,7 +242,7 @@ export default function OwnerAndPetsTable() {
       const response = await fetch(
         `${API_ENDPOINTS.USERS.BASE}/${editOwner?.id}`,
         {
-          method: 'PATCH',
+          method: 'PUT',
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
@@ -240,8 +255,8 @@ export default function OwnerAndPetsTable() {
         await fetchOwners();
         setEditOwner(null);
       }
-    } catch (error) {
-      console.error('Error updating owner:', error);
+    } catch {
+      // silently ignore
     }
   };
 

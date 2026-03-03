@@ -43,8 +43,14 @@ const MailSettings: React.FC<MailSettingsProps> = ({ onSave }) => {
     const fetchMailSettings = async () => {
       try {
         setIsLoading(true);
+        const token = sessionStorage.getItem('token');
         const response = await fetch(
           API_ENDPOINTS.SETTINGS.DETAIL('smtp_config'),
+          {
+            headers: {
+              ...(token && { Authorization: `Bearer ${token}` }),
+            },
+          },
         );
 
         if (!response.ok) {
@@ -67,7 +73,6 @@ const MailSettings: React.FC<MailSettingsProps> = ({ onSave }) => {
           });
         }
       } catch (error) {
-        console.error('Error fetching mail settings:', error);
         setMessage({
           type: 'error',
           text: 'Failed to load mail settings',
@@ -134,10 +139,12 @@ const MailSettings: React.FC<MailSettingsProps> = ({ onSave }) => {
         ? `${API_ENDPOINTS.SETTINGS.BASE}/smtp_config`
         : API_ENDPOINTS.SETTINGS.BASE;
 
+      const token = sessionStorage.getItem('token');
       const response = await fetch(endpoint, {
         method,
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
         body: JSON.stringify(payload),
       });
@@ -160,7 +167,6 @@ const MailSettings: React.FC<MailSettingsProps> = ({ onSave }) => {
       onSave?.(formData);
       setTimeout(() => setMessage(null), 4000);
     } catch (error) {
-      console.error('Error saving mail settings:', error);
       setMessage({
         type: 'error',
         text:

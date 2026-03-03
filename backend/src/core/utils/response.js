@@ -1,4 +1,6 @@
 // src/core/utils/response.js
+const logger = require('./logger');
+
 const successResponse = (data, message = 'Success', statusCode = 200) => {
   return {
     status: 'success',
@@ -8,17 +10,21 @@ const successResponse = (data, message = 'Success', statusCode = 200) => {
   };
 };
 
-const errorHandler = (err, req, res, next) => {
-  console.error('Error:', err);
-  
-  const statusCode = err.statusCode || 500;
-  const message = err.message || 'Internal server error';
-  
-  res.status(statusCode).json({
+const errorResponse = (message, statusCode = 400) => {
+  return {
     status: 'error',
     message,
     timestamp: new Date().toISOString()
-  });
+  };
 };
 
-module.exports = { successResponse, errorHandler };
+const errorHandler = (err, req, res, next) => {
+  logger.error('Unhandled error', err);
+
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Internal server error';
+
+  res.status(statusCode).json(errorResponse(message, statusCode));
+};
+
+module.exports = { successResponse, errorResponse, errorHandler };

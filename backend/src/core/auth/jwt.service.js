@@ -14,8 +14,4 @@ const verifyToken = (token) => {
   }
 };
 
-const decodeToken = (token) => {
-  return jwt.decode(token);
-};
-
-module.exports = { generateToken, verifyToken, decodeToken };
+module.exports = { generateToken, verifyToken };

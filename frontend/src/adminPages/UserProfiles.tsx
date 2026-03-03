@@ -19,7 +19,6 @@ export default function UserProfiles() {
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load profile');
-      console.error('Profile load error:', err);
     } finally {
       setLoading(false);
     }

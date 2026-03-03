@@ -17,23 +17,7 @@ const handleValidationErrors = (req, res, next) => {
   }
   next();
 };
-/*
-router.get('/', requireAuth, authorize('read', 'breed'), controller.list);
-router.get('/:id', requireAuth, authorize('read', 'breed'), controller.getById);
-router.post('/', [
-  requireAuth,
-  authorize('create', 'breed'),
-  body('name').trim().notEmpty(),
-  body('petTypeId').notEmpty().isUUID()
-], handleValidationErrors, controller.create);
-router.put('/:id', [
-  requireAuth,
-  authorize('update', 'breed'),
-  body('name').optional().trim().notEmpty(),
-  body('petTypeId').optional().notEmpty().isUUID()
-], handleValidationErrors, controller.update);
-router.delete('/:id', requireAuth, authorize('delete', 'breed'), controller.delete);
-*/
+
 router.get('/', controller.list);
 router.get('/:id', requireAuth, controller.getById);
 router.post('/', [

@@ -9,7 +9,7 @@ import {
 } from '../../ui/table';
 import Badge from '../../ui/badge/Badge';
 import Checkbox from '../../form/input/Checkbox';
-import PetCareCenterForm from '../../../adminPages/VetPageForms/PetCareCenterForm/PetCareCenterForm';
+import PetCareCenterForm from '../../../adminPages/AdminPageForms/PetCareCenterForm';
 import Pagination from '../tableComponents/Pagination';
 import useSort from '../../../hooks/useSort';
 import SortableTableHeader from '../tableComponents/SortableTableHeader';
@@ -107,7 +107,6 @@ export default function PetCareCenterTable() {
 
       setClinics(items);
     } catch (error: any) {
-      console.error('Error fetching clinics:', error);
       setFetchError(error.message || 'Failed to load clinics');
     } finally {
       setIsLoadingData(false);
@@ -200,7 +199,6 @@ export default function PetCareCenterTable() {
         );
         setTimeout(() => setSuccessBanner(null), 4000);
       } catch (err) {
-        console.error('Failed to update status for selected rows', err);
         setFetchError('Failed to update status for selected rows');
         await fetchClinics();
       }
@@ -270,7 +268,6 @@ export default function PetCareCenterTable() {
       setSelectedRows([]);
       setActionDropdown('No actions');
     } catch (err: any) {
-      console.error('Error deleting clinic:', err);
       setFetchError(err.message || 'Failed to delete clinic');
     } finally {
       setIsLoadingData(false);
@@ -332,7 +329,6 @@ export default function PetCareCenterTable() {
       );
       setTimeout(() => setSuccessBanner(null), 4000);
     } catch (err) {
-      console.error('Failed to toggle status:', err);
       setFetchError('Failed to update status');
       // Revert optimistic update
       await fetchClinics();

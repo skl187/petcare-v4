@@ -1,10 +1,11 @@
 // API service for Medical Records
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+  import.meta.env.VITE_API_BASE_URL || '';
 
 export interface MedicalRecordPayload {
   appointment_id: string;
   pet_id: string;
+  veterinarian_id?: string;
   record_type: 'consultation' | 'checkup' | 'emergency' | 'surgery';
   diagnosis: string;
   symptoms: Record<string, string | number>;
@@ -97,38 +98,28 @@ export const saveMedicalRecord = async (
 export const getMedicalRecordById = async (
   recordId: string,
 ): Promise<MedicalRecordDetail> => {
-  console.log('🔴 getMedicalRecordById CALLED with ID:', recordId);
-
   if (!recordId) {
-    console.error('❌ recordId is empty or null');
     throw new Error('recordId is required');
   }
 
   try {
     const endpoint = `${API_BASE_URL}/api/medical-records/records/${recordId}`;
-    console.log('🟡 Calling endpoint:', endpoint);
-
     const headers = getAuthHeaders();
-    console.log('📋 Headers:', headers);
 
     const response = await fetch(endpoint, {
       method: 'GET',
       headers: headers,
     });
 
-    console.log('📊 Response status:', response.status);
     const data = await response.json();
-    console.log('📦 Response data:', data);
 
     if (!response.ok) {
       throw new Error(data.message || `Failed with status ${response.status}`);
     }
 
     const result = data.data || data;
-    console.log('✅ Successfully loaded medical record');
     return result;
   } catch (error) {
-    console.error('🔴 ERROR in getMedicalRecordById:', error);
     throw error;
   }
 };
@@ -141,7 +132,7 @@ export const getMedicalRecordsByAppointment = async (
 ): Promise<MedicalRecordDetail[]> => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/medical-records/appointment/${appointmentId}`,
+      `${API_BASE_URL}/api/medical-records/appointment/${appointmentId}`,
       {
         method: 'GET',
         headers: getAuthHeaders(),
@@ -199,7 +190,7 @@ export const deleteMedicalRecord = async (
 ): Promise<{ status: string; message: string }> => {
   try {
     const response = await fetch(
-      `${API_BASE_URL}/medical-records/records/${recordId}`,
+      `${API_BASE_URL}/api/medical-records/records/${recordId}`,
       {
         method: 'DELETE',
         headers: getAuthHeaders(),

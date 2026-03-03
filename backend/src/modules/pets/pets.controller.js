@@ -3,7 +3,7 @@
 
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
-//const logger = require('../../core/utils/logger');
+const logger = require('../../core/utils/logger');
 
 const list = async (req, res) => {
   try {
@@ -23,7 +23,7 @@ const list = async (req, res) => {
       [limit, offset]
     );
 
-    //logger.info('Pets listed', { userId: req.user.id, count: result.rows.length });
+    logger.info('Pets listed', { userId: req.user.id, count: result.rows.length });
 
     res.json(successResponse({
       data: result.rows,
@@ -32,7 +32,7 @@ const list = async (req, res) => {
     }));
 
   } catch (err) {
-    //logger.error('Pets list failed', { error: err.message });
+    logger.error('Pets list failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to fetch' });
   }
 };
@@ -56,7 +56,7 @@ const getById = async (req, res) => {
     res.json(successResponse(result.rows[0]));
 
   } catch (err) {
-    //logger.error('Get pet failed', { error: err.message });
+    logger.error('Get pet failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to fetch' });
   }
 };
@@ -77,19 +77,12 @@ const create = async (req, res) => {
        weight || null, height || null, weightUnit || null, heightUnit || null, req.user.id, JSON.stringify(additionalInfo || {}), 1]
     );
 
-    //logger.info('Pet created', { userId: req.user.id, petId: result.rows[0].id });
-
-    // Audit log
-    // await query(
-    //   `INSERT INTO audit_logs (user_id, action, resource, changes, metadata)
-    //    VALUES ($1, $2, $3, $4, $5)`,
-    //   [req.user.id, 'create', 'pet', JSON.stringify({ name, petTypeId, breedId }), JSON.stringify({ ip: req.ip })]
-    // );
+    logger.info('Pet created', { userId: req.user.id, petId: result.rows[0].id });
 
     res.status(201).json(successResponse(result.rows[0], 'Created', 201));
 
   } catch (err) {
-    //logger.error('Create pet failed', { error: err.message });
+    logger.error('Create pet failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to create' });
   }
 };
@@ -128,12 +121,12 @@ const update = async (req, res) => {
       return res.status(404).json({ status: 'error', message: 'Not found' });
     }
 
-    //logger.info('Pet updated', { userId: req.user.id, petId: req.params.id });
+    logger.info('Pet updated', { userId: req.user.id, petId: req.params.id });
 
     res.json(successResponse(result.rows[0], 'Updated'));
 
   } catch (err) {
-    //logger.error('Update pet failed', { error: err.message });
+    logger.error('Update pet failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to update' });
   }
 };
@@ -149,12 +142,12 @@ const delete_pet = async (req, res) => {
       return res.status(404).json({ status: 'error', message: 'Not found' });
     }
 
-    //logger.info('Pet deleted', { userId: req.user.id, petId: req.params.id });
+    logger.info('Pet deleted', { userId: req.user.id, petId: req.params.id });
 
     res.json(successResponse(null, 'Deleted'));
 
   } catch (err) {
-    //logger.error('Delete pet failed', { error: err.message });
+    logger.error('Delete pet failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to delete' });
   }
 };
@@ -174,7 +167,7 @@ const my_pets = async (req, res) => {
 
     res.json(successResponse({ data: result.rows }));
   } catch (err) {
-    //logger.error('My pets fetch failed', { error: err.message });
+    logger.error('My pets fetch failed', { error: err.message });
     res.status(500).json({ status: 'error', message: 'Failed to fetch' });
   }
 };

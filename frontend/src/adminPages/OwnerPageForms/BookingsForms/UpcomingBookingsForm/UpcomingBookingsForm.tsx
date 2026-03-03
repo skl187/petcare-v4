@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import FormCard from '../../../../components/form/FormCard';
 import DatePickerInput from '../../../../components/form/DatePickerInput/DatePickerInput';
 import { MdClose } from 'react-icons/md';
+import { CheckCircle, Clock, MapPin, User, PawPrint, Stethoscope, CreditCard, ChevronRight } from 'lucide-react';
 import { API_ENDPOINTS } from '../../../../constants/api';
 export interface Pet {
   id: string;
@@ -15,17 +16,24 @@ export interface Veterinarian {
   id: string;
   first_name: string;
   last_name: string;
+  specialization?: string;
+  consultation_fee?: number;
 }
 
 export interface Clinic {
   id: string;
   name: string;
+  address?: string;
 }
 
 export interface VetService {
   id: string;
   name: string;
-  default_fee: number;
+  fee?: number;
+  default_fee?: number;
+  description?: string;
+  service_type?: string;
+  default_duration_minutes?: number;
 }
 
 export interface ServiceSelection {
@@ -74,194 +82,106 @@ export interface BookingForEdit extends UpcomingBookingFormData {
 interface Props {
   booking?: BookingForEdit;
   pets: Pet[];
-  veterinarians: Veterinarian[];
-  clinics: Clinic[];
-  vetServices: VetService[];
   onSubmit: (data: UpcomingBookingFormData) => void;
   onCancel: () => void;
 }
 
-const appointmentTypes = [
-  'consultation',
-  'checkup',
-  'vaccination',
-  'surgery',
-  'emergency',
-  'followup',
-  'telemedicine',
-];
+// ─────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────
 
-// ServiceMultiSelect Component
-const ServiceMultiSelect: React.FC<{
-  services: VetService[];
-  selectedServices: ServiceSelection[];
-  onChange: (services: ServiceSelection[]) => void;
-  disabled?: boolean;
-}> = ({ services, selectedServices, onChange, disabled }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleSelectService = (service: VetService) => {
-    const exists = selectedServices.find((s) => s.service_id === service.id);
-    if (exists) {
-      onChange(selectedServices.filter((s) => s.service_id !== service.id));
-    } else {
-      onChange([
-        ...selectedServices,
-        {
-          service_id: service.id,
-          service_name: service.name,
-          quantity: 1,
-          fee: service.default_fee,
-        },
-      ]);
-    }
+const getAuthHeaders = () => {
+  const token = sessionStorage.getItem('token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
-
-  const handleRemove = (serviceId: string) => {
-    onChange(selectedServices.filter((s) => s.service_id !== serviceId));
-  };
-
-  const handleQuantityChange = (serviceId: string, quantity: number) => {
-    onChange(
-      selectedServices.map((s) =>
-        s.service_id === serviceId
-          ? { ...s, quantity: Math.max(1, quantity) }
-          : s,
-      ),
-    );
-  };
-
-  const handleFeeChange = (serviceId: string, fee: number) => {
-    onChange(
-      selectedServices.map((s) =>
-        s.service_id === serviceId ? { ...s, fee: Math.max(0, fee) } : s,
-      ),
-    );
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (isOpen && !(e.target as HTMLElement).closest('.service-dropdown')) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-
-  return (
-    <div className='space-y-2 service-dropdown'>
-      <button
-        type='button'
-        disabled={disabled}
-        onClick={() => setIsOpen(!isOpen)}
-        className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left bg-white disabled:bg-gray-50'
-      >
-        {selectedServices.length > 0
-          ? `${selectedServices.length} service(s) selected`
-          : 'Select services'}
-      </button>
-
-      {isOpen && (
-        <div className='absolute z-10 w-full mt-1 border border-gray-300 rounded-md bg-white shadow-lg'>
-          {services.length === 0 ? (
-            <div className='p-3 text-sm text-gray-500'>
-              No services available
-            </div>
-          ) : (
-            <div className='max-h-48 overflow-y-auto'>
-              {services.map((s) => (
-                <label
-                  key={s.id}
-                  className='flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer'
-                >
-                  <input
-                    type='checkbox'
-                    checked={selectedServices.some(
-                      (sel) => sel.service_id === s.id,
-                    )}
-                    onChange={() => handleSelectService(s)}
-                    className='w-4 h-4 rounded'
-                  />
-                  <span className='ml-2 text-sm'>
-                    {s.name} (${s.default_fee})
-                  </span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {selectedServices.length > 0 && (
-        <div className='space-y-2 p-3 bg-gray-50 rounded-md border border-gray-200'>
-          {selectedServices.map((sel) => (
-            <div
-              key={sel.service_id}
-              className='flex items-center justify-between gap-2 text-sm'
-            >
-              <div className='flex-1'>
-                <span className='font-medium'>{sel.service_name}</span>
-              </div>
-              <div className='flex items-center gap-2'>
-                <div className='flex items-center gap-1'>
-                  <label className='text-xs'>Qty:</label>
-                  <input
-                    type='number'
-                    min='1'
-                    value={sel.quantity}
-                    onChange={(e) =>
-                      handleQuantityChange(
-                        sel.service_id,
-                        parseInt(e.target.value),
-                      )
-                    }
-                    className='w-12 px-2 py-1 border border-gray-300 rounded text-sm'
-                  />
-                </div>
-                <div className='flex items-center gap-1'>
-                  <label className='text-xs'>Fee:</label>
-                  <input
-                    type='number'
-                    min='0'
-                    step='0.01'
-                    value={sel.fee}
-                    onChange={(e) =>
-                      handleFeeChange(
-                        sel.service_id,
-                        parseFloat(e.target.value),
-                      )
-                    }
-                    className='w-20 px-2 py-1 border border-gray-300 rounded text-sm'
-                  />
-                </div>
-                <button
-                  type='button'
-                  onClick={() => handleRemove(sel.service_id)}
-                  className='text-red-600 hover:text-red-800'
-                >
-                  <MdClose size={16} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
 };
 
-const UpcomingBookingsForm: React.FC<Props> = ({
-  booking,
-  pets,
-  veterinarians,
-  clinics,
-  vetServices,
-  onSubmit,
-  onCancel,
-}) => {
+function generateSlots(startTime: string, endTime: string, slotDuration: number): string[] {
+  const slots: string[] = [];
+  const [sh, sm] = startTime.split(':').map(Number);
+  const [eh, em] = endTime.split(':').map(Number);
+  let cur = sh * 60 + sm;
+  const end = eh * 60 + em;
+  const dur = slotDuration || 30;
+  while (cur + dur <= end) {
+    const h = Math.floor(cur / 60);
+    const m = cur % 60;
+    slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    cur += dur;
+  }
+  return slots;
+}
+
+const formatSlotDisplay = (time: string) => {
+  const [h, m] = time.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+};
+
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+const appointmentTypes = [
+  'consultation', 'checkup', 'vaccination', 'surgery', 'emergency', 'followup', 'telemedicine',
+] as const;
+
+// ─────────────────────────────────────────────
+// Step indicator
+// ─────────────────────────────────────────────
+const stepDefs = [
+  { label: 'Pet', icon: PawPrint },
+  { label: 'Clinic', icon: MapPin },
+  { label: 'Vet', icon: Stethoscope },
+  { label: 'When', icon: Clock },
+  { label: 'Services', icon: CheckCircle },
+  { label: 'Payment', icon: CreditCard },
+];
+
+const StepIndicator = ({ current }: { current: number }) => (
+  <div className='flex items-center justify-center gap-1 mb-6 flex-wrap px-2'>
+    {stepDefs.map((s, i) => {
+      const Icon = s.icon;
+      const done = i < current;
+      const active = i === current;
+      return (
+        <React.Fragment key={s.label}>
+          <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            done ? 'bg-green-100 text-green-700' :
+            active ? 'bg-blue-600 text-white' :
+            'bg-gray-100 text-gray-400'
+          }`}>
+            <Icon size={13} />
+            <span>{s.label}</span>
+          </div>
+          {i < stepDefs.length - 1 && (
+            <ChevronRight size={12} className={done ? 'text-green-400' : 'text-gray-300'} />
+          )}
+        </React.Fragment>
+      );
+    })}
+  </div>
+);
+
+const UpcomingBookingsForm: React.FC<Props> = ({ booking, pets, onSubmit, onCancel }) => {
+  // ── external state ──────────────────────────────────────────────────
+  const [clinics, setClinics] = useState<Clinic[]>([]);
+  const [vetsForClinic, setVetsForClinic] = useState<Veterinarian[]>([]);
+  const [servicesForBooking, setServicesForBooking] = useState<VetService[]>([]);
+  const [scheduleRows, setScheduleRows] = useState<any[]>([]);
+  const [exceptionRows, setExceptionRows] = useState<any[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+
+  const [loadingClinics, setLoadingClinics] = useState(false);
+  const [loadingVets, setLoadingVets] = useState(false);
+  const [loadingServices, setLoadingServices] = useState(false);
+  const [loadingSchedule, setLoadingSchedule] = useState(false);
+
+  // ── form ─────────────────────────────────────────────────────────────
   const {
     handleSubmit,
+    register,
     formState: { errors, isSubmitting },
     watch,
     setValue,
@@ -269,199 +189,185 @@ const UpcomingBookingsForm: React.FC<Props> = ({
     control,
   } = useForm<UpcomingBookingFormData>({
     mode: 'onChange',
-    defaultValues: booking
-      ? {
-          user_id:
-            booking.user_id ||
-            (() => {
-              try {
-                const userStr = sessionStorage.getItem('user');
-                return userStr ? JSON.parse(userStr).id : '';
-              } catch {
-                return '';
-              }
-            })(),
-          pet_id: booking.pet_id || pets[0]?.id || '',
-          veterinarian_id:
-            booking.veterinarian_id || veterinarians[0]?.id || '',
-          clinic_id: booking.clinic_id || clinics[0]?.id || '',
-          appointment_date: booking.appointment_date || '',
-          appointment_time: booking.appointment_time || '',
-          appointment_type: (booking.appointment_type as any) || 'checkup',
-          chief_complaint: booking.chief_complaint || '',
-          symptoms: booking.symptoms || [],
-          notes: booking.notes || '',
-          service_ids: booking.service_ids || [],
-          service_selections: booking.service_selections || [],
-          payment_type: (booking.payment_type as any) || 'cash',
-          payment_method: booking.payment_method || 'card',
-          insurance_id: booking.insurance_id || '',
-        }
-      : {
-          user_id: (() => {
-            try {
-              const userStr = sessionStorage.getItem('user');
-              return userStr ? JSON.parse(userStr).id : '';
-            } catch {
-              return '';
-            }
-          })(),
-          pet_id: pets[0]?.id ?? '',
-          veterinarian_id: veterinarians[0]?.id ?? '',
-          clinic_id: clinics[0]?.id ?? '',
-          appointment_date: '',
-          appointment_time: '',
-          appointment_type: 'checkup',
-          chief_complaint: '',
-          symptoms: [],
-          notes: '',
-          service_ids: [],
-          service_selections: [],
-          payment_type: 'cash',
-          payment_method: 'card',
-          insurance_id: '',
-          total_amount: 0,
-        },
+    defaultValues: {
+      user_id: (() => { try { const u = sessionStorage.getItem('user'); return u ? JSON.parse(u).id : ''; } catch { return ''; } })(),
+      pet_id: booking?.pet_id || '',
+      veterinarian_id: booking?.veterinarian_id || '',
+      clinic_id: booking?.clinic_id || '',
+      appointment_date: booking?.appointment_date || '',
+      appointment_time: booking?.appointment_time || '',
+      appointment_type: (booking?.appointment_type as any) || 'checkup',
+      chief_complaint: booking?.chief_complaint || '',
+      symptoms: booking?.symptoms || [],
+      notes: booking?.notes || '',
+      service_ids: booking?.service_ids || [],
+      service_selections: booking?.service_selections || [],
+      payment_type: (booking?.payment_type as any) || 'cash',
+      payment_method: (booking?.payment_method as any) || 'card',
+      insurance_id: booking?.insurance_id || '',
+      total_amount: booking?.total_amount || 0,
+    },
   });
 
-  const [symptomInput, setSymptomInput] = useState('');
-  const [banner, setBanner] = useState<{
-    message: string;
-    type: 'success' | 'error';
-  } | null>(null);
-  const bannerTimerRef = useRef<number | null>(null);
-  const closeTimerRef = useRef<number | null>(null);
-
-  const symptoms = watch('symptoms') || [];
-  const paymentType = watch('payment_type');
+  const petId          = watch('pet_id');
+  const clinicId       = watch('clinic_id');
+  const vetId          = watch('veterinarian_id');
+  const date           = watch('appointment_date');
+  const time           = watch('appointment_time');
+  const paymentType    = watch('payment_type');
   const serviceSelections = watch('service_selections') || [];
+  const symptoms       = watch('symptoms') || [];
 
-  // Auto-dismiss success banners
-  useEffect(() => {
-    if (!banner) return;
-    if (banner.type === 'error') return;
-    if (bannerTimerRef.current) window.clearTimeout(bannerTimerRef.current);
-    bannerTimerRef.current = window.setTimeout(() => setBanner(null), 5000);
-    return () => {
-      if (bannerTimerRef.current) window.clearTimeout(bannerTimerRef.current);
-    };
-  }, [banner]);
+  const [symptomInput, setSymptomInput] = useState('');
+  const [banner, setBanner] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const bannerTimerRef = useRef<number | null>(null);
+  const closeTimerRef  = useRef<number | null>(null);
 
-  // Cleanup
+  // ── step indicator ──────────────────────────────────────────────────
+  const currentStep = !petId ? 0 : !clinicId ? 1 : !vetId ? 2 : (!date || !time) ? 3 : serviceSelections.length === 0 ? 4 : 5;
+
+  // ── cascade effects ─────────────────────────────────────────────────
+  // 1. Fetch clinics on mount
   useEffect(() => {
-    return () => {
-      if (bannerTimerRef.current) window.clearTimeout(bannerTimerRef.current);
-      if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
-    };
+    (async () => {
+      setLoadingClinics(true);
+      try {
+        const res = await fetch(API_ENDPOINTS.CLINICS.BASE, { headers: getAuthHeaders() });
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : Array.isArray(data?.data?.data) ? data.data.data : Array.isArray(data?.data) ? data.data : Array.isArray(data?.clinics) ? data.clinics : [];
+        setClinics(list);
+      } catch { setClinics([]); }
+      finally { setLoadingClinics(false); }
+    })();
   }, []);
 
-  // Reset form when booking data changes (for edit mode)
+  // 2. Fetch vets when clinic changes
   useEffect(() => {
-    if (booking && booking.id) {
-      // Handle vet_service_ids format (objects with quantity and fee)
-      let serviceSelections: ServiceSelection[] = [];
+    if (!clinicId) { setVetsForClinic([]); return; }
+    (async () => {
+      setLoadingVets(true);
+      setValue('veterinarian_id', '');
+      setValue('appointment_date', '');
+      setValue('appointment_time', '');
+      setValue('service_selections', []);
+      setScheduleRows([]);
+      setExceptionRows([]);
+      setAvailableSlots([]);
+      try {
+        const res = await fetch(API_ENDPOINTS.VETERINARIANS.BY_CLINIC(clinicId), { headers: getAuthHeaders() });
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : Array.isArray(data?.data?.data) ? data.data.data : Array.isArray(data?.data) ? data.data : Array.isArray(data?.veterinarians) ? data.veterinarians : [];
+        setVetsForClinic(list);
+      } catch { setVetsForClinic([]); }
+      finally { setLoadingVets(false); }
+    })();
+  }, [clinicId]);
 
-      if (booking.vet_service_ids && Array.isArray(booking.vet_service_ids)) {
-        serviceSelections = booking.vet_service_ids
-          .map((item: any) => {
-            if (typeof item === 'object' && item.service_id) {
-              // Format from API with quantity and fee
-              return {
-                service_id: item.service_id,
-                service_name:
-                  booking.services?.find((s: any) => s.id === item.service_id)
-                    ?.name || '',
-                quantity: item.quantity || 1,
-                fee: item.unit_fee || 0,
-              };
-            } else if (typeof item === 'string') {
-              // Simple string ID format
-              const service = vetServices.find((s) => s.id === item);
-              return {
-                service_id: item,
-                service_name: service?.name || '',
-                quantity: 1,
-                fee: service?.default_fee || 0,
-              };
-            }
-            return null;
-          })
-          .filter(Boolean) as ServiceSelection[];
-      }
+  // 3. Fetch services + schedule when vet+clinic both set
+  useEffect(() => {
+    if (!vetId || !clinicId) { setServicesForBooking([]); setScheduleRows([]); setExceptionRows([]); return; }
+    (async () => {
+      setLoadingServices(true);
+      setLoadingSchedule(true);
+      setValue('service_selections', []);
+      setValue('appointment_date', '');
+      setValue('appointment_time', '');
+      setAvailableSlots([]);
+      try {
+        const [svcRes, schRes, excRes] = await Promise.all([
+          fetch(API_ENDPOINTS.VET_SERVICES.ACTIVE_FOR_BOOKING(vetId, clinicId), { headers: getAuthHeaders() }),
+          fetch(API_ENDPOINTS.VET_SCHEDULES.FOR_BOOKING(vetId, clinicId),       { headers: getAuthHeaders() }),
+          fetch(API_ENDPOINTS.VET_SCHEDULES.EXCEPTIONS_FOR_BOOKING(vetId, clinicId), { headers: getAuthHeaders() }),
+        ]);
+        const svcData = await svcRes.json();
+        const schData = await schRes.json();
+        const excData = await excRes.json();
+        const svcList = Array.isArray(svcData) ? svcData : Array.isArray(svcData?.data?.data) ? svcData.data.data : Array.isArray(svcData?.data) ? svcData.data : Array.isArray(svcData?.services) ? svcData.services : [];
+        const schList = Array.isArray(schData) ? schData : Array.isArray(schData?.data?.data) ? schData.data.data : Array.isArray(schData?.data) ? schData.data : Array.isArray(schData?.schedules) ? schData.schedules : [];
+        const excList = Array.isArray(excData) ? excData : Array.isArray(excData?.data?.data) ? excData.data.data : Array.isArray(excData?.data) ? excData.data : [];
+        setServicesForBooking(svcList);
+        setScheduleRows(schList);
+        setExceptionRows(excList);
+      } catch { setServicesForBooking([]); setScheduleRows([]); setExceptionRows([]); }
+      finally { setLoadingServices(false); setLoadingSchedule(false); }
+    })();
+  }, [vetId, clinicId]);
 
-      const formData: UpcomingBookingFormData = {
-        user_id: booking.user_id || '',
-        pet_id: booking.pet_id || '',
-        veterinarian_id: booking.veterinarian_id || '',
-        clinic_id: booking.clinic_id || '',
-        appointment_date: booking.appointment_date || '',
-        appointment_time: booking.appointment_time || '',
-        appointment_type: (booking.appointment_type as any) || 'checkup',
-        chief_complaint: booking.chief_complaint || '',
-        symptoms: booking.symptoms || [],
-        notes: booking.notes || '',
-        service_ids: Array.isArray(booking.service_ids)
-          ? booking.service_ids.map((s: any) =>
-              typeof s === 'string' ? s : s.service_id,
-            )
-          : [],
-        service_selections: serviceSelections,
-        payment_type: (booking.payment_type as any) || 'cash',
-        payment_method: (booking.payment_method as any) || 'card',
-        insurance_id: booking.insurance_id || '',
-        total_amount: booking.total_amount || 0,
-      };
+  // 4. Compute slots when date or schedule changes, respecting exceptions
+  useEffect(() => {
+    setValue('appointment_time', '');
+    if (!date || scheduleRows.length === 0) { setAvailableSlots([]); return; }
 
-      reset(formData, { keepDefaultValues: false });
+    // Check for an exception on this exact date — any exception type means unavailable
+    const exception = exceptionRows.find((e: any) => e.exception_date?.slice(0, 10) === date);
+    if (exception) {
+      setAvailableSlots([]);
+      return;
     }
-  }, [booking, reset, vetServices]);
+
+    const dow = new Date(date + 'T00:00:00').getDay();
+    const row = scheduleRows.find(
+      (r: any) => Number(r.day_of_week) === dow && r.is_available !== false
+    );
+    if (!row) { setAvailableSlots([]); return; }
+    const duration = Number(row.slot_duration) || 30;
+    let slots = generateSlots(row.start_time, row.end_time, duration);
+
+    // If today is selected, remove slots that are already in the past
+    const todayStr = (() => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; })();
+    if (date === todayStr) {
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      slots = slots.filter(slot => {
+        const [h, m] = slot.split(':').map(Number);
+        return h * 60 + m > nowMinutes;
+      });
+    }
+
+    setAvailableSlots(slots);
+  }, [date, scheduleRows, exceptionRows]);
+
+  // ── helpers ──────────────────────────────────────────────────────────
+  const toggleService = useCallback((svc: VetService) => {
+    const exists = serviceSelections.find(s => s.service_id === svc.id);
+    if (exists) {
+      setValue('service_selections', serviceSelections.filter(s => s.service_id !== svc.id));
+    } else {
+      setValue('service_selections', [...serviceSelections, { service_id: svc.id, service_name: svc.name, quantity: 1, fee: Number(svc.fee ?? svc.default_fee ?? 0) }]);
+    }
+  }, [serviceSelections, setValue]);
+
+  const calculateTotal = useCallback(() =>
+    serviceSelections.reduce((sum, s) => sum + s.fee * s.quantity, 0),
+  [serviceSelections]);
+
+  const handleAddSymptom = () => {
+    if (symptomInput.trim()) { setValue('symptoms', [...symptoms, symptomInput.trim()]); setSymptomInput(''); }
+  };
 
   const parseResponse = async (res: Response) => {
     const txt = await res.text();
-    try {
-      return txt ? JSON.parse(txt) : {};
-    } catch {
-      return { message: txt || res.statusText };
-    }
+    try { return txt ? JSON.parse(txt) : {}; } catch { return { message: txt || res.statusText }; }
   };
 
-  // Calculate total
-  const calculateTotal = () => {
-    return serviceSelections.reduce(
-      (sum, sel) => sum + sel.fee * sel.quantity,
-      0,
-    );
-  };
+  // Auto-dismiss banner
+  useEffect(() => {
+    if (!banner || banner.type === 'error') return;
+    bannerTimerRef.current = window.setTimeout(() => setBanner(null), 5000);
+    return () => { if (bannerTimerRef.current) window.clearTimeout(bannerTimerRef.current); };
+  }, [banner]);
 
-  const handleAddSymptom = () => {
-    if (symptomInput.trim()) {
-      setValue('symptoms', [...symptoms, symptomInput.trim()]);
-      setSymptomInput('');
-    }
-  };
+  useEffect(() => () => {
+    if (bannerTimerRef.current) window.clearTimeout(bannerTimerRef.current);
+    if (closeTimerRef.current)  window.clearTimeout(closeTimerRef.current);
+  }, []);
 
-  const handleRemoveSymptom = (idx: number) => {
-    setValue(
-      'symptoms',
-      symptoms.filter((_, i) => i !== idx),
-    );
-  };
-
+  // ── submit ───────────────────────────────────────────────────────────
   const handleFormSubmit = async (data: UpcomingBookingFormData) => {
     setBanner(null);
-
+    const userId = data.user_id || (() => { try { const u = sessionStorage.getItem('user'); return u ? JSON.parse(u).id : ''; } catch { return ''; } })();
     const payload = {
-      user_id:
-        data.user_id ||
-        (() => {
-          try {
-            const userStr = sessionStorage.getItem('user');
-            return userStr ? JSON.parse(userStr).id : '';
-          } catch {
-            return '';
-          }
-        })() ||
-        '',
+      user_id: userId,
       pet_id: data.pet_id,
       veterinarian_id: data.veterinarian_id,
       clinic_id: data.clinic_id,
@@ -469,598 +375,383 @@ const UpcomingBookingsForm: React.FC<Props> = ({
       appointment_time: data.appointment_time,
       appointment_type: data.appointment_type,
       chief_complaint: data.chief_complaint,
-      symptoms: data.symptoms && data.symptoms.length > 0 ? data.symptoms : [],
+      symptoms: data.symptoms || [],
       notes: data.notes || '',
-      service_ids:
-        serviceSelections && serviceSelections.length > 0
-          ? serviceSelections.map((s) => s.service_id)
-          : [],
+      service_ids: serviceSelections.map(s => s.service_id),
       payment_info: {
         payment_type: data.payment_type,
-        ...(data.payment_type === 'online' && { method: data.payment_method }),
-        ...(data.payment_type === 'insurance' && {
-          insurance_id: data.insurance_id,
-        }),
+        ...(data.payment_type === 'online'     && { method: data.payment_method }),
+        ...(data.payment_type === 'insurance'  && { insurance_id: data.insurance_id }),
         amount_to_pay: calculateTotal(),
       },
     };
-
     try {
-      const token = sessionStorage.getItem('token');
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-
-      let res: Response;
-
-      if (booking) {
-        res = await fetch(API_ENDPOINTS.APPOINTMENTS.DETAIL(booking.id), {
-          method: 'PUT',
-          headers,
-          body: JSON.stringify(payload),
-        });
-      } else {
-        res = await fetch(API_ENDPOINTS.APPOINTMENTS.BASE, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(payload),
-        });
-      }
-
+      const res = await fetch(
+        booking ? API_ENDPOINTS.APPOINTMENTS.DETAIL(booking.id) : API_ENDPOINTS.APPOINTMENTS.BASE,
+        { method: booking ? 'PUT' : 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload) }
+      );
       const responseData = await parseResponse(res);
-
-      if (!res.ok) {
-        const errorMsg =
-          responseData?.message ||
-          responseData?.error ||
-          (responseData?.errors && responseData.errors[0]?.message) ||
-          res.statusText;
-        throw new Error(errorMsg);
-      }
-
-      setBanner({
-        message: booking
-          ? 'Appointment updated successfully!'
-          : 'Appointment created successfully!',
-        type: 'success',
-      });
-
+      if (!res.ok) throw new Error(responseData?.message || responseData?.error || res.statusText);
+      setBanner({ message: booking ? 'Appointment updated successfully!' : 'Appointment created successfully!', type: 'success' });
       onSubmit(data);
       reset();
-
-      if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
       closeTimerRef.current = window.setTimeout(() => onCancel(), 2000);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'An error occurred';
-      console.error('UpcomingBookingsForm error:', err);
-      setBanner({
-        message: `${booking ? 'Update' : 'Create'} failed: ${message}. Please try again.`,
-        type: 'error',
-      });
+      setBanner({ message: `${booking ? 'Update' : 'Create'} failed: ${err instanceof Error ? err.message : 'Unknown error'}`, type: 'error' });
     }
   };
 
+  // ── helpers: selected references ────────────────────────────────────
+  const selectedPet    = pets.find(p => p.id === petId);
+  const selectedClinic = clinics.find(c => c.id === clinicId);
+  const selectedVet    = vetsForClinic.find(v => v.id === vetId);
+
+  // ── render ───────────────────────────────────────────────────────────
   return (
-    <div className='p-4 mx-auto max-w-4xl md:p-6'>
+    <div className='p-4 mx-auto max-w-5xl md:p-6'>
       {/* Banner */}
       {banner && (
-        <div
-          className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg text-white font-medium max-w-sm ${
-            banner.type === 'success' ? 'bg-green-600' : 'bg-red-600'
-          }`}
-        >
-          <div className='flex items-start gap-3'>
-            <div className='flex-shrink-0 pt-0.5'>
-              {banner.type === 'success' ? (
-                <svg
-                  className='w-5 h-5'
-                  viewBox='0 0 20 20'
-                  fill='currentColor'
-                >
-                  <path
-                    fillRule='evenodd'
-                    d='M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z'
-                    clipRule='evenodd'
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className='w-5 h-5'
-                  viewBox='0 0 20 20'
-                  fill='currentColor'
-                >
-                  <path
-                    fillRule='evenodd'
-                    d='M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z'
-                    clipRule='evenodd'
-                  />
-                </svg>
-              )}
-            </div>
-            <div className='flex-1'>
-              <p className='text-sm break-words'>{banner.message}</p>
-            </div>
-            <button
-              onClick={() => setBanner(null)}
-              className='flex-shrink-0 ml-3 inline-flex text-white hover:opacity-75 transition-opacity'
-              aria-label='Dismiss'
-            >
-              <svg className='w-5 h-5' viewBox='0 0 20 20' fill='currentColor'>
-                <path
-                  fillRule='evenodd'
-                  d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
-                  clipRule='evenodd'
-                />
-              </svg>
-            </button>
-          </div>
+        <div className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg text-white font-medium max-w-sm flex items-start gap-3 ${banner.type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}>
+          <p className='text-sm flex-1 break-words'>{banner.message}</p>
+          <button onClick={() => setBanner(null)} className='text-white hover:opacity-75'><MdClose size={18} /></button>
         </div>
       )}
 
-      <FormCard
-        title={booking ? 'Edit Appointment' : 'New Appointment'}
-        onClose={onCancel}
-      >
-        <form onSubmit={handleSubmit(handleFormSubmit)} className='space-y-8'>
-          <section className='space-y-6'>
-            <h3 className='text-lg font-semibold border-b pb-2'>
-              Appointment Details
-            </h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Pet *
-                </label>
-                <Controller
-                  name='pet_id'
-                  control={control}
-                  rules={{ required: 'Pet is required' }}
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.pet_id ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    >
-                      <option value=''>Select a pet</option>
-                      {pets.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                />
-                {errors.pet_id && (
-                  <p className='text-sm text-red-600 mt-1'>
-                    {errors.pet_id.message as string}
-                  </p>
-                )}
-              </div>
+      <FormCard title={booking ? 'Edit Appointment' : 'New Appointment'} onClose={onCancel}>
+        <StepIndicator current={currentStep} />
+        <form onSubmit={handleSubmit(handleFormSubmit)}>
+          <div className='grid lg:grid-cols-5 gap-6'>
 
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Veterinarian *
-                </label>
-                <Controller
-                  name='veterinarian_id'
-                  control={control}
-                  rules={{ required: 'Veterinarian is required' }}
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.veterinarian_id
-                          ? 'border-red-500'
-                          : 'border-gray-300'
-                      }`}
-                    >
-                      <option value=''>Select a veterinarian</option>
-                      {veterinarians.map((v) => (
-                        <option key={v.id} value={v.id}>
-                          {v.first_name} {v.last_name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                />
-                {errors.veterinarian_id && (
-                  <p className='text-sm text-red-600 mt-1'>
-                    {errors.veterinarian_id.message as string}
-                  </p>
-                )}
-              </div>
+            {/* ── LEFT (col-span-3) ─────────────────────────────────── */}
+            <div className='lg:col-span-3 space-y-5'>
 
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Clinic *
-                </label>
-                <Controller
-                  name='clinic_id'
-                  control={control}
-                  rules={{ required: 'Clinic is required' }}
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.clinic_id ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    >
-                      <option value=''>Select a clinic</option>
-                      {clinics.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                />
-                {errors.clinic_id && (
-                  <p className='text-sm text-red-600 mt-1'>
-                    {errors.clinic_id.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Appointment Type *
-                </label>
-                <Controller
-                  name='appointment_type'
-                  control={control}
-                  rules={{ required: 'Appointment type is required' }}
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.appointment_type
-                          ? 'border-red-500'
-                          : 'border-gray-300'
-                      }`}
-                    >
-                      {appointmentTypes.map((t) => (
-                        <option key={t} value={t}>
-                          {t.charAt(0).toUpperCase() + t.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                />
-                {errors.appointment_type && (
-                  <p className='text-sm text-red-600 mt-1'>
-                    {errors.appointment_type.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Date *
-                </label>
-                <Controller
-                  name='appointment_date'
-                  control={control}
-                  rules={{ required: 'Date is required' }}
-                  render={({ field }) => (
-                    <DatePickerInput
-                      value={field.value ? new Date(field.value) : null}
-                      onChange={(date) => {
-                        if (date) {
-                          const year = date.getFullYear();
-                          const month = String(date.getMonth() + 1).padStart(
-                            2,
-                            '0',
-                          );
-                          const day = String(date.getDate()).padStart(2, '0');
-                          field.onChange(`${year}-${month}-${day}`);
-                        }
-                      }}
-                      onBlur={field.onBlur}
-                      error={errors.appointment_date?.message}
-                      required={true}
-                    />
-                  )}
-                />
-                {errors.appointment_date && (
-                  <p className='text-sm text-red-600 mt-1'>
-                    {errors.appointment_date.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Time *
-                </label>
-                <Controller
-                  name='appointment_time'
-                  control={control}
-                  rules={{ required: 'Time is required' }}
-                  render={({ field }) => (
-                    <input
-                      type='time'
-                      {...field}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.appointment_time
-                          ? 'border-red-500'
-                          : 'border-gray-300'
-                      }`}
-                    />
-                  )}
-                />
-                {errors.appointment_time && (
-                  <p className='text-sm text-red-600 mt-1'>
-                    {errors.appointment_time.message as string}
-                  </p>
-                )}
-              </div>
-            </div>
-          </section>
-
-          {/* Clinical Details */}
-          <section className='space-y-6'>
-            <h3 className='text-lg font-semibold border-b pb-2'>
-              Clinical Details
-            </h3>
-            <div className='space-y-6'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Chief Complaint *
-                </label>
-                <Controller
-                  name='chief_complaint'
-                  control={control}
-                  rules={{ required: 'Chief complaint is required' }}
-                  render={({ field }) => (
-                    <input
-                      type='text'
-                      placeholder='e.g., Routine checkup, Injury, etc.'
-                      {...field}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.chief_complaint
-                          ? 'border-red-500'
-                          : 'border-gray-300'
-                      }`}
-                    />
-                  )}
-                />
-                {errors.chief_complaint && (
-                  <p className='text-sm text-red-600 mt-1'>
-                    {errors.chief_complaint.message as string}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Symptoms (optional)
-                </label>
-                <div className='flex gap-2 mb-2'>
-                  <input
-                    type='text'
-                    placeholder='Add symptom (e.g., lethargy, vomiting)'
-                    value={symptomInput}
-                    onChange={(e) => setSymptomInput(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddSymptom();
-                      }
-                    }}
-                    className='flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                  />
-                  <button
-                    type='button'
-                    onClick={handleAddSymptom}
-                    className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700'
-                  >
-                    Add
-                  </button>
-                </div>
-                {symptoms.length > 0 && (
+              {/* STEP 1 — Pet */}
+              <div className='bg-white border border-gray-200 rounded-xl p-4'>
+                <h4 className='text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2'>
+                  <PawPrint size={14} className='text-blue-500' /> Select Pet
+                </h4>
+                {pets.length === 0 ? (
+                  <p className='text-sm text-gray-400'>No pets found.</p>
+                ) : (
                   <div className='flex flex-wrap gap-2'>
-                    {symptoms.map((sym, idx) => (
-                      <div
-                        key={idx}
-                        className='inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'
-                      >
-                        {sym}
-                        <button
-                          type='button'
-                          onClick={() => handleRemoveSymptom(idx)}
-                          className='text-blue-600 hover:text-blue-800'
-                        >
-                          <MdClose size={14} />
-                        </button>
-                      </div>
+                    {pets.map(p => (
+                      <button key={p.id} type='button'
+                        onClick={() => setValue('pet_id', p.id, { shouldValidate: true })}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                          petId === p.id
+                            ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
+                            : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+                        }`}>
+                        {p.image
+                          ? <img src={p.image} alt={p.name} className='w-6 h-6 rounded-full object-cover' />
+                          : <div className='w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center'><PawPrint size={12} className='text-blue-500' /></div>
+                        }
+                        {p.name}
+                        {petId === p.id && <CheckCircle size={14} className='text-blue-500' />}
+                      </button>
                     ))}
                   </div>
                 )}
+                {errors.pet_id && <p className='text-xs text-red-500 mt-2'>{errors.pet_id.message as string}</p>}
+                <input type='hidden' {...register('pet_id', { required: 'Please select a pet' })} />
               </div>
 
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Notes (optional)
-                </label>
-                <Controller
-                  name='notes'
-                  control={control}
-                  render={({ field }) => (
-                    <textarea
-                      placeholder='Add any additional notes about the appointment'
-                      {...field}
-                      className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
-                      rows={3}
+              {/* STEP 2 — Clinic */}
+              <div className={`bg-white border rounded-xl p-4 transition-opacity ${!petId ? 'opacity-50 pointer-events-none' : 'border-gray-200'}`}>
+                <h4 className='text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2'>
+                  <MapPin size={14} className='text-blue-500' /> Select Clinic
+                  {loadingClinics && <span className='text-xs text-gray-400 normal-case font-normal'>Loading...</span>}
+                </h4>
+                <div className='flex flex-wrap gap-2'>
+                  {clinics.map(c => (
+                    <button key={c.id} type='button'
+                      onClick={() => setValue('clinic_id', c.id, { shouldValidate: true })}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                        clinicId === c.id
+                          ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
+                          : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+                      }`}>
+                      <MapPin size={13} className={clinicId === c.id ? 'text-blue-500' : 'text-gray-400'} />
+                      <div className='text-left'>
+                        <div>{c.name}</div>
+                        {c.address && <div className='text-xs font-normal text-gray-400'>{c.address}</div>}
+                      </div>
+                      {clinicId === c.id && <CheckCircle size={14} className='text-blue-500' />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <input type='hidden' {...register('clinic_id', { required: 'Please select a clinic' })} />
+
+              {/* STEP 3 — Vet */}
+              <div className={`bg-white border rounded-xl p-4 transition-opacity ${!clinicId ? 'opacity-50 pointer-events-none' : 'border-gray-200'}`}>
+                <h4 className='text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2'>
+                  <Stethoscope size={14} className='text-blue-500' /> Select Veterinarian
+                  {loadingVets && <span className='text-xs text-gray-400 normal-case font-normal'>Loading...</span>}
+                </h4>
+                {!loadingVets && vetsForClinic.length === 0 && clinicId && (
+                  <p className='text-sm text-gray-400'>No veterinarians available at this clinic.</p>
+                )}
+                <div className='flex flex-wrap gap-2'>
+                  {vetsForClinic.map(v => (
+                    <button key={v.id} type='button'
+                      onClick={() => setValue('veterinarian_id', v.id, { shouldValidate: true })}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                        vetId === v.id
+                          ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
+                          : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+                      }`}>
+                      <div className='w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0'>
+                        <User size={13} className='text-indigo-500' />
+                      </div>
+                      <div className='text-left'>
+                        <div>Dr. {v.first_name} {v.last_name}</div>
+                        {v.specialization && <div className='text-xs font-normal text-gray-400'>{v.specialization}</div>}
+                      </div>
+                      {vetId === v.id && <CheckCircle size={14} className='text-blue-500' />}
+                    </button>
+                  ))}
+                </div>
+                <input type='hidden' {...register('veterinarian_id', { required: 'Please select a veterinarian' })} />
+              </div>
+
+              {/* STEP 4 — Date + Slots */}
+              <div className={`bg-white border rounded-xl p-4 transition-opacity ${!vetId ? 'opacity-50 pointer-events-none' : 'border-gray-200'}`}>
+                <h4 className='text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2'>
+                  <Clock size={14} className='text-blue-500' /> Pick Date &amp; Time
+                  {loadingSchedule && <span className='text-xs text-gray-400 normal-case font-normal'>Loading schedule...</span>}
+                </h4>
+                <div className='grid grid-cols-2 gap-4'>
+                  <div>
+                    <label className='block text-xs font-medium text-gray-600 mb-1.5'>Date <span className='text-red-500'>*</span></label>
+                    <Controller name='appointment_date' control={control} rules={{ required: 'Date is required' }}
+                      render={({ field }) => (
+                        <DatePickerInput
+                          value={field.value ? new Date(field.value + 'T00:00:00') : null}
+                          minDate={new Date()}
+                          onChange={date => {
+                            if (date) {
+                              const y = date.getFullYear(), mo = String(date.getMonth()+1).padStart(2,'0'), d = String(date.getDate()).padStart(2,'0');
+                              field.onChange(`${y}-${mo}-${d}`);
+                            }
+                          }}
+                          onBlur={field.onBlur}
+                          error={errors.appointment_date?.message}
+                          required
+                        />
+                      )}
                     />
-                  )}
-                />
-              </div>
-            </div>
-          </section>
-
-          {/* Services */}
-          <section className='space-y-6'>
-            <h3 className='text-lg font-semibold border-b pb-2'>Services</h3>
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Select Services
-              </label>
-              <Controller
-                name='service_selections'
-                control={control}
-                render={({ field }) => (
-                  <ServiceMultiSelect
-                    services={vetServices}
-                    selectedServices={field.value || []}
-                    onChange={field.onChange}
-                    disabled={isSubmitting}
-                  />
-                )}
-              />
-            </div>
-          </section>
-
-          {/* Payment Information */}
-          <section className='space-y-6'>
-            <h3 className='text-lg font-semibold border-b pb-2'>
-              Payment Information
-            </h3>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-2'>
-                  Payment Type *
-                </label>
-                <Controller
-                  name='payment_type'
-                  control={control}
-                  rules={{ required: 'Payment type is required' }}
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.payment_type
-                          ? 'border-red-500'
-                          : 'border-gray-300'
-                      }`}
-                    >
-                      <option value='cash'>Cash at Clinic</option>
-                      <option value='online'>Online Payment</option>
-                      <option value='insurance'>Insurance</option>
-                    </select>
-                  )}
-                />
-                {errors.payment_type && (
-                  <p className='text-sm text-red-600 mt-1'>
-                    {errors.payment_type.message as string}
-                  </p>
-                )}
-              </div>
-
-              {paymentType === 'online' && (
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Payment Method *
-                  </label>
-                  <Controller
-                    name='payment_method'
-                    control={control}
-                    rules={{ required: 'Payment method is required' }}
-                    render={({ field }) => (
-                      <select
-                        {...field}
-                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          errors.payment_method
-                            ? 'border-red-500'
-                            : 'border-gray-300'
-                        }`}
-                      >
-                        <option value='card'>Card</option>
-                        <option value='upi'>UPI</option>
-                        <option value='bank_transfer'>Bank Transfer</option>
-                      </select>
+                  </div>
+                  <div>
+                    <label className='block text-xs font-medium text-gray-600 mb-1.5'>Available Slots <span className='text-red-500'>*</span></label>
+                    {date && availableSlots.length === 0 && !loadingSchedule && (
+                      <p className='text-xs text-amber-600 mb-2'>
+                        No slots available on {date ? DAY_NAMES[new Date(date+'T00:00:00').getDay()] : 'this day'}.
+                      </p>
                     )}
-                  />
-                  {errors.payment_method && (
-                    <p className='text-sm text-red-600 mt-1'>
-                      {errors.payment_method.message as string}
-                    </p>
-                  )}
+                    <div className='flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1'>
+                      {availableSlots.map(slot => (
+                        <button key={slot} type='button'
+                          onClick={() => setValue('appointment_time', slot, { shouldValidate: true })}
+                          className={`px-2.5 py-1 rounded-md border text-xs font-medium transition-all ${
+                            time === slot
+                              ? 'border-blue-500 bg-blue-600 text-white shadow-sm'
+                              : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+                          }`}>
+                          {formatSlotDisplay(slot)}
+                        </button>
+                      ))}
+                    </div>
+                    {errors.appointment_time && <p className='text-xs text-red-500 mt-1'>{errors.appointment_time.message as string}</p>}
+                  </div>
                 </div>
-              )}
+              </div>
 
-              {paymentType === 'insurance' && (
-                <div>
-                  <label className='block text-sm font-medium text-gray-700 mb-2'>
-                    Insurance ID *
-                  </label>
-                  <Controller
-                    name='insurance_id'
-                    control={control}
-                    rules={
-                      paymentType === 'insurance'
-                        ? { required: 'Insurance ID is required' }
-                        : {}
-                    }
-                    render={({ field }) => (
-                      <input
-                        type='text'
-                        placeholder='e.g., INS-12345-6789'
-                        {...field}
-                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                          errors.insurance_id
-                            ? 'border-red-500'
-                            : 'border-gray-300'
-                        }`}
+              {/* Clinical Details */}
+              <div className='bg-white border border-gray-200 rounded-xl p-4'>
+                <h4 className='text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3'>Clinical Details</h4>
+                <div className='space-y-3'>
+                  {/* Appointment Type */}
+                  <div>
+                    <label className='block text-xs font-medium text-gray-600 mb-1.5'>Appointment Type <span className='text-red-500'>*</span></label>
+                    <Controller name='appointment_type' control={control} rules={{ required: true }}
+                      render={({ field }) => (
+                        <select {...field} className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'>
+                          {appointmentTypes.map(t => (
+                            <option key={t} value={t}>{t.charAt(0).toUpperCase()+t.slice(1)}</option>
+                          ))}
+                        </select>
+                      )}
+                    />
+                  </div>
+                  {/* Chief Complaint */}
+                  <div>
+                    <label className='block text-xs font-medium text-gray-600 mb-1.5'>Chief Complaint <span className='text-red-500'>*</span></label>
+                    <Controller name='chief_complaint' control={control} rules={{ required: 'Required' }}
+                      render={({ field }) => (
+                        <input type='text' placeholder='e.g., Routine checkup, Limping…' {...field}
+                          className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.chief_complaint ? 'border-red-400' : 'border-gray-200'}`} />
+                      )}
+                    />
+                    {errors.chief_complaint && <p className='text-xs text-red-500 mt-1'>{errors.chief_complaint.message as string}</p>}
+                  </div>
+                  {/* Symptoms */}
+                  <div>
+                    <label className='block text-xs font-medium text-gray-600 mb-1.5'>Symptoms <span className='text-gray-400 font-normal'>(optional)</span></label>
+                    <div className='flex gap-2 mb-2'>
+                      <input type='text' placeholder='e.g., lethargy, vomiting' value={symptomInput}
+                        onChange={e => setSymptomInput(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddSymptom(); } }}
+                        className='flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500' />
+                      <button type='button' onClick={handleAddSymptom} className='px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700'>Add</button>
+                    </div>
+                    <div className='flex flex-wrap gap-1.5'>
+                      {symptoms.map((sym, idx) => (
+                        <span key={idx} className='inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-800 rounded-full text-xs'>
+                          {sym}
+                          <button type='button' onClick={() => setValue('symptoms', symptoms.filter((_,i) => i!==idx))} className='text-blue-600 hover:text-blue-800'><MdClose size={11} /></button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Notes */}
+                  <div>
+                    <label className='block text-xs font-medium text-gray-600 mb-1.5'>Notes <span className='text-gray-400 font-normal'>(optional)</span></label>
+                    <Controller name='notes' control={control}
+                      render={({ field }) => (
+                        <textarea placeholder='Additional notes…' {...field} rows={3}
+                          className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500' />
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── RIGHT (col-span-2) ─────────────────────────────────── */}
+            <div className='lg:col-span-2 space-y-5'>
+
+              {/* STEP 5 — Services */}
+              <div className={`bg-white border rounded-xl p-4 transition-opacity ${!vetId || !clinicId ? 'opacity-50 pointer-events-none' : 'border-gray-200'}`}>
+                <h4 className='text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2'>
+                  <CheckCircle size={14} className='text-blue-500' /> Services
+                  {loadingServices && <span className='text-xs text-gray-400 normal-case font-normal'>Loading...</span>}
+                </h4>
+                {!loadingServices && servicesForBooking.length === 0 && vetId && clinicId && (
+                  <p className='text-sm text-gray-400'>No services available.</p>
+                )}
+                <div className='space-y-2 max-h-64 overflow-y-auto pr-1'>
+                  {servicesForBooking.map(svc => {
+                    const selected = serviceSelections.some(s => s.service_id === svc.id);
+                    return (
+                      <button key={svc.id} type='button' onClick={() => toggleService(svc)}
+                        className={`w-full flex items-start gap-3 p-3 rounded-lg border text-left transition-all ${
+                          selected
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50'
+                        }`}>
+                        <div className={`mt-0.5 w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${selected ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`}>
+                          {selected && <CheckCircle size={10} className='text-white' />}
+                        </div>
+                        <div className='flex-1 min-w-0'>
+                          <div className='text-sm font-medium text-gray-800'>{svc.name}</div>
+                          {svc.description && <div className='text-xs text-gray-400 truncate'>{svc.description}</div>}
+                          {svc.default_duration_minutes && <div className='text-xs text-gray-400'>{svc.default_duration_minutes} min</div>}
+                        </div>
+                        <div className='text-sm font-semibold text-blue-600 flex-shrink-0'>${Number(svc.fee ?? svc.default_fee ?? 0).toFixed(2)}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* STEP 6 — Payment */}
+              <div className='bg-white border border-gray-200 rounded-xl p-4'>
+                <h4 className='text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2'>
+                  <CreditCard size={14} className='text-blue-500' /> Payment
+                </h4>
+                <div className='space-y-3'>
+                  <div>
+                    <label className='block text-xs font-medium text-gray-600 mb-1.5'>Payment Type <span className='text-red-500'>*</span></label>
+                    <Controller name='payment_type' control={control} rules={{ required: true }}
+                      render={({ field }) => (
+                        <select {...field} className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'>
+                          <option value='cash'>Cash at Clinic</option>
+                          <option value='online'>Online Payment</option>
+                          <option value='insurance'>Insurance</option>
+                        </select>
+                      )}
+                    />
+                  </div>
+                  {paymentType === 'online' && (
+                    <div>
+                      <label className='block text-xs font-medium text-gray-600 mb-1.5'>Payment Method <span className='text-red-500'>*</span></label>
+                      <Controller name='payment_method' control={control} rules={{ required: paymentType === 'online' }}
+                        render={({ field }) => (
+                          <select {...field} className='w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'>
+                            <option value='card'>Card</option>
+                            <option value='upi'>UPI</option>
+                            <option value='bank_transfer'>Bank Transfer</option>
+                          </select>
+                        )}
                       />
-                    )}
-                  />
-                  {errors.insurance_id && (
-                    <p className='text-sm text-red-600 mt-1'>
-                      {errors.insurance_id.message as string}
-                    </p>
+                    </div>
+                  )}
+                  {paymentType === 'insurance' && (
+                    <div>
+                      <label className='block text-xs font-medium text-gray-600 mb-1.5'>Insurance ID <span className='text-red-500'>*</span></label>
+                      <Controller name='insurance_id' control={control} rules={{ required: paymentType === 'insurance' ? 'Required' : false }}
+                        render={({ field }) => (
+                          <input type='text' placeholder='e.g., INS-12345-6789' {...field}
+                            className={`w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.insurance_id ? 'border-red-400' : 'border-gray-200'}`} />
+                        )}
+                      />
+                    </div>
                   )}
                 </div>
-              )}
+              </div>
 
-              <div className='md:col-span-2 p-4 bg-blue-50 border border-blue-200 rounded-md'>
-                <div className='text-sm font-medium text-gray-700 mb-2'>
-                  Total Amount
+              {/* Summary card */}
+              <div className='rounded-xl border border-gray-200 bg-white p-4'>
+                <h4 className='text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3'>Booking Summary</h4>
+                <div className='space-y-1.5 text-sm text-gray-700'>
+                  {selectedPet    && <div className='flex items-center gap-2'><PawPrint size={13} className='text-gray-400' /><span>{selectedPet.name}</span></div>}
+                  {selectedClinic && <div className='flex items-center gap-2'><MapPin size={13} className='text-gray-400' /><span>{selectedClinic.name}</span></div>}
+                  {selectedVet    && <div className='flex items-center gap-2'><Stethoscope size={13} className='text-gray-400' /><span>Dr. {selectedVet.first_name} {selectedVet.last_name}</span></div>}
+                  {date && time   && <div className='flex items-center gap-2'><Clock size={13} className='text-gray-400' /><span>{date} · {formatSlotDisplay(time)}</span></div>}
+                  {serviceSelections.length > 0 && (
+                    <div className='mt-2 pt-2 border-t border-gray-100 space-y-1'>
+                      {serviceSelections.map(s => (
+                        <div key={s.service_id} className='flex justify-between text-xs text-gray-600'>
+                          <span>{s.service_name}</span><span>${(s.fee * s.quantity).toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div className='text-3xl font-bold text-blue-600'>
-                  ${calculateTotal().toFixed(2)}
-                </div>
-                <div className='text-xs text-gray-600 mt-2'>
-                  {serviceSelections.length} service(s) selected
+                <div className='mt-3 pt-3 border-t border-gray-100'>
+                  <div className='rounded-lg bg-emerald-50 px-3 py-2.5'>
+                    <p className='text-xs text-gray-500 mb-0.5'>Total</p>
+                    <p className='text-lg font-bold text-emerald-600'>${calculateTotal().toFixed(2)}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
 
-          {/* Actions */}
-          <div className='flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 border-t'>
-            <button
-              type='button'
-              onClick={onCancel}
-              className='px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium'
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type='submit'
-              disabled={isSubmitting}
-              className='px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 font-medium'
-            >
-              {isSubmitting
-                ? booking
-                  ? 'Updating...'
-                  : 'Creating...'
-                : booking
-                  ? 'Update Appointment'
-                  : 'Create Appointment'}
-            </button>
+            </div>
+
+            {/* ACTIONS */}
+            <div className='lg:col-span-5 flex justify-end gap-3 pt-4 border-t'>
+              <button type='button' onClick={onCancel} disabled={isSubmitting}
+                className='px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50'>
+                Cancel
+              </button>
+              <button type='submit' disabled={isSubmitting}
+                className='px-5 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-medium'>
+                {isSubmitting ? (booking ? 'Updating…' : 'Creating…') : (booking ? 'Update Appointment' : 'Book Appointment')}
+              </button>
+            </div>
+
           </div>
         </form>
       </FormCard>
@@ -1069,3 +760,4 @@ const UpcomingBookingsForm: React.FC<Props> = ({
 };
 
 export default UpcomingBookingsForm;
+

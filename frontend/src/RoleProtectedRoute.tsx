@@ -60,7 +60,6 @@ const RoleProtectedRoute = ({ allowedRoles }: RoleProtectedRouteProps) => {
 
   // Check if user's role is in allowed roles
   if (userRole && !allowedRoles.includes(userRole as any)) {
-    console.warn(`User role '${userRole}' not in allowed roles:`, allowedRoles);
     return <Navigate to={getRoleBasedHomePath()} replace />;
   }
 

@@ -98,8 +98,8 @@ const MyPetsTable = () => {
           name: it.name ?? '',
         })),
       );
-    } catch (error) {
-      console.error('Error fetching pet types:', error);
+    } catch {
+      // silently ignore
     }
   }, []);
 
@@ -129,10 +129,9 @@ const MyPetsTable = () => {
         ),
       }));
 
-      console.log(`Fetched ${processedBreeds.length} breeds:`, processedBreeds);
       setBreeds(processedBreeds);
-    } catch (error) {
-      console.error('Error fetching breeds:', error);
+    } catch {
+      // silently ignore
     }
   }, []);
 
@@ -211,7 +210,6 @@ const MyPetsTable = () => {
 
       setPets(items);
     } catch (error: any) {
-      console.error('Error fetching pets:', error);
       setFetchError(error.message || 'Failed to load pets');
     } finally {
       setIsLoadingData(false);
@@ -591,6 +589,10 @@ const MyPetsTable = () => {
                                 'Content-Type': 'application/json',
                               },
                               body: JSON.stringify({ status: newStatus }),
+                            }).then((res) => {
+                              if (!res.ok) {
+                                throw new Error('Failed to update status');
+                              }
                             }).catch(() => {
                               setFetchError('Failed to update status');
                               setPets((prev) =>

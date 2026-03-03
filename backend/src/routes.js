@@ -12,13 +12,15 @@ const veterinariansRoutes = require('./modules/veterinarians/veterinarians.route
 const vetServicesRoutes = require('./modules/vet_services/vet_services.routes');
 const rolesRoutes = require('./modules/roles/roles.routes');
 const permissionsRoutes = require('./modules/permissions/permissions.routes');
-const medicalRecordsRoutes = require("./modules/medical-records/medical-records.routes");
-const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
-const reviewsRoutes = require("./modules/reviews/reviews.routes");
-const settingsRoutes = require("./modules/settings/settings.routes");
-const notificationChannelsRoutes = require("./modules/notification-channels/notification-channels.routes");
-const notificationsRoutes = require("./modules/notifications/notifications.routes");
-const vetSchedulesRoutes = require("./modules/vet-schedules/vet-schedules.routes");
+const medicalRecordsRoutes = require('./modules/medical-records/medical-records.routes');
+const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
+const reviewsRoutes = require('./modules/reviews/reviews.routes');
+const settingsRoutes = require('./modules/settings/settings.routes');
+const notificationChannelsRoutes = require('./modules/notification-channels/notification-channels.routes');
+const notificationsRoutes = require('./modules/notifications/notifications.routes');
+const vetSchedulesRoutes = require('./modules/vet-schedules/vet-schedules.routes');
+const paymentsRoutes = require('./modules/payments/payments.routes');
+const splitPaymentRoutes = require('./modules/vet-appointments/routes/splitPaymentRoutes');
 
 const router = express.Router();
 
@@ -37,9 +39,10 @@ router.use('/medical-records', medicalRecordsRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/reviews', reviewsRoutes);
 router.use('/settings', settingsRoutes);
-router.use('/setting', settingsRoutes);
 router.use('/notification-channels', notificationChannelsRoutes);
 router.use('/notifications', notificationsRoutes);
 router.use('/vet-schedules', vetSchedulesRoutes);
+router.use('/payments', paymentsRoutes);
+router.use('/vet-appointments', splitPaymentRoutes);
 
 module.exports = router;

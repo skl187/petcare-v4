@@ -5,7 +5,7 @@ import Label from "../../../components/form/Label";
 import Input from "../../../components/form/input/InputField";
 import TextArea from "../../../components/form/input/TextArea";
 import { API_ENDPOINTS } from "../../../constants/api";
-import { Permission } from "../../../components/tables/permissionTables/PermissionsTable";
+import { Permission } from "../../../components/tables/AdminTables/PermissionsTable";
 
 interface PermissionFormData {
   name: string;
@@ -84,7 +84,6 @@ export default function PermissionForm({
 
       onSuccess();
     } catch (err) {
-      console.error("Error saving permission:", err);
       setError("Failed to save permission");
     } finally {
       setLoading(false);

@@ -38,7 +38,6 @@ export default function SignInForm() {
   // Navigate when user is set and role is available
   useEffect(() => {
     if (user && roleToNavigate) {
-      console.log('User set in context, navigating to appropriate route');
       handleRoleBasedRedirect(roleToNavigate);
       setRoleToNavigate(null); // Reset to prevent multiple navigations
     }
@@ -58,26 +57,21 @@ export default function SignInForm() {
   // Function to handle redirection based on role
   const handleRoleBasedRedirect = (role: string) => {
     const normalizedRole = role.toLowerCase().trim();
-    console.log('Normalized role:', normalizedRole);
 
     switch (normalizedRole) {
       case 'superadmin':
       case 'admin':
-        console.log('Redirecting to /home');
         navigate('/home');
         break;
       case 'doctor':
       case 'veterinary':
       case 'veterinarian':
-        console.log('Redirecting to /vet/home');
         navigate('/vet/home');
         break;
       case 'owner':
-        console.log('Redirecting to /owner/home');
         navigate('/owner/home');
         break;
       default:
-        console.log('Default redirect to /home');
         navigate('/home');
     }
   };
@@ -119,7 +113,6 @@ export default function SignInForm() {
         });
 
         const data = await response.json();
-        console.log('Login response:', data);
 
         if (!response.ok) {
           setApiError(data.message || 'Invalid credentials. Please try again.');
@@ -130,12 +123,10 @@ export default function SignInForm() {
         // Store token
         if (data.data?.token) {
           sessionStorage.setItem('token', data.data.token);
-          console.log('Token stored');
         }
 
         // Get user data from response
         const userData = data.data?.user;
-        console.log('User data:', userData);
 
         if (!userData) {
           setApiError('No user data received. Please try again.');
@@ -145,7 +136,6 @@ export default function SignInForm() {
 
         // Store user data via AuthContext
         setUser(userData);
-        console.log('User data stored');
 
         // Get role for redirection
         const roles = userData.roles || [];
@@ -166,9 +156,6 @@ export default function SignInForm() {
           roleForRedirect = userData.role || 'owner';
         }
 
-        console.log('Roles array:', roles);
-        console.log('Role for redirect:', roleForRedirect);
-
         // Set loading to false
         setLoading(false);
 
@@ -176,7 +163,6 @@ export default function SignInForm() {
         setRoleToNavigate(roleForRedirect);
       } catch (err) {
         setApiError('Network error. Please try again.');
-        console.error('Error:', err);
         setLoading(false);
       }
     }
@@ -282,6 +268,7 @@ export default function SignInForm() {
                 <Button
                   className='w-full'
                   size='sm'
+                  type='submit'
                   disabled={
                     !email ||
                     !password ||

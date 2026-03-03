@@ -5,16 +5,18 @@ import ReviewModal from "../../components/reviews/ReviewModal";
 export default function PendingReviewsWidget() {
   const [appointments, setAppointments] = useState<PendingReviewAppointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<PendingReviewAppointment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const loadPendingReviews = async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await getPendingReviewAppointments();
       setAppointments(data.appointments);
-    } catch (err) {
-      console.error("Failed to load pending reviews:", err);
+    } catch {
+      setError("Failed to load pending reviews");
     } finally {
       setLoading(false);
     }
@@ -51,6 +53,10 @@ export default function PendingReviewsWidget() {
         </div>
       </div>
     );
+  }
+
+  if (error) {
+    return null; // Don't show widget on error
   }
 
   if (appointments.length === 0) {

@@ -7,10 +7,16 @@
 .zencoder/
 .zenflow/
 
-frontend/node_modules/
+frontend/node_modules
 
-backend/node_modules/
+backend/node_modules
 
 .docs
 .sql
+.gitignore
+deployment.md
+docker-compose.dev.yml
+full_backup.sql
+nginx-prod.conf
+nginx.conf
 readme.md

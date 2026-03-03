@@ -27,24 +27,16 @@ const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle }) => {
 
     const normalizedRole = (userRole || '').toLowerCase().trim();
 
-    console.log('PageBreadcrumb - User:', user);
-    console.log('PageBreadcrumb - userRole:', userRole);
-    console.log('PageBreadcrumb - normalizedRole:', normalizedRole);
-
     switch (normalizedRole) {
       case 'veterinary':
       case 'veterinarian':
-        console.log('PageBreadcrumb - Redirecting to /vet/home');
         return '/vet/home';
       case 'owner':
-        console.log('PageBreadcrumb - Redirecting to /owner/home');
         return '/owner/home';
       case 'superadmin':
       case 'admin':
-        console.log('PageBreadcrumb - Redirecting to /home');
         return '/home';
       default:
-        console.log('PageBreadcrumb - Default redirect to /home');
         return '/home';
     }
   };

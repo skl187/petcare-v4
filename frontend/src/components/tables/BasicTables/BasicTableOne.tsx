@@ -139,10 +139,8 @@ export default function EnhancedTable() {
   const handleApplyAction = () => {
     if (actionDropdown === "Delete") {
       // Handle delete logic
-      console.log("Deleting selected rows");
     } else if (actionDropdown === "Status" && statusUpdate) {
       // Handle status update logic
-      console.log("Updating status to:", statusUpdate);
     }
   };
 

@@ -21,7 +21,6 @@ const VetDashboard = () => {
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load dashboard');
-        console.error('Dashboard load error:', err);
       } finally {
         setLoading(false);
       }

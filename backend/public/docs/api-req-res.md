@@ -452,3 +452,94 @@ Response:
 }
 ```
 
+# GET /api/vet-services/my-clinics
+Get list of clinics where authenticated veterinarian is mapped
+
+**Request:**
+```bash
+curl -X GET http://localhost:3000/api/vet-services/my-clinics \
+  -H "Authorization: Bearer {token}"
+```
+
+**Response:** `200 OK`
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "mapping_id": "mapping-uuid-1",
+      "clinic_id": "clinic-A-uuid",
+      "clinic_name": "Happy Paws Clinic",
+      "contact_email": "info@happypaws.com",
+      "contact_number": "+1-555-0123",
+      "is_primary": true,
+      "consultation_fee_override": 75.00
+    },
+    {
+      "mapping_id": "mapping-uuid-2",
+      "clinic_id": "clinic-B-uuid",
+      "clinic_name": "Pet Care Plus",
+      "contact_email": "info@petcareplus.com",
+      "contact_number": "+1-555-0456",
+      "is_primary": false,
+      "consultation_fee_override": null
+    }
+  ]
+}
+```
+
+---
+
+# GET /api/vet-services/my-services
+Get vet services by user_id from bearer token - returns services with clinic names
+
+**Request:**
+```bash
+curl -X GET http://localhost:3000/api/vet-services/my-services \
+  -H "Authorization: Bearer {token}"
+```
+
+**Response:** `200 OK`
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "id": "vs-uuid-1",
+      "code": "CONS001",
+      "name": "Consultation",
+      "description": "General consultation",
+      "service_type": "consultation",
+      "default_duration_minutes": 30,
+      "default_fee": 55.00,
+      "clinic_name": "Happy Paws Clinic",
+      "clinic_id": "clinic-A-uuid",
+      "is_primary": true
+    },
+    {
+      "id": "vs-uuid-2",
+      "code": "SURG001",
+      "name": "Surgery",
+      "description": "General surgery",
+      "service_type": "surgery",
+      "default_duration_minutes": 60,
+      "default_fee": 250.00,
+      "clinic_name": "Pet Care Plus",
+      "clinic_id": "clinic-B-uuid",
+      "is_primary": false
+    }
+  ]
+}
+```
+
+---
+## POST /api/vet-services/my — Request Body
+json{
+  "clinic_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "name": "General Consultation",
+  "code": "CONSULT-GEN",
+  "description": "Routine checkup and health assessment for pets",
+  "default_duration_minutes": 30,
+  "default_fee": 500.00,
+  "service_type": "consultation"
+}

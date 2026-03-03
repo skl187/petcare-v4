@@ -1,5 +1,6 @@
 // src/core/email/email.service.js
 const nodemailer = require('nodemailer');
+const logger = require('../utils/logger');
 const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, CLIENT_URL, NODE_ENV } = require('../../config/env');
 const { getSetting } = require('../settings/settings.service');
 
@@ -21,9 +22,8 @@ const getTransporter = () => {
   if (!transporter) {
     const cfg = resolveSmtpConfig();
 
-    // In development without SMTP config, skip transporter
     if (NODE_ENV !== 'production' && !cfg.host) {
-      console.log('[email] No SMTP configured (env or DB), emails will be logged to console');
+      logger.info('[email] No SMTP configured, emails will be logged');
       return null;
     }
 
@@ -42,8 +42,7 @@ const sendEmail = async ({ to, subject, html, text }) => {
   const cfg = resolveSmtpConfig();
 
   if (!transport) {
-    // Log email for development
-    console.log('[email] Would send email:', { to, subject, text: text?.substring(0, 200) });
+    logger.debug('[email] Would send email', { to, subject });
     return { messageId: 'dev-mode-' + Date.now() };
   }
 

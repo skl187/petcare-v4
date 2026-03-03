@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import PageMeta from '../../components/common/PageMeta';
 import ComponentCard from '../../components/common/ComponentCard';
-import VeterinaryBookingsTable from '../../components/vetTables/Veterinary/VeterninaryBookingsTable/VeterinaryBookingsTable';
-import VeterinaryBookingsDetail from '../../adminPages/VetPageForms/Veterinary/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
+import VeterinaryBookingsTable from '../../components/vetTables/Veterinary/VeterinaryBookingsTable';
+import VeterinaryBookingsDetail from '../../adminPages/AdminPageForms/VeterinaryBookingsDetail/VeterinaryBookingsDetail';
 
 const VeterinaryBookings = () => {
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<
@@ -12,7 +12,6 @@ const VeterinaryBookings = () => {
 
   // Handler for when edit button is clicked in table
   const handleSelectAppointment = (booking: any) => {
-    console.log('Selected appointment:', booking.id, 'petId:', booking.pet_id);
     setSelectedAppointmentId(booking.id);
     setSelectedPetId(booking.pet_id);
   };

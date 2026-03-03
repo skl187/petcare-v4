@@ -1,6 +1,6 @@
 import PageMeta from "../../components/common/PageMeta";
 import PageBreadCrumb from "../../components/common/PageBreadCrumb";
-import RolesTable from "../../components/tables/roleTables/RolesTable";
+import RolesTable from "../../components/tables/AdminTables/RolesTable";
 
 export default function ManageRoles() {
   return (

@@ -14,15 +14,23 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({
+      status: 'error',
+      message: 'Invalid or expired token',
+      timestamp: new Date().toISOString()
+    });
   }
 };
 
 const requireAuth = (req, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ error: 'Authentication required' });
+    return res.status(401).json({
+      status: 'error',
+      message: 'Authentication required',
+      timestamp: new Date().toISOString()
+    });
   }
   next();
 };
 
-module.exports = { authMiddleware,requireAuth };
+module.exports = { authMiddleware, requireAuth };

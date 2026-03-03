@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const { requireAuth } = require('../../core/auth/auth.middleware');
 const settingsController = require('./settings.controller');
-const { attachCheckPermission } = require('../../core/rbac/rbac.middleware');
 
-// Attach permission helper
-//router.use(attachCheckPermission);
+// All settings routes require authentication
+router.use(requireAuth);
 
 // List settings (superadmin use)
 router.get('/', settingsController.list);

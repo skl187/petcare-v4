@@ -15,6 +15,7 @@ interface DatePickerInputProps {
   maxDate?: Date;
   className?: string;
   id?: string;
+  showTimeSelect?: boolean;
 }
 
 const DatePickerInput = React.forwardRef<HTMLDivElement, DatePickerInputProps>(
@@ -31,6 +32,7 @@ const DatePickerInput = React.forwardRef<HTMLDivElement, DatePickerInputProps>(
       maxDate,
       className = '',
       id = `date-picker-${Math.random().toString(36).substr(2, 9)}`,
+      showTimeSelect = false,
     },
     ref,
   ) => {
@@ -50,7 +52,8 @@ const DatePickerInput = React.forwardRef<HTMLDivElement, DatePickerInputProps>(
         mode: 'single',
         static: true,
         monthSelectorType: 'static',
-        dateFormat: 'Y-m-d',
+        enableTime: showTimeSelect,
+        dateFormat: showTimeSelect ? 'Y-m-d H:i' : 'Y-m-d',
         defaultDate: value
           ? typeof value === 'string'
             ? new Date(value)
@@ -94,7 +97,7 @@ const DatePickerInput = React.forwardRef<HTMLDivElement, DatePickerInputProps>(
             id={id}
             type='text'
             disabled={disabled}
-            placeholder='YYYY-MM-DD'
+            placeholder={showTimeSelect ? 'YYYY-MM-DD HH:MM' : 'YYYY-MM-DD'}
             className={`w-full px-3 py-2 pl-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
               disabled
                 ? 'bg-gray-100 cursor-not-allowed opacity-50'

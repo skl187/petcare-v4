@@ -5,6 +5,7 @@
 
 const { query, getConnection } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 // ============================================================================
 // MEDICAL RECORDS LISTING & RETRIEVAL
@@ -84,7 +85,7 @@ const getMedicalRecordById = async (req, res) => {
     const { id } = req.params;
 
     const result = await query(
-      `SELECT mr.*, 
+      `SELECT mr.*,
               p.name as pet_name, p.date_of_birth as pet_dob,
               vu.first_name as vet_first_name, vu.last_name as vet_last_name, v.specialization,
               a.appointment_number
@@ -121,7 +122,7 @@ const getMedicalRecordById = async (req, res) => {
       lab_tests: labTests.rows
     }));
   } catch (err) {
-    console.error('getMedicalRecordById error:', err);
+    logger.error('getMedicalRecordById error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to fetch medical record' });
   }
 };
@@ -402,7 +403,7 @@ const createMedicalRecord = async (req, res) => {
 
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('Create medical record error:', err.message);
+    logger.error('Create medical record error:', err.message);
     res.status(500).json({
       status: 'error',
       message: process.env.NODE_ENV === 'production' ? 'Failed to create medical record' : err.message

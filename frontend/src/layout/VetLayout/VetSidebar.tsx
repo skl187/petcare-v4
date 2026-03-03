@@ -3,6 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { RxDashboard } from 'react-icons/rx';
 import { TbUsersGroup } from 'react-icons/tb';
 import { MdOutlinePets } from 'react-icons/md';
+import { IoSettingsOutline } from 'react-icons/io5';
+import { FaWallet } from 'react-icons/fa';
 import { ChevronDownIcon } from '../../icons';
 import { useSidebar } from '../../context/SidebarContext';
 
@@ -34,6 +36,16 @@ const vetNavItems: NavItem[] = [
       // { name: 'Owners and Pets', path: '/vet/owners' },
       { name: 'Booking Reviews', path: '/vet/reviews' },
     ],
+  },
+  {
+    icon: <IoSettingsOutline />,
+    name: 'Availability',
+    path: '/vet/availability',
+  },
+  {
+    icon: <FaWallet />,
+    name: 'Payments',
+    path: '/vet/payments',
   },
 ];
 

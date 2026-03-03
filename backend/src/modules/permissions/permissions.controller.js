@@ -1,6 +1,7 @@
 // src/modules/permissions/permissions.controller.js
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
+const logger = require('../../core/utils/logger');
 
 /**
  * List permissions with pagination/search
@@ -49,7 +50,7 @@ const listPermissions = async (req, res) => {
       meta: { total, page, limit }
     }));
   } catch (err) {
-    console.error('List permissions error:', err);
+    logger.error('List permissions error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to list permissions' });
   }
 };
@@ -72,7 +73,7 @@ const getPermission = async (req, res) => {
 
     res.json(successResponse({ permission: result.rows[0] }));
   } catch (err) {
-    console.error('Get permission error:', err);
+    logger.error('Get permission error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to fetch permission' });
   }
 };
@@ -102,7 +103,7 @@ const createPermission = async (req, res) => {
 
     res.status(201).json(successResponse({ permission: result.rows[0] }, 'Permission created'));
   } catch (err) {
-    console.error('Create permission error:', err);
+    logger.error('Create permission error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to create permission' });
   }
 };
@@ -157,7 +158,7 @@ const updatePermission = async (req, res) => {
 
     res.json(successResponse({ permission: result.rows[0] }, 'Permission updated'));
   } catch (err) {
-    console.error('Update permission error:', err);
+    logger.error('Update permission error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to update permission' });
   }
 };
@@ -181,7 +182,7 @@ const deletePermission = async (req, res) => {
 
     res.json(successResponse(null, 'Permission deleted'));
   } catch (err) {
-    console.error('Delete permission error:', err);
+    logger.error('Delete permission error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to delete permission' });
   }
 };
@@ -201,7 +202,7 @@ const listResources = async (req, res) => {
       resources: result.rows.map(r => r.resource)
     }));
   } catch (err) {
-    console.error('List resources error:', err);
+    logger.error('List resources error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to list resources' });
   }
 };
@@ -261,7 +262,7 @@ const getGroupedPermissions = async (req, res) => {
       total_resources: resources.length
     }));
   } catch (err) {
-    console.error('Get grouped permissions error:', err);
+    logger.error('Get grouped permissions error:', err);
     res.status(500).json({ status: 'error', message: 'Failed to get grouped permissions' });
   }
 };

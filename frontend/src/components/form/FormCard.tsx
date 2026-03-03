@@ -17,9 +17,9 @@ const FormCard: React.FC<FormCardProps> = ({
   const headerHeight = '64px';
 
   return (
-    <div className='fixed inset-0 z-50 flex justify-end'>
-      {/* Semi-transparent overlay */}
-      <div className='fixed inset-0 ' onClick={onClose} />
+    <div className='fixed inset-0 z-[100000] flex justify-end'>
+      {/* Semi-transparent overlay — covers header too */}
+      <div className='fixed inset-0 bg-black/40' onClick={onClose} />
 
       {/* Form container - positioned below header */}
       <div

@@ -1,6 +1,6 @@
 import PageMeta from "../../components/common/PageMeta";
 import ComponentCard from "../../components/common/ComponentCard";
-import NotificationListTable from "../../components/tables/notifications/NotificationListTable";
+import NotificationListTable from "../../components/tables/AdminTables/NotificationListTable";
 
 const ListNotification = () => {
   return (

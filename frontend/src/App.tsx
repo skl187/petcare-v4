@@ -13,20 +13,19 @@ import Images from './adminPages/UiElements/Images';
 import Badges from './adminPages/UiElements/Badges';
 import Avatars from './adminPages/UiElements/Avatars';
 import Buttons from './adminPages/UiElements/Buttons';
-import LineChart from './adminPages/Charts/LineChart';
-import BarChart from './adminPages/Charts/BarChart';
-import Calendar from './adminPages/Calendar';
+import LineChart from './adminPages/UiElements/LineChart';
+import BarChart from './adminPages/UiElements/BarChart';
+import Calendar from './adminPages/UiElements/Calendar';
 import FormElements from './adminPages/Forms/FormElements';
-import Blank from './adminPages/Blank';
+import Blank from './adminPages/UiElements/Blank';
 import AppLayout from './layout/AppLayout';
 import { ScrollToTop } from './components/common/ScrollToTop';
 import Home from './adminPages/Dashboard/Home';
-import TodayAppointments from './adminPages/today_appointments/today_appointments';
+import TodaysAppointments from './adminPages/TodaysAppoinments';
 import Reports from './sidebar/reports/Reports';
 import CategoryList from './sidebar/veterinary/CategoryList';
 import Employees from './adminPages/users/Employees';
 import EmpRequestList from './adminPages/users/EmpRequestList';
-import BookingReviews from './adminPages/users/BookingReviews';
 import Tax from './sidebar/finance/Tax';
 import EmployeeEarnings from './sidebar/finance/EmployeeEarnings';
 import DailyBookings from './sidebar/overallReports/DailyBookings';
@@ -42,7 +41,6 @@ import AppBanner from './sidebar/appBanner/AppBanner';
 import AccessControl from './sidebar/accessControl/AccessControl';
 import SystemServices from './sidebar/systemServices/SystemServices';
 import AppPageDetail from './sidebar/pages/AppPageDetail';
-
 
 import SignIn from './authPages/SignIn';
 import SignUp from './authPages/SignUp';
@@ -63,17 +61,20 @@ import ServiceList from './adminPages/veterinary/ServiceList';
 import PetCenterList from './adminPages/veterinary/petCentersList';
 // users
 import OwnerAndPets from './adminPages/users/OwnerAndPets';
+import BookingReviews from './adminPages/users/BookingReviews';
 // notifications
-import ListNotification from './adminPages/notifications/ListNotification';
-import TemplateNotification from './adminPages/notifications/TemplateNotification';
+import ListNotification from './adminPages/Notifications/ListNotification';
+import TemplateNotification from './adminPages/Notifications/TemplateNotification';
 // pets
 import PetType from './adminPages/pets/PetType';
 import PetBreed from './adminPages/pets/PetBreed';
+// payments
+import AdminPayments from './adminPages/Payments/AdminPayments';
 // roles
 import ManageRoles from './adminPages/roles/manageRoles';
 import ManagePermissions from './adminPages/roles/managePermissions';
 // settings
-import AdminSettings from './adminPages/settings';
+import AdminSettings from './adminPages/Settings';
 
 // Veterinary Imports
 import VetDahboard from './vetPages/VetDashboard/VetDahboard';
@@ -81,17 +82,19 @@ import VetServiceList from './vetPages/VetServices/VetServiceList';
 import VeterinaryBookings from './vetPages/VetServices/VeterinaryBookingsWrapper';
 import VetDashOwenerAndPets from './vetPages/VetUsers/VetDashOwenerAndPets';
 import VetDashVetReviews from './vetPages/VetUsers/VetDashVetReviews';
+import AvailabilitySettings from './vetPages/AvailabilitySettings/AvailabilitySettings';
+import PaymentList from './vetPages/Payments/PaymentList';
 
 //Owner and pets
 import OwnerDashboard from './userPages/ownerDashboard/OwnerDashboard';
 import MyPets from './userPages/myPets/MyPets';
-import ViewBookingsHistory from './userPages/Bookings/BookingsHistory/ViewBookingsHistory';
-import ViewUpcomingBookings from './userPages/Bookings/UpcomingBookings/ViewUpcomingBookings';
+import ViewBookingsHistory from './userPages/Bookings/ViewBookingsHistory';
+import ViewUpcomingBookings from './userPages/Bookings/ViewUpcomingBookings';
 import Payments from './userPages/Payments/Payments';
 import MessageInbox from './userPages/Messages/Inbox/MessageInbox';
 import SendNewMessage from './userPages/Messages/SendMessage/SendNewMessage';
 import ToastContainer from './components/ui/toast/ToastContainer';
-import { VeterinaryBookingsDetail } from './adminPages/VetPageForms/Veterinary/VeterinaryBookingsDetail';
+import { VeterinaryBookingsDetail } from './adminPages/AdminPageForms/VeterinaryBookingsDetail';
 import ProfileWithLayout from './adminPages/ProfileWithLayout';
 
 export default function App() {
@@ -125,7 +128,10 @@ export default function App() {
             >
               <Route element={<AppLayout />}>
                 <Route path='/home' element={<Home />} />
-                <Route path='/today-appointments' element={<TodayAppointments />} />
+                <Route
+                  path='/todaysBookings'
+                  element={<TodaysAppointments />}
+                />
                 <Route path='/reports' element={<Reports />} />
                 {/* veterinary */}
                 <Route path='/vetBookings' element={<VetBookings />} />
@@ -160,6 +166,8 @@ export default function App() {
                 {/* Pet */}
                 <Route path='/petType' element={<PetType />} />
                 <Route path='/petBreed' element={<PetBreed />} />
+                {/* Payments */}
+                <Route path='/admin/payments' element={<AdminPayments />} />
                 {/* Pages */}
                 <Route path='/appPage' element={<AppPage />} />
                 <Route path='/appPage/:slug' element={<AppPageDetail />} />
@@ -223,6 +231,11 @@ export default function App() {
                 <Route path='/vet/services' element={<VetServiceList />} />
                 <Route path='/vet/owners' element={<VetDashOwenerAndPets />} />
                 <Route path='/vet/reviews' element={<VetDashVetReviews />} />
+                <Route
+                  path='/vet/availability'
+                  element={<AvailabilitySettings />}
+                />
+                <Route path='/vet/payments' element={<PaymentList />} />
               </Route>
             </Route>
 
@@ -248,7 +261,6 @@ export default function App() {
                 <Route path='/owner/new-message' element={<SendNewMessage />} />
               </Route>
             </Route>
-            
           </Route>
 
           {/* Fallback Route for 404 */}
