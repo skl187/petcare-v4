@@ -1,6 +1,7 @@
 // API Base URL from environment variables
+// Fallback: Use current origin if VITE_API_BASE_URL is not set
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL;
+  import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : '');
 
 // API Endpoints
 export const API_ENDPOINTS = {
