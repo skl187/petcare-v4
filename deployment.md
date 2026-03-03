@@ -167,3 +167,100 @@ docker pg_restore -h postgres_db -U postgres -d petcare backup.dump
 docker compose -f docker-compose.dev.yml up -d
 # Prod deploy
 docker compose -f docker-compose.prod.yml up -d --build
+
+
+
+rsync -avz ./frontend/dist admskl@bracevps:/home/admskl/v4/frontend
+
+
+# to check page slowness
+curl -o /dev/null -s -w "%{time_total}\n" https://portal.domain.app
+1.737014
+# Check NGINX Time Breakdown
+curl -w "@-" -o /dev/null -s https://portal.bracepetcare.app <<'EOF'
+DNS: %{time_namelookup}
+Connect: %{time_connect}
+SSL: %{time_appconnect}
+TTFB: %{time_starttransfer}
+Total: %{time_total}
+EOF
+# o/p
+DNS:      0.01s   ✅ fast
+Connect:  0.77s   ❌ slow
+SSL:      1.08s   ❌ VERY slow
+TTFB:     1.38s
+Total:    1.38s
+
+# solution
+FIX 1 — Disable IPv6 Listening (FASTEST WIN)
+  listen 0.0.0.0:443 ssl http2;
+  listen 0.0.0.0:80;
+FIX 2 — Enable SSL Session Reuse
+  Add inside http{} block (/etc/nginx/nginx.conf):
+  ssl_session_cache shared:SSL:50m;
+  ssl_session_timeout 1d;
+  ssl_session_tickets on;
+  ssl_buffer_size 4k;
+FIX 3 — Enable TLS Optimization
+  Also add:
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_prefer_server_ciphers off;
+FIX 4 — Enable Keepalive
+  Inside server block:
+  keepalive_timeout 65;
+  keepalive_requests 1000;
+FIX 5 — Check Cloud Provider Firewall (VERY COMMON)
+  If using:
+  AWS, Azure, DigitalOcean, Contabo, Hostinger VPS
+  Security inspection may slow TLS.
+  Test from server itself:
+  curl -k https://localhost
+
+
+project/
+│
+├── docker-compose.prod.yml
+│
+├── nginx/
+│   └── nginx.conf
+│
+├── frontend/
+├── backend/
+└── db/
+
+
+docker exec postgresql pg_dump -U dbadmin -d bracedb26 --schema-only > schema.sql
+# Backup Prod
+docker exec postgres_db pg_dump -U postgres -d petcare > prod_backup.sql
+# Apply Schema
+docker exec -i postgres_db psql -U postgres -d petcare < schema.sql
+
+
+docker exec postgresql pg_dump -U dbadmin -d bracedb26 > local_full.sql
+scp local_full.sql admskl@bracevps:/home/admskl/db
+scp admskl@bracevps:/home/admskl/db/prod_backup.sql .
+docker exec postgres_db pg_dump 
+-U postgres \
+-d petcare \
+--data-only \
+> seed_data.sql
+
+docker exec -t postgres_db pg_dump -U postgres --data-only petcare > seed_data.sql
+
+dtop
+docker exec -it postgres_db psql -U postgres
+DROP DATABASE petcare;
+CREATE DATABASE petcare;
+\DROP DATABASE mydb;
+CREATE DATABASE mydb;
+\q
+
+docker exec -i postgres_db psql -U postgres -d petcare < .local_full.sql
+
+
+
+docker exec -i postgres_db psql -U postgres -d petcare < .local_full.sql
+Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+localhost:3000/api/vet-services:1  Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+localhost:3000/api/payments/all:1  Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+localhost:3000/api/payments/all:1  Failed to load resource: net::ERR_BLOCKED_BY_CLIENT

@@ -1,7 +1,6 @@
 // Payment Service - API calls for payment management
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { API_ENDPOINTS } from '../constants/api';
 
 export interface Payment {
   id: string;
@@ -68,8 +67,7 @@ const getAuthHeaders = () => {
  */
 export const getVetPayments = async (): Promise<Payment[]> => {
   try {
-    const url = `${API_BASE_URL}/api/payments/vet`;
-    const response = await fetch(url, {
+    const response = await fetch(API_ENDPOINTS.PAYMENTS.VET, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -89,8 +87,7 @@ export const getVetPayments = async (): Promise<Payment[]> => {
  * Admin — fetch all payments across all vets
  */
 export const getAllPayments = async (): Promise<AdminPayment[]> => {
-  const url = `${API_BASE_URL}/api/payments/all`;
-  const response = await fetch(url, { method: 'GET', headers: getAuthHeaders() });
+  const response = await fetch(API_ENDPOINTS.PAYMENTS.ALL, { method: 'GET', headers: getAuthHeaders() });
   if (!response.ok) throw new Error(`Failed to fetch payments: ${response.statusText}`);
   const result = await response.json();
   return result.data || [];
@@ -100,8 +97,7 @@ export const getAllPayments = async (): Promise<AdminPayment[]> => {
  * Owner — fetch own payments
  */
 export const getUserPayments = async (): Promise<UserPayment[]> => {
-  const url = `${API_BASE_URL}/api/payments/user`;
-  const response = await fetch(url, { method: 'GET', headers: getAuthHeaders() });
+  const response = await fetch(API_ENDPOINTS.PAYMENTS.USER, { method: 'GET', headers: getAuthHeaders() });
   if (!response.ok) throw new Error(`Failed to fetch payments: ${response.statusText}`);
   const result = await response.json();
   return result.data || [];
@@ -115,8 +111,7 @@ export const updatePaymentStatus = async (
   status: 'pending' | 'completed' | 'failed' | 'cancelled',
 ): Promise<Payment> => {
   try {
-    const url = `${API_BASE_URL}/api/payments/${paymentId}`;
-    const response = await fetch(url, {
+    const response = await fetch(API_ENDPOINTS.PAYMENTS.DETAIL(paymentId), {
       method: 'PATCH',
       headers: getAuthHeaders(),
       body: JSON.stringify({ payment_status: status }),

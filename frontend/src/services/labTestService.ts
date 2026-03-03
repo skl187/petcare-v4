@@ -1,6 +1,6 @@
 // API service for Lab Tests
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+  import.meta.env.VITE_API_BASE_URL || '';
 
 const getAuthToken = (): string | null => {
   return sessionStorage.getItem('token');

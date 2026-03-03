@@ -7,7 +7,8 @@ const { query } = require('../../../core/db/pool');
 const paymentUtils = require('../../../core/utils/paymentUtils');
 const { successResponse } = require('../../../core/utils/response');
 const logger = require('../../../core/utils/logger');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto'); // use built-in crypto instead of uuid package (ESM only)
+
 
 /**
  * Record a payment for an appointment (supports split payments)
@@ -60,10 +61,10 @@ const recordPayment = async (req, res) => {
     }
 
     const isSplit = is_partial || existingPayments.length > 0;
-    const groupId = isSplit ? (split_payment_group_id || uuidv4()) : null;
+    const groupId = isSplit ? (split_payment_group_id || randomUUID()) : null;
     const sequence = isSplit ? paymentUtils.getNextPaymentSequence(existingPayments, groupId) : null;
 
-    const paymentId = uuidv4();
+    const paymentId = randomUUID();
     const newPaymentResult = await query(
       `INSERT INTO vet_appointment_payments (
         id, appointment_id, user_id, payment_method, paid_amount,

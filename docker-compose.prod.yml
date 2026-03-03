@@ -1,4 +1,4 @@
-version: "3.9"
+# version: "3.9"
 
 services:
   backend:
@@ -9,28 +9,20 @@ services:
     ports:
       - "3000:3000"
     restart: unless-stopped
+    networks:
+      - db_default
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dist
     container_name: frontend
-    ports:
-      - "3001:80"
     restart: unless-stopped
+    ports:
+    - "5173:5173"
+    networks:
+      - db_default
 
----
-
-# frontend/Dockerfile
-FROM node:20-alpine AS builder
-
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-
-COPY . .
-RUN npm run build
-
-
-FROM nginx:alpine
-
-COPY --from=builder /app/dist /usr/share/nginx/html
----
+networks:
+  db_default:
+    external: true

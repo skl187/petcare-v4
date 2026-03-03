@@ -37,15 +37,11 @@ const ServiceListTable = () => {
     return ['admin', 'superadmin'].includes((slug || '').toLowerCase());
   });
 
-  // Get API base URL
-  const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-
   // Determine API endpoint based on user role
   // For admins: use /api/vet-services (all services)
   // For veterinarians: use /api/vet-services/my (own services)
   const API_BASE = isAdmin
-    ? `${API_BASE_URL}/api/vet-services`
+    ? API_ENDPOINTS.VET_SERVICES.ADMIN_BASE
     : API_ENDPOINTS.VET_SERVICES.BASE;
 
   // State

@@ -1,6 +1,6 @@
 // API Base URL from environment variables
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+  import.meta.env.VITE_API_BASE_URL;
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -60,6 +60,7 @@ export const API_ENDPOINTS = {
   // Vet Services
   VET_SERVICES: {
     BASE: `${API_BASE_URL}/api/vet-services/my`,
+    ADMIN_BASE: `${API_BASE_URL}/api/vet-services`,
     DETAIL: (id: string) => `${API_BASE_URL}/api/vet-services/my/${id}`,
     CLINICS: `${API_BASE_URL}/api/vet-services/my/clinics`,
     ACTIVE_FOR_BOOKING: (vetId: string, clinicId: string) =>
@@ -168,5 +169,14 @@ export const API_ENDPOINTS = {
       `${API_BASE_URL}/api/vet-appointments/${appointmentId}/payments/${paymentId}`,
     SUMMARY: (appointmentId: string) =>
       `${API_BASE_URL}/api/vet-appointments/${appointmentId}/payment-summary`,
+  },
+
+  // Payments
+  PAYMENTS: {
+    BASE: `${API_BASE_URL}/api/payments`,
+    ALL: `${API_BASE_URL}/api/payments/all`,
+    VET: `${API_BASE_URL}/api/payments/vet`,
+    USER: `${API_BASE_URL}/api/payments/user`,
+    DETAIL: (id: string) => `${API_BASE_URL}/api/payments/${id}`,
   },
 } as const;
