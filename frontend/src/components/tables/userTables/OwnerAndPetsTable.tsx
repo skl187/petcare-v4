@@ -1,4 +1,5 @@
-import { MdEdit, MdPets } from 'react-icons/md';
+import { MdEdit, MdPets, MdManageAccounts } from 'react-icons/md';
+import ChangeRoleModal from './ChangeRoleModal';
 import { useState, useEffect } from 'react';
 import {
   Table,
@@ -47,6 +48,7 @@ export default function OwnerAndPetsTable() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [loading, setLoading] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
+  const [roleChangeUser, setRoleChangeUser] = useState<OwnerAndPet | null>(null);
 
   // Fetch owners from API with pagination
   useEffect(() => {
@@ -427,6 +429,13 @@ export default function OwnerAndPetsTable() {
                       >
                         <MdEdit className='w-5 h-5' />
                       </button>
+                      <button
+                        onClick={() => setRoleChangeUser(owner)}
+                        className='text-purple-600 hover:text-purple-800 p-1 rounded hover:bg-purple-50'
+                        title='Change Role'
+                      >
+                        <MdManageAccounts className='w-5 h-5' />
+                      </button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -445,6 +454,15 @@ export default function OwnerAndPetsTable() {
       />
 
       {/* Edit Dialog */}
+      {roleChangeUser && (
+        <ChangeRoleModal
+          userId={roleChangeUser.id}
+          userName={`${roleChangeUser.first_name} ${roleChangeUser.last_name}`.trim() || roleChangeUser.email}
+          onClose={() => setRoleChangeUser(null)}
+          onSuccess={() => { setRoleChangeUser(null); fetchOwners(); }}
+        />
+      )}
+
       {editOwner ? (
         <OwnerAndPetsForm
           owner={{

@@ -206,7 +206,8 @@ export default function NotificationTemplateTable() {
                     <TableCell className='p-2 py-4'><Checkbox checked={selectedRows.includes(t.template_key)} onChange={() => toggleSelectRow(t.template_key)} /></TableCell>
                     <TableCell className='p-2 py-4'><span className='text-sm text-gray-900'>{t.template_key}</span></TableCell>
                     <TableCell className='p-2 py-4'><span className='text-sm text-gray-700'>{t.name}</span></TableCell>
-                    <TableCell className='p-2 py-4'><span className='text-sm text-gray-600 break-words'>{t.subject}</span></TableCell>
+                    <TableCell className='p-2 py-4'><span className='text-sm text-gray-600 capitalize'>{t.channel}</span></TableCell>
+                    <TableCell className='p-2 py-4'><span className='text-sm text-gray-600 break-words'>{t.description || '—'}</span></TableCell>
                     <TableCell className='p-2 py-4'><span className='text-sm text-gray-600'>{t.locale || 'en'}</span></TableCell>
                     <TableCell className='p-2 py-4'>
                       <div className='flex items-center gap-3'>

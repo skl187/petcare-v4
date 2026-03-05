@@ -10,7 +10,9 @@ export default function UpcomingBookings({ data }: Props) {
   const appointments = data?.appointments?.upcoming || [];
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    // Parse date-only strings as local time to avoid UTC midnight timezone shift
+    const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',

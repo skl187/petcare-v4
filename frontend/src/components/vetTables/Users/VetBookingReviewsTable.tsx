@@ -144,12 +144,14 @@ const VetBookingReviewsTable: React.FC = () => {
       minute: '2-digit',
     });
 
-  const formatAppointmentDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString('en-US', {
+  const formatAppointmentDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
+  };
 
   if (loading && !reviewsData) {
     return (

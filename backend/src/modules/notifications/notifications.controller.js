@@ -3,6 +3,24 @@ const { successResponse } = require('../../core/utils/response');
 const notificationService = require('../../core/notifications/notification.service');
 const logger = require('../../core/utils/logger');
 
+const list = async (req, res) => {
+  try {
+    const { limit = 20, page = 1 } = req.query;
+    const offset = (page - 1) * limit;
+    const result = await query(
+      `SELECT n.id, n.user_id, n.notification_key, n.channel, n.template_key, n.status, n.scheduled_at, n.sent_at, n.created_at, u.email
+       FROM notifications n
+       LEFT JOIN users u ON n.user_id = u.id
+       ORDER BY n.created_at DESC
+       LIMIT $1 OFFSET $2`,
+      [limit, offset]
+    );
+    res.json(successResponse(result.rows));
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: 'Failed to fetch' });
+  }
+};
+
 const listPending = async (req, res) => {
   try {
     const result = await query(
@@ -307,4 +325,4 @@ const deleteTemplate = async (req, res) => {
   }
 };
 
-module.exports = { listPending, getById, resend, create, preview, listTemplates, getTemplateByKey, createTemplate, updateTemplate, deleteTemplate };
+module.exports = { list, listPending, getById, resend, create, preview, listTemplates, getTemplateByKey, createTemplate, updateTemplate, deleteTemplate };

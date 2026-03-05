@@ -59,8 +59,8 @@ const MailSettings: React.FC<MailSettingsProps> = ({ onSave }) => {
 
         const result = await response.json();
 
-        if (result.data && result.data.data && result.data.data.length > 0) {
-          const settings = result.data.data[0];
+        if (result.data && result.data.value) {
+          const settings = result.data;
           setSettingsId(settings.id);
           setFormData({
             host: settings.value.host || '',
@@ -114,7 +114,7 @@ const MailSettings: React.FC<MailSettingsProps> = ({ onSave }) => {
     setIsSaving(true);
     try {
       const payload = {
-        namespace: 'tenant_acme',
+        namespace: 'global',
         key: 'smtp_config',
         value: {
           host: formData.host,

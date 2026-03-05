@@ -332,11 +332,7 @@ const AdminReviewsTable: React.FC = () => {
                           </div>
                           {r.appointment_date && (
                             <div className='text-xs text-gray-500'>
-                              {new Date(r.appointment_date).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                              })}
+                              {(() => { const [y,m,d] = r.appointment_date.split('T')[0].split('-').map(Number); return new Date(y, m-1, d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }); })()}
                             </div>
                           )}
                         </div>

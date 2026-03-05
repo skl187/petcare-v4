@@ -13,6 +13,8 @@ router.get('/templates/:key', controller.getTemplateByKey);
 router.put('/templates/:key', controller.updateTemplate);
 router.delete('/templates/:key', controller.deleteTemplate);
 
+// List recent notifications
+router.get('/', controller.list);
 // Create a notification (schedule or send immediately)
 router.post('/', controller.create);
 // Preview rendered template with payload

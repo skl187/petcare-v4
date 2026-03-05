@@ -37,14 +37,14 @@ const ownerNavItems: NavItem[] = [
     name: 'Payments',
     path: '/owner/payments',
   },
-  {
-    icon: <TbMessage />,
-    name: 'Messages',
-    subItems: [
-      { name: 'Inbox', path: '/owner/messages-inbox' },
-      { name: 'Send Message', path: '/owner/new-message' },
-    ],
-  },
+  // {
+  //   icon: <TbMessage />,
+  //   name: 'Messages',
+  //   subItems: [
+  //     { name: 'Inbox', path: '/owner/messages-inbox' },
+  //     { name: 'Send Message', path: '/owner/new-message' },
+  //   ],
+  // },
 ];
 
 const OwnerSidebar: React.FC = () => {

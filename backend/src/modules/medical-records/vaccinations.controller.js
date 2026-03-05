@@ -4,6 +4,62 @@
 const { query } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
 const logger = require('../../core/utils/logger');
+const notificationService = require('../../core/notifications/notification.service');
+
+// Schedule a vaccination due reminder (fires 3 days before next_due_date)
+const scheduleVaccinationReminder = async ({ pet_id, vaccine_name, next_due_date }) => {
+  if (!next_due_date) return;
+  try {
+    // Get pet owner info
+    const ownerRow = await query(
+      `SELECT p.name as pet_name, u.id as user_id, u.email
+       FROM pets p
+       JOIN users u ON p.owner_id = u.id
+       WHERE p.id = $1`,
+      [pet_id]
+    );
+    if (!ownerRow.rows.length || !ownerRow.rows[0].email) return;
+    const { pet_name, user_id, email } = ownerRow.rows[0];
+
+    const dueDate = new Date(next_due_date);
+    const reminderDate = new Date(dueDate);
+    reminderDate.setDate(reminderDate.getDate() - 3);
+
+    const ins = await query(
+      `INSERT INTO notifications (user_id, notification_key, channel, target, template_key, locale, payload, scheduled_at, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
+      [
+        user_id, 'vaccination_due_reminder', 'email',
+        JSON.stringify({ email }),
+        'vaccination_due_email', 'en',
+        JSON.stringify({ pet_name, vaccine_name, due_date: next_due_date }),
+        reminderDate, 'pending'
+      ]
+    );
+
+    // If reminder date is now or past, send immediately
+    if (reminderDate <= new Date()) {
+      const notifId = ins.rows[0].id;
+      try {
+        const sendResult = await notificationService.sendNotification({
+          template_key: 'vaccination_due_email', channel: 'email',
+          target: { email },
+          payload: { pet_name, vaccine_name, due_date: next_due_date },
+          locale: 'en',
+        });
+        await query(`UPDATE notifications SET status='sent', sent_at=now() WHERE id=$1`, [notifId]);
+        await query(
+          `INSERT INTO notification_logs (notification_id, channel, provider, status, response) VALUES ($1,$2,$3,$4,$5)`,
+          [notifId, 'email', sendResult.provider || null, 'sent', JSON.stringify(sendResult)]
+        );
+      } catch (sendErr) {
+        await query(`UPDATE notifications SET status='failed', error=$2 WHERE id=$1`, [notifId, sendErr.message]);
+      }
+    }
+  } catch (err) {
+    logger.warn('Vaccination reminder scheduling failed:', err.message);
+  }
+};
 
 const listVaccinations = async (req, res) => {
   try {
@@ -223,6 +279,11 @@ const createVaccination = async (req, res) => {
       );
 
       createdVaccinations.push(result.rows[0]);
+
+      // Schedule vaccination due reminder if next_due_date provided
+      if (vaccine.next_due_date) {
+        await scheduleVaccinationReminder({ pet_id, vaccine_name: vaccine.vaccine_name, next_due_date: vaccine.next_due_date });
+      }
     }
 
     res.status(201).json(successResponse({
