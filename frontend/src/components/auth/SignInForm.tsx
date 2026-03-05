@@ -189,7 +189,7 @@ export default function SignInForm() {
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className='space-y-6'>
+            <div className='flex flex-col gap-6'>
               {/* API Error Banner */}
               {apiError && (
                 <div className='p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:text-red-400 dark:border-red-900'>
@@ -264,22 +264,20 @@ export default function SignInForm() {
               </div>
 
               {/* Sign-in Button */}
-              <div>
-                <Button
-                  className='w-full'
-                  size='sm'
-                  type='submit'
-                  disabled={
-                    !email ||
-                    !password ||
-                    loading ||
-                    !validateEmail(email) ||
-                    !validatePassword(password)
-                  }
-                >
-                  {loading ? 'Signing in...' : 'Sign in'}
-                </Button>
-              </div>
+              <Button
+                className='w-full'
+                size='sm'
+                type='submit'
+                disabled={
+                  !email ||
+                  !password ||
+                  loading ||
+                  !validateEmail(email) ||
+                  !validatePassword(password)
+                }
+              >
+                {loading ? 'Signing in...' : 'Sign in'}
+              </Button>
             </div>
           </form>
 
