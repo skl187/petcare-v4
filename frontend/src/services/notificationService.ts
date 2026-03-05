@@ -68,6 +68,33 @@ export const createNotification = async (data: {
   return result.data;
 };
 
+export interface NotificationItem {
+  id: string;
+  user_id: string | null;
+  notification_key: string | null;
+  channel: string;
+  template_key: string | null;
+  status: 'pending' | 'sent' | 'failed';
+  scheduled_at: string | null;
+  sent_at: string | null;
+  created_at: string;
+  email: string | null;
+  // extended fields (available via listPending / detail)
+  phone?: string | null;
+  locale?: string;
+  payload?: Record<string, any>;
+  error?: string | null;
+  retry_count?: number;
+}
+
+export const listNotifications = async (limit = 20, page = 1): Promise<NotificationItem[]> => {
+  const url = `${API_ENDPOINTS.NOTIFICATIONS.BASE}?limit=${limit}&page=${page}`;
+  const response = await fetch(url, { method: 'GET', headers: getAuthHeaders() });
+  if (!response.ok) throw new Error(`Failed to list notifications: ${response.statusText}`);
+  const result: ApiResponse<NotificationItem[]> = await response.json();
+  return result.data || [];
+};
+
 // ---- Template CRUD (stored in app_settings.namespace = 'notification_templates') ----
 export const listTemplates = async (page = 1, limit = 100) => {
   const url = `${API_ENDPOINTS.NOTIFICATIONS.TEMPLATES.BASE}?page=${page}&limit=${limit}`;

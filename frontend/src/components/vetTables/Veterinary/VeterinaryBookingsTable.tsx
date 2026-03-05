@@ -394,11 +394,7 @@ export default function VeterinaryBookingsTable({
                       >
                         <span className='text-sm text-gray-900 leading-tight'>
                           {r.date
-                            ? new Date(r.date).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })
+                            ? (() => { const [y,m,d] = r.date.split('T')[0].split('-').map(Number); return new Date(y, m-1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); })()
                             : 'N/A'}
                         </span>
                         <span className='text-xs text-gray-400 leading-tight'>

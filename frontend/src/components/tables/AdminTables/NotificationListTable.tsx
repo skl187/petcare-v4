@@ -1,4 +1,4 @@
-import { MdRefresh } from 'react-icons/md';
+import { MdRefresh, MdAdd } from 'react-icons/md';
 import { useState, useEffect, useCallback } from 'react';
 import { Table, TableBody, TableCell, TableHeader, TableRow } from '../../ui/table';
 import Badge from '../../ui/badge/Badge';
@@ -6,26 +6,9 @@ import Pagination from '../tableComponents/Pagination';
 import useSort from '../../../hooks/useSort';
 import SortableTableHeader from '../tableComponents/SortableTableHeader';
 import { TableToolbar } from '../tableComponents/TableToolbar';
-import { listPendingNotifications, resendNotification } from '../../../services/notificationService';
+import { listNotifications, resendNotification, NotificationItem } from '../../../services/notificationService';
 import { showToast } from '../../ui/toast/showToast';
-
-export interface NotificationItem {
-  id: string;
-  user_id?: string;
-  notification_key?: string;
-  channel: string;
-  template_key: string;
-  locale: string;
-  payload?: Record<string, any>;
-  status: 'pending' | 'sent' | 'failed';
-  error?: string;
-  retry_count?: number;
-  scheduled_at?: string;
-  sent_at?: string;
-  created_at?: string;
-  email?: string;
-  phone?: string;
-}
+import SendNotificationForm from '../../../adminPages/Forms/NotificationForms/ListNotificationForm';
 
 export default function NotificationListTable() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,6 +16,7 @@ export default function NotificationListTable() {
   const [filterChannel, setFilterChannel] = useState<'all' | 'email' | 'sms' | 'push'>('all');
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [actionDropdown, setActionDropdown] = useState('No actions');
+  const [isSendFormOpen, setIsSendFormOpen] = useState(false);
 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -55,7 +39,7 @@ export default function NotificationListTable() {
     setIsLoadingData(true);
     setFetchError(null);
     try {
-      const data = await listPendingNotifications();
+      const data = await listNotifications(200);
       setNotifications(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setFetchError(err.message || 'Failed to load notifications');
@@ -145,6 +129,9 @@ export default function NotificationListTable() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         selectedRowsCount={selectedRows.length}
+        onAddNew={() => setIsSendFormOpen(true)}
+        addButtonLabel='Send Notification'
+        addButtonIcon={<MdAdd className='w-5 h-5' />}
         bulkActionsOptions={
           <>
             <option value='No actions'>No actions</option>
@@ -257,6 +244,13 @@ export default function NotificationListTable() {
         onPageChange={setCurrentPage}
         onItemsPerPageChange={setItemsPerPage}
       />
+
+      {isSendFormOpen && (
+        <SendNotificationForm
+          onCancel={() => setIsSendFormOpen(false)}
+          onSaved={() => { setIsSendFormOpen(false); fetchData(); }}
+        />
+      )}
     </div>
   );
 }

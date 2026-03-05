@@ -285,6 +285,7 @@ export default function AdminPaymentsTable({
       <TableToolbar
         onAddNew={undefined}
         addButtonLabel=''
+        showAddButton={false}
         selectedRowsCount={selectedRows.length}
         bulkActionsOptions={<></>}
         statusUpdateOptions={<></>}

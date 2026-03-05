@@ -3,6 +3,41 @@
 const { query, getConnection, transaction } = require('../../core/db/pool');
 const { successResponse } = require('../../core/utils/response');
 const logger = require('../../core/utils/logger');
+const notificationService = require('../../core/notifications/notification.service');
+
+// Helper: schedule a notification and send immediately if scheduled_at <= now
+const scheduleNotification = async ({ user_id, email, template_key, channel = 'email', payload = {}, scheduled_at }) => {
+  try {
+    const target = email ? { email } : null;
+    const scheduledDate = scheduled_at ? new Date(scheduled_at) : new Date();
+    // Insert notification record
+    const ins = await query(
+      `INSERT INTO notifications (user_id, notification_key, channel, target, template_key, locale, payload, scheduled_at, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
+      [user_id || null, template_key, channel,
+        target ? JSON.stringify(target) : null,
+        template_key, 'en', JSON.stringify(payload),
+        scheduledDate, 'pending']
+    );
+    // Send immediately if not future-scheduled
+    if (scheduledDate <= new Date()) {
+      const notifId = ins.rows[0].id;
+      try {
+        const sendResult = await notificationService.sendNotification({ template_key, channel, target, payload, locale: 'en' });
+        await query(`UPDATE notifications SET status='sent', sent_at=now() WHERE id=$1`, [notifId]);
+        await query(
+          `INSERT INTO notification_logs (notification_id, channel, provider, status, response) VALUES ($1,$2,$3,$4,$5)`,
+          [notifId, channel, sendResult.provider || null, 'sent', JSON.stringify(sendResult)]
+        );
+      } catch (sendErr) {
+        await query(`UPDATE notifications SET status='failed', error=$2 WHERE id=$1`, [notifId, sendErr.message]);
+        logger.warn('scheduleNotification send failed:', sendErr.message);
+      }
+    }
+  } catch (err) {
+    logger.warn('scheduleNotification insert failed:', err.message);
+  }
+};
 
 // ==================ADMIN - APPOINTMENT LISTING & RETRIEVAL==========================
 // Admin-specific: list appointments with filter (today, past, upcoming, all), status, user_id, veterinarian_id, clinic_id
@@ -663,6 +698,35 @@ const createAppointment = async (req, res) => {
 
     await client.query('COMMIT');
 
+    // --- Notification: 1-day before reminder ---
+    try {
+      const uRow = await query(`SELECT email FROM users WHERE id=$1`, [user_id]);
+      const pRow = await query(`SELECT name FROM pets WHERE id=$1`, [pet_id]);
+      const vRow = await query(`SELECT u.first_name, u.last_name FROM veterinarians v JOIN users u ON v.user_id=u.id WHERE v.id=$1`, [veterinarian_id]);
+      const userEmail = uRow.rows[0]?.email || null;
+      const petName = pRow.rows[0]?.name || 'your pet';
+      const vetName = vRow.rows[0] ? `${vRow.rows[0].first_name || ''} ${vRow.rows[0].last_name || ''}`.trim() : 'your vet';
+      // Schedule reminder for 1 day before the appointment
+      const reminderDate = new Date(appointment_date);
+      reminderDate.setDate(reminderDate.getDate() - 1);
+      await scheduleNotification({
+        user_id,
+        email: userEmail,
+        template_key: 'appointment_reminder',
+        channel: 'email',
+        payload: {
+          pet_name: petName,
+          appointment_date,
+          appointment_time,
+          vet_name: vetName,
+          appointment_number: appointmentNumber,
+        },
+        scheduled_at: reminderDate,
+      });
+    } catch (notifErr) {
+      logger.warn('Appointment reminder notification failed:', notifErr.message);
+    }
+
     logger.info('Appointment created', { appointmentId, userId: user_id, appointmentNumber });
 
     res.status(201).json(successResponse({
@@ -759,6 +823,45 @@ const updateAppointmentStatus = async (req, res) => {
     );
 
     logger.info('Appointment status updated', { appointmentId: id, oldStatus: currentStatus, newStatus: status, userId: req.user?.id });
+
+    // --- Notification triggers ---
+    try {
+      const apptRow = await query(
+        `SELECT a.user_id, a.appointment_date, a.appointment_time, a.appointment_number,
+                p.name as pet_name, u.email,
+                CONCAT(vu.first_name,' ',vu.last_name) as vet_name
+         FROM vet_appointments a
+         JOIN users u ON a.user_id=u.id
+         LEFT JOIN pets p ON a.pet_id=p.id
+         LEFT JOIN veterinarians v ON a.veterinarian_id=v.id
+         LEFT JOIN users vu ON v.user_id=vu.id
+         WHERE a.id=$1`, [id]
+      );
+      if (apptRow.rows.length > 0) {
+        const appt = apptRow.rows[0];
+        if (status === 'confirmed') {
+          await scheduleNotification({
+            user_id: appt.user_id, email: appt.email,
+            template_key: 'appointment_confirmed',
+            payload: { pet_name: appt.pet_name, appointment_date: appt.appointment_date, appointment_time: appt.appointment_time, vet_name: appt.vet_name, appointment_number: appt.appointment_number },
+          });
+        } else if (status === 'completed') {
+          await scheduleNotification({
+            user_id: appt.user_id, email: appt.email,
+            template_key: 'appointment_completed',
+            payload: { pet_name: appt.pet_name, appointment_date: appt.appointment_date, vet_name: appt.vet_name, appointment_number: appt.appointment_number },
+          });
+        } else if (status === 'cancelled') {
+          await scheduleNotification({
+            user_id: appt.user_id, email: appt.email,
+            template_key: 'appointment_cancelled',
+            payload: { pet_name: appt.pet_name, appointment_date: appt.appointment_date, appointment_number: appt.appointment_number, reason: notes || '' },
+          });
+        }
+      }
+    } catch (notifErr) {
+      logger.warn('Status change notification failed:', notifErr.message);
+    }
 
     res.json(successResponse(result.rows[0], 'Appointment status updated'));
   } catch (err) {

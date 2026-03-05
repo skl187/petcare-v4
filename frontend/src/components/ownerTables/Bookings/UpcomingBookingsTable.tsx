@@ -18,7 +18,7 @@ import { API_ENDPOINTS } from '../../../constants/api';
 import type { VetBooking } from '../../vetTables/Veterinary/VeterinaryBookingsTable';
 
 // --- API Constants ---
-const PETS_API = API_ENDPOINTS.PETS.BASE;
+const PETS_API = API_ENDPOINTS.MY_PETS.BASE;
 const OWNER_API_ORIGIN = new URL(
   API_ENDPOINTS.OWNER_BOOKINGS.BASE(),
   window.location.origin,
@@ -594,7 +594,7 @@ export default function UpcomingBookingsTable({
                           <div className='flex flex-col gap-0.5'>
                             <span className='text-sm text-gray-900 leading-tight'>
                               {a.appointment_date
-                                ? new Date(a.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                                ? (() => { const [y,m,d] = a.appointment_date.split('T')[0].split('-').map(Number); return new Date(y, m-1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); })()
                                 : 'N/A'}
                             </span>
                             <span className='text-xs text-gray-400 leading-tight'>

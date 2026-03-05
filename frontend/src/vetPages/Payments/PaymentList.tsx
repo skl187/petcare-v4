@@ -15,10 +15,12 @@ const InvoiceModal = ({ payment, onClose }: { payment: Payment; onClose: () => v
   const formatCurrency = (amount: string | number) =>
     `$${parseFloat(String(amount)).toFixed(2)}`;
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (dateString: string) => {
+    const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('en-US', {
       year: 'numeric', month: 'long', day: 'numeric',
     });
+  };
 
   const handlePrint = () => window.print();
 
@@ -203,10 +205,12 @@ const PaymentList = () => {
     }
   };
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (dateString: string) => {
+    const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
+    return new Date(year, month - 1, day).toLocaleDateString('en-US', {
       year: 'numeric', month: 'short', day: 'numeric',
     });
+  };
 
   const formatCurrency = (amount: string | number) =>
     `$${parseFloat(String(amount)).toFixed(2)}`;

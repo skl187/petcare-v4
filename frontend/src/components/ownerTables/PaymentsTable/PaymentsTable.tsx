@@ -19,8 +19,10 @@ import { getUserPayments, UserPayment } from '../../../services/paymentService';
 // ─────────────────────────────────────────────
 const InvoiceModal = ({ payment, onClose }: { payment: UserPayment; onClose: () => void }) => {
   const fmt = (v: string | number) => `$${parseFloat(String(v)).toFixed(2)}`;
-  const fmtDate = (d: string) =>
-    new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const fmtDate = (d: string) => {
+    const [y,m,day] = d.split('T')[0].split('-').map(Number);
+    return new Date(y, m-1, day).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'>
@@ -154,8 +156,10 @@ export default function PaymentsTable() {
   const currentItems = (sortedData as UserPayment[]).slice(indexOfLast - itemsPerPage, indexOfLast);
 
   const fmt = (v: string | number) => `$${parseFloat(String(v)).toFixed(2)}`;
-  const fmtDate = (d: string) =>
-    new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  const fmtDate = (d: string) => {
+    const [y,m,day] = d.split('T')[0].split('-').map(Number);
+    return new Date(y, m-1, day).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
 
   if (loading) return <div className='flex items-center justify-center py-10'><div className='animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600' /></div>;
   if (error) return <div className='p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm'>{error}</div>;
@@ -169,6 +173,7 @@ export default function PaymentsTable() {
       <TableToolbar
         onAddNew={undefined}
         addButtonLabel=''
+        showAddButton={false}
         selectedRowsCount={0}
         bulkActionsOptions={<></>}
         statusUpdateOptions={<></>}

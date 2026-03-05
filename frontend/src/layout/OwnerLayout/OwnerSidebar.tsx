@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { RxDashboard } from 'react-icons/rx';
 import { MdOutlinePets, MdOutlineCalendarToday } from 'react-icons/md';
-import { TbReportMoney, TbMessage } from 'react-icons/tb';
+import { TbReportMoney } from 'react-icons/tb';
 import { ChevronDownIcon } from '../../icons';
 import { useSidebar } from '../../context/SidebarContext';
 
@@ -37,14 +37,14 @@ const ownerNavItems: NavItem[] = [
     name: 'Payments',
     path: '/owner/payments',
   },
-  {
-    icon: <TbMessage />,
-    name: 'Messages',
-    subItems: [
-      { name: 'Inbox', path: '/owner/messages-inbox' },
-      { name: 'Send Message', path: '/owner/new-message' },
-    ],
-  },
+  // {
+  //   icon: <TbMessage />,
+  //   name: 'Messages',
+  //   subItems: [
+  //     { name: 'Inbox', path: '/owner/messages-inbox' },
+  //     { name: 'Send Message', path: '/owner/new-message' },
+  //   ],
+  // },
 ];
 
 const OwnerSidebar: React.FC = () => {

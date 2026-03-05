@@ -421,7 +421,7 @@ export default function TodaysAppointmentsTable() {
                       <TableCell className='px-3 py-3 min-w-[130px]'>
                         <div className='flex flex-col gap-0.5'>
                           <span className='text-sm text-gray-900 leading-tight'>
-                            {new Date(booking.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            {(() => { const [y,m,d] = booking.appointment_date.split('T')[0].split('-').map(Number); return new Date(y, m-1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); })()}
                           </span>
                           <span className='text-xs text-gray-400 leading-tight'>
                             {booking.appointment_time || 'N/A'}

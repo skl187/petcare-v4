@@ -109,7 +109,7 @@ export const API_ENDPOINTS = {
   // Settings
   SETTINGS: {
     BASE: `${API_BASE_URL}/api/settings`,
-    DETAIL: (key: string) => `${API_BASE_URL}/api/settings?key=${key}`,
+    DETAIL: (key: string) => `${API_BASE_URL}/api/settings/${key}`,
   },
 
   // Dashboard
